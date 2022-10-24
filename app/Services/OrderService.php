@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Services;
+
+use App\CustomFacades\CustomClass;
+use App\Events\NewMessage;
+use App\Jobs\HandleMessageRead;
+use App\Models\Message;
+use App\Presenters\AuctioneerOrderActionPresenter;
+use App\Presenters\OrderStatusPresenter;
+use App\Repositories\OrderRepository;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
+
+
+class OrderService extends OrderRepository
+{
+    public function createOrder($lot)
+    {
+        $now = Carbon::now();
+
+        $commission = $lot->current_bid * ($lot->owner->commission_rate/100);
+        $premium = $lot->current_bid * ($lot->winner->premium_rate/100);
+
+        $input = [
+            'lot_id' => $lot->id,
+            'user_id' => $lot->winner_id,
+            'status' => 0,
+            'payment_due_at' => $now->addDays(7),
+            'subtotal' => $lot->current_bid,
+            'owner_real_take' => $lot->current_bid - $commission,
+            'commission' => $commission,
+            'premium' => $premium,
+            'earning' => $premium + $commission
+        ];
+
+        $order = OrderRepository::create($input);
+
+        OrderRepository::createOrderRecord(0, $order->id);
+    }
+
+
+    public function getOrder($orderId)
+    {
+        return OrderRepository::find($orderId);
+    }
+
+    public function confirmOrder($request, $orderId)
+    {
+        $input = [
+            'payment_method'=>$request->payment_method,
+            'delivery_method'=>$request->delivery_method,
+            'delivery_cost'=>$request->delivery_cost,
+            'subtotal'=>$request->subtotal,
+            'total'=>$request->total,
+        ];
+
+        if($request->delivery_method != 0) {
+            $this->storeOrderLogisticInfo($request, $orderId);
+        }
+
+        OrderRepository::update($input, $orderId);
+        OrderRepository::updateOrderStatus(10, $orderId);
+    }
+
+    public function storeOrderLogisticInfo($request, $orderId)
+    {
+        $input = [
+            'type'=>0,
+            'addressee_name'=>$request->recipient_name,
+            'addressee_phone'=>$request->recipient_phone,
+            'remark'=>$request->remark
+        ];
+        switch ($request->delivery_method) {
+            case 1:
+                $input = array_merge($input, [
+                    'delivery_zip_code' => $request->delivery_zip_code,
+                    'delivery_address' => $request->delivery_address,
+                ]);
+                break;
+            case 2:
+                $input = array_merge($input, [
+                    'cross_board_delivery_country'=> $request->cross_board_delivery_country,
+                    'cross_board_delivery_country_code' => $request->cross_board_delivery_country_code,
+                    'cross_board_delivery_address' => $request->cross_board_delivery_address
+                ]);
+                break;
+        }
+
+        OrderRepository::createLogisticRecord($input, $orderId);
+    }
+
+    public function getLogisticInfo($order, $type)
+    {
+        return $order->logisticRecords->where('type', $type)->first();
+    }
+
+    public function hasPaid($request, $orderId)
+    {
+        $order = $this->getOrder($orderId);
+
+        if($order->delivery_method === 0) {
+            $status = 12;
+        } else {
+            $status = 13;
+        }
+
+        $input = [
+            'payment_method' => $order->payment_method,
+            'amount' => $request->TradeAmt,
+            'merchant_trade_no' => $request->MerchantTradeNo
+        ];
+
+        OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
+    }
+
+    public function ajaxGetOrders()
+    {
+        $orders = OrderRepository::all();
+        $orderStatusPresenter = new OrderStatusPresenter;
+        $orderActionPresenter = new AuctioneerOrderActionPresenter;
+        $datatable = DataTables::of($orders)
+            ->addColumn('id', function ($order) {
+                return $order->id;
+            })
+            ->addColumn('name', function ($order) {
+                return '<a href="'.route('auctioneer.orders.show', $order).'">'.$order->lot->name.'</a>';
+            })
+            ->addColumn('order_status', function ($order) use ($orderStatusPresenter) {
+                if($order->process_status === 6 && $order->owner_take_status === 1) {
+                    return '已匯款給賣家';
+                } else {
+                    return $orderStatusPresenter->present($order);
+
+                }
+            })
+            ->addColumn('action', function ($order) use ($orderActionPresenter) {
+                #return '<div id="ex1" class="modal"><p>Thanks for clicking. That felt good.</p><a href="#" rel="modal:close">Close</a></div><a href="#ex1" rel="modal:open" class="uk-button custom-button-1">Open Modal</a>';
+                return '<div class="uk-align-right">'.$orderActionPresenter->present($order).'</div>';
+            })
+            ->rawColumns(['name', 'order_status', 'action'])
+            ->toJson();
+
+        return $datatable;
+    }
+
+    public function noticeShipping($orderId)
+    {
+        $order = OrderRepository::updateOrderStatus(20, $orderId);
+    }
+
+    public function storeShippingLogistic($request, $orderId)
+    {
+        $order = $this->getOrder($orderId);
+        $logistic = $this->getLogisticInfo($order, 0);
+        $logistic->update([
+            'company_name'=>$request->logistics_name,
+            'tracking_code'=>$request->tracking_code
+        ]);
+    }
+
+    public function noticeArrival($orderId)
+    {
+        $order = OrderRepository::updateOrderStatus(21, $orderId);
+    }
+
+    public function completeOrder($orderId)
+    {
+        $order = OrderRepository::updateOrderStatus(40, $orderId);
+        $order->lot->update(['status'=>40]);
+        CustomClass::sendTemplateNotice(1, 3, 2, $order->id);
+    }
+
+    public function noticeRemit($request, $orderId, $type)
+    {
+        $order = $this->getOrder($orderId);
+        if($type == 0) {
+            $status = 11;
+            $input = [
+                'status' => $status,
+                'payment_method' => 1,
+                'amount'=>$order->total,
+                'remitter_id'=>Auth::user()->id,
+                'remitter_account'=>$request->account_last_five_number,
+                'payee_id'=>1
+            ];
+
+        } else { #type 1
+            $status = 41;
+            $owner = $order->lot->owner;
+            $input = [
+                'status' => $status,
+                'payment_method' => 1,
+                'amount'=>$order->owner_real_take,
+                'remitter_id'=>Auth::user()->id,
+                'remitter_account'=>Auth::user()->bank_account_number,
+                'payee_id'=>$owner->id,
+                'payee_account'=>$owner->bank_name.$owner->bank_branch_name.$owner->bank_account_name.$owner->bank_account_number
+            ];
+            $order->lot()->update(['status'=>41]);
+            CustomClass::sendTemplateNotice($order->lot->owner_id, 3, 3, $orderId);
+        }
+        OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
+
+    }
+
+    public function noticeConfirmAtmPay($orderId)
+    {
+        $order = $this->getOrder($orderId);
+        if($order->delivery_method == 0) {
+            $status = 12;
+        } else {
+            $status = 13;
+        }
+        $order = OrderRepository::updateOrderStatus($status, $orderId);
+        CustomClass::sendTemplateNotice($order->user_id, 3, 1, $order->id, 1);
+    }
+
+    public function sendMessage($request, $orderId)
+    {
+        $input = [
+            'user_id'=>Auth::user()->id,
+            'message'=>$request->message,
+        ];
+        $order = $this->getOrder($orderId);
+
+        if(Auth::user()->id === $order->user_id) {#is winner
+            if($order->lot->entrust === 0) {
+                $input['target_user_id'] = $order->lot->owner_id;
+            } else {
+                $input['target_user_id'] = 1;
+            }
+        } else {#auctioneer or owner send to winner
+            $input['target_user_id'] = $order->user_id;
+        }
+
+        $message = $order->messages()->create($input);
+        broadcast(new NewMessage($message, $order))->toOthers();
+        HandleMessageRead::dispatch($message)->delay(Carbon::now()->addSeconds(10));
+        #NewMessage::dispatch($message, $order);
+    }
+
+    public function haveRead($messageId)
+    {
+        Message::find($messageId)->update(['read_at'=>Carbon::now()]);
+    }
+}
