@@ -41,7 +41,8 @@ class NoticePresenter
                     0 => ['已安排競標', '物品 No.'.$notice->target_id.' ，安排於'.$notice->lot->auction_start_at_format.'開始競標。'],
                     1 => ['競標成功', '物品 No.'.$notice->target_id.' ，以 NT$'.number_format($notice->lot->current_bid).'賣出'],
                     2 => ['流標', '物品 No.'.$notice->target_id.' ，為達底價流標，請至平台選擇處理方式。'],
-                    3 => ['流標', '物品 No.'.$notice->target_id.' ，無人競標流標，請至平台選擇處理方式。']
+                    3 => ['流標', '物品 No.'.$notice->target_id.' ，無人競標流標，請至平台選擇處理方式。'],
+                    4 => ['棄標', '物品 No.'.$notice->target_id.' ，遭到棄標，請至平台選擇處理方式。'],
                 };
             case 3:
                 return match ($notice->code) {
@@ -51,11 +52,21 @@ class NoticePresenter
                     3 => ['已完成委賣', '訂單 No.'.$notice->target_id.' ，已匯款'],
                 };
             case 4:
+                $logisticInfo = $notice->lot->logisticRecords->where('type',1)->first();
+                return match ($notice->code) {
+                    0 => ['下架的物品已寄出', '物品編號 No.'.$notice->target_id.' ，已寄出。'.$logisticInfo->company_name.': '.$logisticInfo->tracking_code],
+                };
+            case 5:
                 $logisticInfo = $notice->lot->logisticRecords->where('type',2)->first();
                 return match ($notice->code) {
-                    0 => ['物品已寄出', '物品編號 No.'.$notice->target_id.' ，已寄出。'.$logisticInfo->company_name.': '.$logisticInfo->tracking_code],
+                    0 => ['流標的物品已寄出', '物品編號 No.'.$notice->target_id.' ，已寄出。'.$logisticInfo->company_name.': '.$logisticInfo->tracking_code],
                 };
-
+            case 6:
+                return match ($notice->code) {
+                    0 => ['付款提醒通知', '提醒您，訂單 No.' . $notice->target_id . ' 還未付款，請您在今天起的四天內完成付款，若逾時付款導致棄標，將被暫時停權一週，若為第二次棄標，您的帳號將會被永久停權。'],
+                    1 => ['付款逾時', '訂單 No.' . $notice->target_id . ' 逾期付款，此次棄標將導致您停權一週，若棄標第二次，我們將永久停權您的帳號。'],
+                    2 => ['付款逾時', '訂單 No.' . $notice->target_id . ' 逾期付款，此次棄標將導致您的帳號永久停權。'],
+                };
         }
     }
 }

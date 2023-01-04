@@ -20,8 +20,8 @@ class UserService extends UserRepository
     {
         $input = $request->all();
         $input['password'] = Hash::make($request->password);
-        $input['buyer_premium'] = 2;
-        $input['seller_commission'] = 3;
+        $input['commission_rate'] = config('shop.promotion.commission_rate');
+        $input['premium_rate'] = config('shop.promotion.premium_rate');
 
         $newUser = UserRepository::create($input);
 
@@ -301,7 +301,7 @@ class UserService extends UserRepository
                 }
             }
         }
-        $count += UserRepository::getLotNoticeCount([23, 24], $userId);
+        $count += UserRepository::getLotNoticeCount([23, 25], $userId);
         return $count;
 
     }
@@ -309,5 +309,15 @@ class UserService extends UserRepository
     public function getOrderLotNoticeCount($userId)
     {
         return UserRepository::getOrderNoticeCount([0, 12, 21, 10], $userId);
+    }
+
+    public function getReturnedLotNoticeCount($userId)
+    {
+        return UserRepository::getLotNoticeCount([32], $userId);
+    }
+
+    public function updateAccountStatus($type, $user)#1: temporary,2: forever
+    {
+        UserRepository::update(['status'=>$type], $user->id);
     }
 }

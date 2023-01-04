@@ -110,7 +110,10 @@ class MartController extends Controller
 
     public function test()
     {
-        $this->lotService->test();
+        #$this->lotService->test();
         #$this->transactionRecordService->test();
+        $lot = $this->lotService->getLot(1);
+        $carbon = Carbon::now();
+        return CustomClass::viewWithTitle(view('test')->with('lot', $lot)->with('carbon', $carbon), 'Test');
     }
 }

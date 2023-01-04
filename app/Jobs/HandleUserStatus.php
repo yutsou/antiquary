@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\PromotionService;
+use App\Services\UserService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,20 +10,19 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SendSms implements ShouldQueue
+class HandleUserStatus implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    protected $phone, $message;
+    protected $user, $type;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($phone, $message)
+    public function __construct($type, $user)
     {
-        $this->phone = $phone;
-        $this->message = $message;
+        $this->user = $user;
+        $this->type = $type;
     }
 
     /**
@@ -33,6 +32,6 @@ class SendSms implements ShouldQueue
      */
     public function handle()
     {
-        app(PromotionService::class)->smsSend($this->phone, $this->message);
+        app(UserService::class)->updateAccountStatus($this->type, $this->user);
     }
 }

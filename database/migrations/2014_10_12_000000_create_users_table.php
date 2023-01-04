@@ -25,8 +25,9 @@ return new class extends Migration
             $table->string('line_id')->nullable();
             $table->string('line_nonce')->nullable();
             $table->tinyInteger('role')->default(3);
-            $table->tinyInteger('commission_rate')->nullable();
-            $table->tinyInteger('premium_rate')->nullable();
+            $table->tinyInteger('status')->default(0);
+            $table->float('commission_rate')->nullable();
+            $table->float('premium_rate')->nullable();
             $table->timestamp('birthday')->nullable();
             $table->string('county')->nullable();
             $table->string('district')->nullable();

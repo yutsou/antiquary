@@ -213,12 +213,12 @@ class LotService extends LotRepository
 
     public function getSellingLots($user)
     {
-        return $user->ownLots->whereBetween('status',[10,24]);
+        return $user->ownLots->whereBetween('status',[10,25]);
     }
 
     public function getReturnedLots($user)
     {
-        return $user->ownLots->whereBetween('status',[30, 33]);
+        return $user->ownLots->whereBetween('status',[30, 34]);
     }
 
     public function getFinishedLots($user)
@@ -355,27 +355,62 @@ class LotService extends LotRepository
         #
     }
 
+    #type 0 application 1 returned 2 unsold
+
     public function unsoldLotLogistic($request, $lotId)
+    {
+        $lot = $this->getLot($lotId);
+        if ($lot->status == 25) {
+            $type = 3;
+            $status = 35;
+        } else {#23 or 24
+            $type = 2;
+            $status = 30;
+        }
+
+        $input = [
+            'addressee_name' => $request->addressee_name,
+            'addressee_phone' => $request->addressee_phone,
+            'delivery_zip_code' => $request->zipcode,
+            'delivery_address'=>$request->county.$request->district.$request->address,
+            'type'=>$type
+        ];
+        LotRepository::createLogisticRecord($input, $lotId);
+
+        $input = [
+            'status'=>$status,
+        ];
+        LotRepository::update($input, $lotId);
+    }
+
+    public function returnedLotLogistic($request, $lotId)
     {
         $input = [
             'addressee_name' => $request->addressee_name,
             'addressee_phone' => $request->addressee_phone,
             'delivery_zip_code' => $request->zipcode,
             'delivery_address'=>$request->county.$request->district.$request->address,
-            'type'=>2
+            'type'=>1
         ];
         LotRepository::createLogisticRecord($input, $lotId);
 
         $input = [
-            'status'=>30,
+            'status'=>33,
         ];
         LotRepository::update($input, $lotId);
     }
 
     public function reBiding($lotId)
     {
+        $lot = $this->getLot($lotId);
+        if ($lot->status == 25) {
+            $status = 13;
+        } else {#23 or 24
+            $status = 12;
+        }
+
         $input = [
-            'status'=>12,
+            'status'=>$status,
             'current_bid'=>0,
             'auction_id'=>null,
             'auction_start_at'=>null,
@@ -388,13 +423,13 @@ class LotService extends LotRepository
         $lot->bidRecords()->delete();
     }
 
-    public function returnUnsoldLot($request, $lotId)
+    public function returnLot($request, $lotId, $type)#1 下架 2 流標退回
     {
         $input = [
             'company_name' => $request->company_name,
             'tracking_code' => $request->tracking_code,
         ];
-        $lot = LotRepository::updateLogisticRecord($input, $lotId, 2);
+        $lot = LotRepository::updateLogisticRecord($input, $lotId, $type);
 
         $status = $lot->status+1;
 
@@ -404,9 +439,14 @@ class LotService extends LotRepository
         LotRepository::update($input, $lotId);
     }
 
+    public function updateLotStatus($status, $lot)
+    {
+        return parent::update(['status'=>$status], $lot->id);
+    }
+
     public function test()
     {
-        $lot = $this->getLot(1);
+        $lot = $this->getLot(2);
         OrderCreate::dispatch($lot);
     }
 

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Services\LotService;
 use App\Services\OrderService;
+use App\Services\PromotionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use App\CustomFacades\CustomClass;
 use App\Services\UserService;
@@ -16,7 +18,7 @@ class AuctioneerController extends Controller
 {
     private $userService, $categoryService, $imageService, $domainService, $orderService, $lotService;
 
-    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService)
+    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService)
     {
         $this->userService = $userService;
         $this->categoryService = $categoryService;
@@ -24,6 +26,7 @@ class AuctioneerController extends Controller
         $this->domainService = $domainService;
         $this->orderService = $orderService;
         $this->lotService = $lotService;
+        $this->promotionService = $promotionService;
     }
 
     static function showDashboard()
@@ -193,5 +196,49 @@ class AuctioneerController extends Controller
     {
         $order = $this->orderService->getOrder($orderId);
         return CustomClass::viewWithTitle(view('auctioneer.orders.member_chatroom')->with('order', $order), $order->lot->name);
+    }
+
+    public function indexPromotions()
+    {
+        $promotions = $this->promotionService->getPromotion();
+        return CustomClass::viewWithTitle(view('auctioneer.promotions.index')->with('promotions', $promotions), '優惠管理');
+    }
+
+    public function updatePromotion(Request $request)
+    {
+        $input = $request->all();
+        $rules = [
+            'commission_rate' => 'required',
+            'premium_rate' => 'required'
+        ];
+        $messages = [
+            'commission_rate.required'=>'賣家佣金抽成為必填',
+            'premium_rate.required'=>'買家額外費用為必填'
+        ];
+
+        if($request->commission_rate > 1) {
+            $rules['commission_rate'] = $rules['commission_rate'].'|integer';
+            $messages['commission_rate.integer'] = '數值大於1的話必須為整數';
+        }
+
+        if($request->premium_rate > 1) {
+            $rules['premium_rate'] = $rules['premium_rate'].'|integer';
+            $messages['premium_rate.integer'] = '數值大於1的話必須為整數';
+        }
+
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 400); // 400 being the HTTP code for an invalid request.
+        } else {
+            $this->promotionService->updatePromotion($request);
+            return Response::json(array(
+                'success' => route('auctioneer.promotions.index'),
+                'errors' => false
+            ), 200);
+        }
     }
 }

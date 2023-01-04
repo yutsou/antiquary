@@ -91,6 +91,9 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');
     Route::get('/orders/{orderId}/member-chatroom', [AuctioneerController::class, 'indexMemberMessages'])->name('auctioneer.orders.member_chatroom_show');
+
+    Route::get('/promotions', [AuctioneerController::class, 'indexPromotions'])->name('auctioneer.promotions.index');
+    Route::post ('/promotions', [AuctioneerController::class, 'updatePromotion'])->name('auctioneer.promotions.update');
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');
@@ -119,6 +122,10 @@ Route::prefix('expert/dashboard')->middleware(EnsureIsExpert::class)->group(func
     Route::get('/main-categories/{mainCategoryId}/auctions/create', [ExpertController::class, 'createAuction'])->name('expert.auctions.create');
     Route::post('/main-categories/{mainCategoryId}/auctions', [ExpertController::class, 'storeAuction'])->name('expert.auctions.store');
 
+    Route::get('/main-categories/{mainCategoryId}/lots/{lotId}/returned-logistic-info', [ExpertController::class, 'editReturnedLogisticInfo'])->name('expert.returned_lot_logistic_info.edit');
+    Route::post('/main-categories/{mainCategoryId}/lots/{lotId}/returned-logistic-info', [ExpertController::class, 'updateReturnedLogisticInfo'])->name('expert.returned_lot_logistic_info.update');
+
+
     Route::get('/main-categories/{mainCategoryId}/lots/{lotId}/logistic-info', [ExpertController::class, 'createUnsoldLotLogisticInfo'])->name('expert.unsold_lot_logistic_info.create');
     Route::post('/main-categories/{mainCategoryId}/lots/{lotId}/logistic-info', [ExpertController::class, 'storeUnsoldLotLogisticInfo'])->name('expert.unsold_lot_logistic_info.store');
 });
@@ -144,9 +151,15 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class, Ensure
     Route::get('/unsold-lots/{lotId}', [MemberController::class, 'editUnsoldLot'])->name('account.unsold_lots.edit');
     Route::post('/unsold-lots/{lotId}', [MemberController::class, 'handleUnsoldLot'])->name('account.unsold_lots.handle');
     #finished lots
-    Route::get('/finished-lots', [MemberController::class, 'indexedFinishedLots'])->name('account.finished_lots.index');
+    Route::get('/finished-lots', [MemberController::class, 'indexFinishedLots'])->name('account.finished_lots.index');
 
-    Route::get('/returned-lots', [MemberController::class, 'indexedReturnedLots'])->name('account.returned_lots.index');
+    #returned lots
+    Route::get('/returned-lots', [MemberController::class, 'indexReturnedLots'])->name('account.returned_lots.index');
+    Route::get('/returned-lots/{lotId}', [MemberController::class, 'editReturnedLot'])->name('account.returned_lots.edit');
+    Route::post('/returned-lots/{lotId}', [MemberController::class, 'updateReturnedLot'])->name('account.returned_lots.update');
+
+
+
 });
 
 Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->group(function () {
@@ -177,10 +190,10 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->grou
     Route::post('/axios/lots/manual_bid', [MemberController::class, 'manualBid']);
     Route::post('/axios/lots/auto_bid', [MemberController::class, 'autoBid']);
 
-    Route::get('/account/bind', [AuthController::class, 'showBind'])->name('account.bind.show');
+    Route::get('/bind', [AuthController::class, 'showBind'])->name('account.bind.show');
 
-    Route::get('/account/notices', [MemberController::class, 'indexNotices'])->name('account.notices.index');
-    Route::get('/account/unread-notices', [MemberController::class, 'indexUnreadNotices'])->name('account.unread_notices.index');
+    Route::get('/notices', [MemberController::class, 'indexNotices'])->name('account.notices.index');
+    Route::get('/unread-notices', [MemberController::class, 'indexUnreadNotices'])->name('account.unread_notices.index');
 });
 
 Route::prefix('account')->middleware('auth')->group(function () {

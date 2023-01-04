@@ -18,7 +18,7 @@ class ExpertLotIndexPresenter
                                         <input type="hidden" name="_token" value="'.csrf_token().'" />
                                         <input type="text" name="lotId" value="'.$lot->id.'" hidden>
                                         <p class="uk-text-right">
-                                            <a href="#" rel="modal:close" class="uk-button custom-button-2">取消</a>
+                                            <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
                                             <button class="uk-button custom-button-1 take-down" type="submit" lotId="'.$lot->id.'">確定</button>
                                         </p>
                                     </form>
@@ -35,7 +35,7 @@ class ExpertLotIndexPresenter
                                         <input type="hidden" name="_token" value="'.csrf_token().'" />
                                         <input type="text" name="lotId" value="'.$lot->id.'" hidden>
                                         <p class="uk-text-right">
-                                            <a href="#" rel="modal:close" class="uk-button custom-button-2">取消</a>
+                                            <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
                                             <button class="uk-button custom-button-1 take-down" type="submit" lotId="'.$lot->id.'">確定</button>
                                         </p>
                                     </form>
@@ -43,9 +43,13 @@ class ExpertLotIndexPresenter
                                 <a href="#take-down-lot-'.$lot->id.'" rel="modal:open" class="uk-button custom-button-2">下架</a>
                             </div>
                         ';
-            case $lot->status == 30 || $lot->status == 32:
+            case $lot->status == 30:
                 return '
                         <a href="'.route('expert.unsold_lot_logistic_info.create', [$mainCategory->id, $lot->id]).'" class="uk-button custom-button-1">查看 / 填寫 退還資訊</a>
+                    ';
+            case $lot->status == 33:
+                return '
+                        <a href="'.route('expert.returned_lot_logistic_info.edit', [$mainCategory->id, $lot->id]).'" class="uk-button custom-button-1">查看 / 填寫 退還資訊</a>
                     ';
             default :
                 return '

@@ -5,12 +5,14 @@ namespace App\Services;
 use App\CustomFacades\CustomClass;
 use App\Events\NewMessage;
 use App\Jobs\HandleMessageRead;
+use App\Jobs\HandlePaymentNotice;
 use App\Models\Message;
 use App\Presenters\AuctioneerOrderActionPresenter;
 use App\Presenters\OrderStatusPresenter;
 use App\Repositories\OrderRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Yajra\DataTables\Facades\DataTables;
 
 
@@ -20,8 +22,8 @@ class OrderService extends OrderRepository
     {
         $now = Carbon::now();
 
-        $commission = $lot->current_bid * ($lot->owner->commission_rate/100);
-        $premium = $lot->current_bid * ($lot->winner->premium_rate/100);
+        $commission = $this->getCommission($lot);
+        $premium = $this->getPremium($lot);
 
         $input = [
             'lot_id' => $lot->id,
@@ -38,6 +40,8 @@ class OrderService extends OrderRepository
         $order = OrderRepository::create($input);
 
         OrderRepository::createOrderRecord(0, $order->id);
+
+        HandlePaymentNotice::dispatch($order, 0)->delay(Carbon::now()->addSeconds(120));
     }
 
 
@@ -244,5 +248,31 @@ class OrderService extends OrderRepository
     public function haveRead($messageId)
     {
         Message::find($messageId)->update(['read_at'=>Carbon::now()]);
+    }
+
+    public function getCommission($lot)
+    {
+        $promotionStatus = Cache::get('shop.promotion.status');
+        if($promotionStatus === true) {
+            return $lot->current_bid * (config('shop.promotion.commission_rate')/100);
+        } else {
+            return $lot->current_bid * ($lot->owner->commission_rate/100);
+        }
+
+    }
+
+    public function getPremium($lot)
+    {
+        $promotionStatus = config('shop.promotion.status');
+        if($promotionStatus === true) {
+            return $lot->current_bid * (config('shop.promotion.premium_rate')/100);
+        } else {
+            return $lot->current_bid * ($lot->owner->premium_rate/100);
+        }
+    }
+
+    public function updateOrderStatus($status, $order)
+    {
+        return parent::updateOrderStatus($status, $order->id);
     }
 }

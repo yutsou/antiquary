@@ -13,15 +13,15 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- Styles -->
-        <link rel="stylesheet" href="{{ asset('extensions/uikit-3.13.10/css/uikit.min.css') }}" />
+        <link rel="stylesheet" href="{{ asset('extensions/uikit-3.15.19/css/uikit.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('css/custom.css') }}?v={{$version}}" />
         <link href="{{ asset('extensions/sweetalert2/css/material-ui.min.css') }}" rel="stylesheet">
         @stack('style')
 
         <!-- Scripts -->
         <script src="{{ asset('js/jquery-3.6.0/jquery.min.js') }}"></script>
-        <script src="{{ asset('extensions/uikit-3.13.10/js/uikit.min.js') }}"></script>
-        <script src="{{ asset('extensions/uikit-3.13.10/js/uikit-icons.min.js') }}"></script>
+        <script src="{{ asset('extensions/uikit-3.15.19/js/uikit.min.js') }}"></script>
+        <script src="{{ asset('extensions/uikit-3.15.19/js/uikit-icons.min.js') }}"></script>
         <script src="{{ asset('extensions/sweetalert2/js/sweetalert2.min.js') }}"></script>
         @stack('scripts')
     </head>

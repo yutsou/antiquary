@@ -71,15 +71,16 @@ class BidService
     {
         $lot = $this->getLot($lotId);
 
-        $first = Carbon::createFromFormat('Y-m-d H:i:s', $lot->auction_end_at);
-        $second = Carbon::createFromFormat('Y-m-d H:i:s', $lot->auction_end_at)->subSeconds(150);
+        $first = Carbon::createFromFormat('Y-m-d H:i:s', $lot->auction_end_at)->subSeconds(60);
+        $second = Carbon::createFromFormat('Y-m-d H:i:s', $lot->auction_end_at);
+
         $now = Carbon::now();
 
         $auction = $lot->auction;
 
         #when time between last
-        if($now->between($second, $first)) {
-            $lot->update(['auction_end_at'=>$now->addSeconds(150)]);
+        if($now->between($first, $second)) {
+            $lot->update(['auction_end_at'=>$now->addSeconds(90)]);
             HandleAuctionEnd::dispatch($auction)->delay($now->addSeconds(5));
         }
 
@@ -162,9 +163,9 @@ class BidService
 
     public function autoBidLot($lotId, $bidderId, $inputAutoBid)
     {
-
         $lot = $this->getLot($lotId);
         if($lot->bidRecords->count() == 0) {#第一個出價者
+
             if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
                 $bid = 0+$this->bidRule(0);
                 $this->bidLot($lotId, $bidderId, $bid);
@@ -173,80 +174,141 @@ class BidService
                 $this->bidLot($lotId, $bidderId, $bid);
             }
         } else {
+
             $topBidderId = $lot->bidRecords()->latest()->first()->bidder_id;
 
-            if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
-                if($lot->current_bid >= $lot->reserve_price) {#當現在價格大於等於底價時
-                    $lotMaxAutoBid = $this->getLotMaxAutoBid($lotId);
-                    if($this->checkCurrentAutoBidIsValid($lot, $lotMaxAutoBid)) {#有其他自動出價，並且有效
-                        if($inputAutoBid > $lotMaxAutoBid->bid) {#當自動出價大於已有的自動出價
-                            if($inputAutoBid >= $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid)) {#當自動出價大於等於目前最高出價的下一個出價
-                                if($bidderId == $lotMaxAutoBid->user_id) {#如果自動出價者是已有的自動出價者
-                                    #dd(0);
-                                    $bid = false;
-                                    $lotMaxAutoBid->update(['bid'=>$inputAutoBid]);
-                                }
-                                else {
-                                    #通知已有的自動出價者出價
-                                    #dd(1);
-                                    $bid = $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid);
-                                    $this->bidLot($lotId, $bidderId, $bid);#目前最高出價的下一個出價####wrong
+            if(isset($lot->reserve_price)){#有底價
+                if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
+                    if($lot->current_bid >= $lot->reserve_price) {#當現在價格大於等於底價時
+                        $lotMaxAutoBid = $this->getLotMaxAutoBid($lotId);
+                        if($this->checkCurrentAutoBidIsValid($lot, $lotMaxAutoBid)) {#有其他自動出價，並且有效
+                            if($inputAutoBid > $lotMaxAutoBid->bid) {#當自動出價大於已有的自動出價
+                                if($inputAutoBid >= $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid)) {#當自動出價大於等於目前最高出價的下一個出價
+                                    if($bidderId == $lotMaxAutoBid->user_id) {#如果自動出價者是已有的自動出價者
+                                        #dd(0);
+                                        $bid = false;
+                                        $lotMaxAutoBid->update(['bid'=>$inputAutoBid]);
+                                    }
+                                    else {
+                                        #通知已有的自動出價者出價
+                                        #dd(1);
+                                        $bid = $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid);
+                                        $this->bidLot($lotId, $bidderId, $bid);#目前最高出價的下一個出價####wrong
+                                        $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
+                                    }
+
+                                } else {#當自動出價小於目前最高出價的下一個出價
+                                    #自動出價者出價
+                                    #dd(2);
+                                    $bid = $inputAutoBid;
+                                    $this->bidLot($lotId, $bidderId, $bid);#直達最頂
                                     $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
+                                    #通知已有的動出價者
                                 }
 
-                            } else {#當自動出價小於目前最高出價的下一個出價
+                            } else {#當自動出價小於已有的自動出價#########
                                 #自動出價者出價
-                                #dd(2);
+                                #dd(3);
                                 $bid = $inputAutoBid;
-                                $this->bidLot($lotId, $bidderId, $bid);#直達最頂
+                                $this->bidLot($lotId, $bidderId, $bid);#直達最頂(自動出價金額)
+                                $this->dispatchLineNotice($lot, $bidderId, null, $bid, 1);
+                                #已有的自動出價者出價
+                                if($inputAutoBid+$this->bidRule($inputAutoBid) >= $lotMaxAutoBid->bid) {#當自動出價的下一個出價大於等於目前自動出價者的最高出價
+                                    $bid = $lotMaxAutoBid->bid;
+                                    $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#目前最高自動出價者的出價
+                                    $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, null, $bid, 1);
+                                    $this->dispatchLineNotice($lot, $bidderId, $topBidderId, $bid, 0);
+                                } else {#當自動出價的下一個出價小於目前自動出價者的最高出價
+                                    $bid = $inputAutoBid+$this->bidRule($inputAutoBid);
+                                    $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#自動出價的下一個出價
+                                    $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, null, $bid, 1);
+                                    $this->dispatchLineNotice($lot, $bidderId, $topBidderId, $bid, 0);
+                                }
+                            }
+
+                        } else {#沒有其他自動出價，或是其他自動出價無效
+                            #dd(4);
+                            if($bidderId == $topBidderId) {
+                                $bid = false;
+                            } else {
+                                $bid = $lot->current_bid + $this->bidRule($lot->current_bid);
+                                $this->bidLot($lotId, $bidderId, $bid);
                                 $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
-                                #通知已有的動出價者
                             }
 
-                        } else {#當自動出價小於已有的自動出價#########
-                            #自動出價者出價
-                            #dd(3);
-                            $bid = $inputAutoBid;
-                            $this->bidLot($lotId, $bidderId, $bid);#直達最頂(自動出價金額)
-                            $this->dispatchLineNotice($lot, $bidderId, null, $bid, 1);
-                            #已有的自動出價者出價
-                            if($inputAutoBid+$this->bidRule($inputAutoBid) >= $lotMaxAutoBid->bid) {#當自動出價的下一個出價大於等於目前自動出價者的最高出價
-                                $bid = $lotMaxAutoBid->bid;
-                                $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#目前最高自動出價者的出價
-                                $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, null, $bid, 1);
-                                $this->dispatchLineNotice($lot, $bidderId, $topBidderId, $bid, 0);
-                            } else {#當自動出價的下一個出價小於目前自動出價者的最高出價
-                                $bid = $inputAutoBid+$this->bidRule($inputAutoBid);
-                                $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#自動出價的下一個出價
-                                $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, null, $bid, 1);
-                                $this->dispatchLineNotice($lot, $bidderId, $topBidderId, $bid, 0);
-                            }
                         }
-
-                    } else {#沒有其他自動出價，或是其他自動出價無效
-                        #dd(4);
-                        if($bidderId == $topBidderId) {
-                            $bid = false;
-                            $lotMaxAutoBid->update(['bid'=>$inputAutoBid]);
-                        } else {
-                            $bid = $lot->current_bid + $this->bidRule($lot->current_bid);
-                            $this->bidLot($lotId, $bidderId, $bid);
-                            $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
-                        }
-
+                    } else {#當現有價格小於底價時
+                        #dd(5);
+                        $bid = $lot->reserve_price;
+                        $this->bidLot($lotId, $bidderId, $bid);#直達底價
+                        $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
                     }
-                } else {#當現有價格小於底價時
-                    #dd(5);
-                    $bid = $lot->reserve_price;
-                    $this->bidLot($lotId, $bidderId, $bid);#直達底價
+                } else {#自動出價小於等於底價
+                    $bid = $inputAutoBid;
+                    $this->bidLot($lotId, $bidderId, $bid);#直達最頂
                     $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
                 }
-            } else {#自動出價小於等於底價
-                #dd(6);
-                $bid = $inputAutoBid;
-                $this->bidLot($lotId, $bidderId, $bid);#直達最頂
-                $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
+            } else {#沒有底價
+
+                $lotMaxAutoBid = $this->getLotMaxAutoBid($lotId);
+                if($this->checkCurrentAutoBidIsValid($lot, $lotMaxAutoBid)) {#有其他自動出價，並且有效
+
+                    if($inputAutoBid > $lotMaxAutoBid->bid) {#當自動出價大於已有的自動出價
+                        if($inputAutoBid >= $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid)) {#當自動出價大於等於目前最高出價的下一個出價
+                            if($bidderId == $lotMaxAutoBid->user_id) {#如果自動出價者是已有的自動出價者
+                                #dd(0);
+                                $bid = false;
+                                $lotMaxAutoBid->update(['bid'=>$inputAutoBid]);
+                            }
+                            else {
+                                #通知已有的自動出價者出價
+                                #dd(1);
+                                $bid = $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid);
+                                $this->bidLot($lotId, $bidderId, $bid);#目前最高出價的下一個出價####wrong
+                                $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
+                            }
+
+                        } else {#當自動出價小於目前最高出價的下一個出價
+                            #自動出價者出價
+                            #dd(2);
+                            $bid = $inputAutoBid;
+                            $this->bidLot($lotId, $bidderId, $bid);#直達最頂
+                            $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
+                            #通知已有的動出價者
+                        }
+
+                    } else {#當自動出價小於已有的自動出價#########
+                        #自動出價者出價
+                        #dd(3);
+                        $bid = $inputAutoBid;
+                        $this->bidLot($lotId, $bidderId, $bid);#直達最頂(自動出價金額)
+                        $this->dispatchLineNotice($lot, $bidderId, null, $bid, 1);
+                        #已有的自動出價者出價
+                        if($inputAutoBid+$this->bidRule($inputAutoBid) >= $lotMaxAutoBid->bid) {#當自動出價的下一個出價大於等於目前自動出價者的最高出價
+                            $bid = $lotMaxAutoBid->bid;
+                            $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#目前最高自動出價者的出價
+                            $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, null, $bid, 1);
+                            $this->dispatchLineNotice($lot, $bidderId, $topBidderId, $bid, 0);
+                        } else {#當自動出價的下一個出價小於目前自動出價者的最高出價
+                            $bid = $inputAutoBid+$this->bidRule($inputAutoBid);
+                            $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#自動出價的下一個出價
+                            $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, null, $bid, 1);
+                            $this->dispatchLineNotice($lot, $bidderId, $topBidderId, $bid, 0);
+                        }
+                    }
+
+                } else {#沒有其他自動出價，或是其他自動出價無效
+                    if($bidderId == $topBidderId) {
+                        $bid = false;
+                    } else {
+                        $bid = $lot->current_bid + $this->bidRule($lot->current_bid);
+                        $this->bidLot($lotId, $bidderId, $bid);
+                        $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0);
+                    }
+
+                }
             }
+
         }
 
 

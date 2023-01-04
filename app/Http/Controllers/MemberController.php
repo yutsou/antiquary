@@ -52,7 +52,12 @@ class MemberController extends Controller
         $ownerApplicationNoticeCount = $this->userService->getOwnerApplicationNoticeCount(Auth::user()->id);
         $ownerSellingLotNoticeCount = $this->userService->getOwnerSellingLotNoticeCount(Auth::user()->id);
         $ownerOrderNoticeCount = $this->userService->getOrderLotNoticeCount(Auth::user()->id);
-        $customView = CustomClass::viewWithTitle(view('account.dashboard')->with('ownerApplicationNoticeCount', $ownerApplicationNoticeCount)->with('ownerSellingLotNoticeCount', $ownerSellingLotNoticeCount)->with('ownerOrderNoticeCount', $ownerOrderNoticeCount), '會員中心');
+        $ownerReturnedLotNoticeCount = $this->userService->getReturnedLotNoticeCount(Auth::user()->id);
+        $customView = CustomClass::viewWithTitle(view('account.dashboard')
+            ->with('ownerApplicationNoticeCount', $ownerApplicationNoticeCount)
+            ->with('ownerSellingLotNoticeCount', $ownerSellingLotNoticeCount)
+            ->with('ownerOrderNoticeCount', $ownerOrderNoticeCount)
+            ->with('ownerReturnedLotNoticeCount', $ownerReturnedLotNoticeCount), '會員中心');
         return $customView;
     }
 
@@ -226,9 +231,11 @@ class MemberController extends Controller
         $validator = $this->lotValidation($request, 0);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->all()]);
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 400); // 400 being the HTTP code for an invalid request.
         }
-
 
         $lotId = $this->lotService->createLot($request);
 
@@ -260,7 +267,11 @@ class MemberController extends Controller
         $this->lotService->syncLotImages($lotId, $syncImageIds);
 
         CustomClass::sendTemplateNotice(Auth::user()->id, 1, 0, $lotId);
-        //return redirect()->route('account.lots.application_index');
+
+        return Response::json(array(
+            'success' => route('account.applications.index'),
+            'errors' => false
+        ), 200);
     }
 
     public function editLot($lotId)
@@ -276,7 +287,10 @@ class MemberController extends Controller
         $validator = $this->lotValidation($request, 1);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->all()]);
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 400); // 400 being the HTTP code for an invalid request.
         }
 
         $lot = $this->lotService->getLot($lotId);
@@ -327,7 +341,10 @@ class MemberController extends Controller
             $this->lotService->attachLotImages($lotId, $newImageIds);
         }
 
-        #return back();
+        return Response::json(array(
+            'success' => route('account.applications.index'),
+            'errors' => false
+        ), 200);
     }
 
     public function ajaxSubCategories($mainCategoryId)
@@ -360,18 +377,51 @@ class MemberController extends Controller
         return CustomClass::viewWithTitle(view('account.selling_lots.index')->with('lots', $lots), '正在委賣的物品');
     }
 
-    public function indexedFinishedLots()
+    public function indexFinishedLots()
     {
         $user = $this->userService->getUser(Auth::user()->id);
         $lots = $this->lotService->getFinishedLots($user);
         return CustomClass::viewWithTitle(view('account.finished_lots.index')->with('lots', $lots), '完成委賣的物品');
     }
 
-    public function indexedReturnedLots()
+    public function indexReturnedLots()
     {
         $user = $this->userService->getUser(Auth::user()->id);
         $lots = $this->lotService->getReturnedLots($user);
         return CustomClass::viewWithTitle(view('account.returned_lots.index')->with('lots', $lots), '退回的物品');
+    }
+
+    public function editReturnedLot($lotId)
+    {
+        return CustomClass::viewWithTitle(view('account.returned_lots.edit')->with('lotId', $lotId), '物品退還資訊');
+    }
+
+    public function updateReturnedLot(Request $request, $lotId)
+    {
+        $input = $request->all();
+
+        $rules = [
+            "addressee_name" => 'required',
+            "addressee_phone" => 'required',
+            "county" => 'required',
+            "district" => 'required',
+            "address" => 'required',
+        ];
+
+        $messages = [
+            'addressee.required'=>'未填寫收件人姓名',
+            'addressee_phone.required'=>'未填寫收件人電話',
+            'county.required'=>'未選擇縣市',
+            'district.required'=>'未選擇鄉鎮市',
+            'address.required'=>'未填寫地址'
+        ];
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->all()]);
+        }
+
+        $this->lotService->returnedLotLogistic($request, $lotId);
     }
 
     public function storeApplicationLogisticInfo(Request $request, $lotId)
@@ -418,6 +468,13 @@ class MemberController extends Controller
             'bidderId.not_in' => '您不能對自己的物品出價'
         ];
 
+        ###判斷maxAutoBid是不是自己
+        $lotMaxAutoBid = $this->bidService->getLotMaxAutoBid($lotId);
+        if(isset($lotMaxAutoBid) && $lotMaxAutoBid->user_id == $request->bidderId) {
+            $rules['bid'] = 'required|gte:'.$lotMaxAutoBid->bid;
+            $messages['bid.gte'] =  '出價必須大於已設定的自動出價';
+        }
+
         if($request->bid < $lot->reserve_price) {
             $type = 'warning';
             $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
@@ -425,6 +482,8 @@ class MemberController extends Controller
             $type = 'success';
             $successMessage = '';
         }
+
+
 
         $validator = Validator::make($input, $rules, $messages);
 
@@ -638,7 +697,7 @@ class MemberController extends Controller
 
     public function editUnsoldLot($lotId)
     {
-        return CustomClass::viewWithTitle(view('account.unsold_lots.edit')->with('lotId', $lotId), '流標處理');
+        return CustomClass::viewWithTitle(view('account.unsold_lots.edit')->with('lotId', $lotId), '流標/棄標 處理');
     }
 
     public function handleUnsoldLot(Request $request, $lotId)

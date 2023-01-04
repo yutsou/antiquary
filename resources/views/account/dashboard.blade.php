@@ -80,7 +80,11 @@
                     <li>
                         <hr>
                     </li>
-                    <li><a href="{{ route('account.returned_lots.index') }}">退回的物品</a></li>
+                    <li><a href="{{ route('account.returned_lots.index') }}">退回的物品</a>
+                        @if($ownerReturnedLotNoticeCount != 0)
+                            <span class="uk-badge" style="background-color: #003a6c;">{{ $ownerReturnedLotNoticeCount }}</span>
+                        @endif
+                    </li>
                 </ul>
             </div>
         </div>

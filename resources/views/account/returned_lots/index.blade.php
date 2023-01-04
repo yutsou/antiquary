@@ -23,9 +23,12 @@
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
         $(function () {
-            $('.custom-card-click').on('click', function() {
+            $('.returned-lot-logistic-info').on('click', function() {
                 let lotId = $(this).attr('lotId');
-                window.location.assign('/account/applications/'+lotId);
+                let url = '{{ route("account.returned_lots.edit", ":id") }}';
+                url = url.replace(':id', lotId);
+                window.location.assign(url);
+                return false;
             });
         });
     </script>

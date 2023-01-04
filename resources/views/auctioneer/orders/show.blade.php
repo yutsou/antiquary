@@ -14,6 +14,12 @@
                     <table class="uk-table uk-table-divider">
                         <tbody>
                         <tr>
+                            <td class="uk-table-expand">得標者姓名</td>
+                            <td class="uk-table-expand">{{ $order->user->name }}</td>
+                            <td class="uk-table-expand">得標者電話</td>
+                            <td class="uk-table-expand">{{ $order->user->phone }}</td>
+                        </tr>
+                        <tr>
                             <td class="uk-table-expand">付款方式</td>
                             <td class="uk-table-expand">{{ $methodPresenter->transferPaymentMethod($order->payment_method) }}</td>
                             <td class="uk-table-expand">付款截止時間</td>
@@ -29,32 +35,34 @@
                             <td class="uk-table-expand">收貨人/取貨人 電話</td>
                             <td class="uk-table-expand">{{ $logisticInfo->addressee_phone ?? '' }}</td>
                         </tr>
-                        @switch($order->delivery_method)
-                            @case(1)
-                                <tr>
-                                    <td class="uk-table-expand">宅配地址</td>
-                                    <td class="uk-table-expand">{{ $logisticInfo->delivery_zipcode }}{{ $logisticInfo->delivery_address }}</td>
-                                </tr>
-                                @break
-                            @case(2)
-                                <tr>
-                                    <td class="uk-width-small">宅配國家</td>
-                                    <td class="uk-table-expand">{{ strtoupper($logisticInfo->cross_board_delivery_country_code) }} - {{ $logisticInfo->cross_board_delivery_country }}</td>
+                        @if($order->delivery_method > 0)
+                            @switch($order->delivery_method)
+                                @case(1)
+                                    <tr>
+                                        <td class="uk-table-expand">宅配地址</td>
+                                        <td class="uk-table-expand">{{ $logisticInfo->delivery_zipcode }}{{ $logisticInfo->delivery_address }}</td>
+                                    </tr>
+                                    @break
+                                @case(2)
+                                    <tr>
+                                        <td class="uk-width-small">宅配國家</td>
+                                        <td class="uk-table-expand">{{ strtoupper($logisticInfo->cross_board_delivery_country_code) }} - {{ $logisticInfo->cross_board_delivery_country }}</td>
 
-                                </tr>
+                                    </tr>
+                                    <tr>
+                                        <td class="uk-width-small">境外宅配地址</td>
+                                        <td class="uk-table-expand">{{ $logisticInfo->cross_board_delivery_address }}</td>
+                                    </tr>
+                                    @break
+                            @endswitch
+                            @if($order->status > 0)
                                 <tr>
-                                    <td class="uk-width-small">境外宅配地址</td>
-                                    <td class="uk-table-expand">{{ $logisticInfo->cross_board_delivery_address }}</td>
+                                    <td class="uk-width-small">物流公司</td>
+                                    <td class="uk-table-expand">{{ $logisticInfo->company_name }}</td>
+                                    <td class="uk-width-small">物流追蹤碼</td>
+                                    <td class="uk-table-expand">{{ $logisticInfo->tracking_code }}</td>
                                 </tr>
-                                @break
-                        @endswitch
-                        @if($order->status>2)
-                            <tr>
-                                <td class="uk-width-small">物流公司</td>
-                                <td class="uk-table-expand">{{ $logisticInfo->company_name }}</td>
-                                <td class="uk-width-small">物流追蹤碼</td>
-                                <td class="uk-table-expand">{{ $logisticInfo->tracking_code }}</td>
-                            </tr>
+                            @endif
                         @endif
                         </tbody>
                     </table>

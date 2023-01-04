@@ -18,8 +18,7 @@
             <div class="uk-alert-warning" id="validator-alert" uk-alert hidden>
                 <ul id="validator-alert-ul"></ul>
             </div>
-                <form class="uk-form-stacked" method="POST" id="lot-form"  enctype="multipart/form-data">
-                    @csrf
+                <form class="uk-form-stacked" id="lot-form">
                     <ul class="uk-child-width-expand" uk-tab>
                         <li class="uk-active uk-text-nowrap"><a href="#">物品資料</a></li>
                         <li><a href="#" class="uk-text-nowrap">圖片</a></li>
@@ -73,7 +72,7 @@
                                     <div class="uk-card uk-card-default uk-card-body">
                                         <h3 class="uk-card-title uk-form-label">上傳物品封面圖片</h3>
                                         <div class="uk-margin">
-                                            <div class="uk-child-width-1-2" id="main-image-preview">
+                                            <div class="uk-child-width-1-3" id="main-image-preview">
                                                 <img src="{{ $lot->main_image->url }}">
                                             </div>
                                         </div>
@@ -99,7 +98,7 @@
                                                 @endforeach
                                             </div>
                                         </div>
-                                        @if($lot->process == 0 && $lot->status == 0)
+                                        @if($lot->status == 1)
                                             <div class="js-upload" uk-form-custom>
                                                 <input type="file" multiple id="gallery-photo-add" name="images[]">
                                                 <button class="uk-button uk-button-default custom-color-group-1" type="button"
@@ -123,7 +122,14 @@
                     </ul>
                     @if($lot->status == 1)
                         <div class="uk-margin uk-flex uk-flex-right">
-                            <button type="submit" class="uk-button custom-button-1 uk-width-auto@s">修改</button>
+                            <a href="#confirmEdit" rel="modal:open" class="uk-button custom-button-1">送出修改</a>
+                            <div id="confirmEdit" class="modal">
+                                <h2>確認送出修改嗎？</h2>
+                                <p class="uk-text-right">
+                                    <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
+                                    <a class="uk-button custom-button-1 uk-width-auto@s" id="submit-edit">確認</a>
+                                </p>
+                            </div>
                         </div>
                     @endif
                 </form>
@@ -131,6 +137,7 @@
     </div>
 @endsection
 @push('style')
+    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
     <style>
         .uk-active > a {
             border-bottom: 2px solid #003a6c !important;
@@ -138,6 +145,7 @@
     </style>
 @endpush
 @push('scripts')
+    <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
         let getDefaultSpecification = function (mainCategoryId) {
             $.ajax({
@@ -257,9 +265,8 @@
                 }
             });
 
-            $('#lot-form').submit(function (e) {
-                e.preventDefault();
-                let inputData = new FormData(this);
+            $('#submit-edit').click(function () {
+                let inputData = new FormData($('#lot-form')[0]);
 
                 $.ajax({
                     headers: {
@@ -270,30 +277,33 @@
                     data: inputData,
                     contentType: false,
                     processData: false,
-                    success: function (data) {
-                        if (typeof (data.error) !== 'undefined') {
-                            let errors = Object.values(data.error)
-                            $('#validator-alert').prop('hidden', false);
-                            let validatorAlertUl = $('#validator-alert-ul');
-                            validatorAlertUl.empty();
-                            errors.forEach(i => validatorAlertUl.append($("<li></li>").text(i)));
-                            $('html,body').animate({scrollTop: 0}, 500);
-                        } else {
-                            Swal.fire({
-                                position: 'center',
-                                icon: 'success',
-                                title: '已送出',
-                                showConfirmButton: false,
-                            })
+                    success: function (response) {
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: '已送出',
+                            showConfirmButton: false,
+                        })
 
-                            setTimeout(function() {
-                                window.location.assign('{{ route('account.applications.index') }}');
-                            }, 1000);
+                        function successAction (response) {
+                            window.location.replace(response.success);
                         }
+
+                        setTimeout(function (){
+                            successAction(response)
+                        }, 1500);
+                    },
+                    error: function (response) {
+                        let errors = merge_errors(response)
+                        let validatorAlert = $('#validator-alert');
+                        validatorAlert.empty();
+                        validatorAlert.prop('hidden', false);
+                        validatorAlert.append(errors);
+                        $('html,body').animate({scrollTop: 0}, 500);
                     }
                 });
+                $.modal.close();
             });
-
         });
     </script>
 @endpush

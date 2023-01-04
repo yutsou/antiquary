@@ -186,13 +186,21 @@
                     </li>
                 </ul>
                 <div class="uk-margin uk-flex uk-flex-right">
-                    <button class="uk-button custom-button-1 uk-width-auto@s" type="submit">建立物品</button>
+                    <a href="#confirmCreate" rel="modal:open" class="uk-button custom-button-1">建立物品</a>
+                    <div id="confirmCreate" class="modal">
+                        <h2>確認建立物品嗎？</h2>
+                        <p class="uk-text-right">
+                            <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
+                            <a class="uk-button custom-button-1 uk-width-auto@s" id="submit-form">確認</a>
+                        </p>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 @endsection
 @push('style')
+    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
     <style>
         .uk-active > a {
             border-bottom: 2px solid #003a6c !important;
@@ -200,6 +208,7 @@
     </style>
 @endpush
 @push('scripts')
+    <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
         let getDefaultSpecification = function (mainCategoryId) {
             $.ajax({
@@ -319,9 +328,9 @@
                 }
             });
 
-            $('#lot-form').submit(function (e) {
-                e.preventDefault();
-                let inputData = new FormData(this);
+            $('#submit-form').click(function () {
+                //e.preventDefault();
+                let inputData = new FormData($('#lot-form')[0]);
 
                 $.ajax({
                     headers: {
@@ -332,28 +341,32 @@
                     data: inputData,
                     contentType: false,
                     processData: false,
-                    success: function (data) {
-                        if (typeof (data.error) !== 'undefined') {
-                            let errors = Object.values(data.error)
-                            $('#validator-alert').prop('hidden', false);
-                            let validatorAlertUl = $('#validator-alert-ul');
-                            validatorAlertUl.empty();
-                            errors.forEach(i => validatorAlertUl.append($("<li></li>").text(i)));
-                            $('html,body').animate({scrollTop: 0}, 500);
-                        } else {
-                            Swal.fire({
-                                position: 'center',
-                                icon: 'success',
-                                title: '已送出',
-                                showConfirmButton: false,
-                            })
+                    success: function (response) {
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: '已送出',
+                            showConfirmButton: false,
+                        })
 
-                            setTimeout(function() {
-                                window.location.assign('{{ route('account.applications.index') }}');
-                            }, 1000);
+                        function successAction (response) {
+                            window.location.replace(response.success);
                         }
+
+                        setTimeout(function (){
+                            successAction(response)
+                        }, 1500);
+                    },
+                    error: function (response) {
+                        let errors = merge_errors(response)
+                        let validatorAlert = $('#validator-alert');
+                        validatorAlert.empty();
+                        validatorAlert.prop('hidden', false);
+                        validatorAlert.append(errors);
+                        $('html,body').animate({scrollTop: 0}, 500);
                     }
                 });
+                $.modal.close();
             });
 
         });

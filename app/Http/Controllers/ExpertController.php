@@ -298,10 +298,47 @@ class ExpertController extends Controller
             return response()->json(['error' => $validator->errors()->all()]);
         }
 
-        $this->lotService->returnUnsoldLot($request, $lotId);
+        $this->lotService->returnLot($request, $lotId, 2);
+
+        $lot = $this->lotService->getLot($lotId);
+        CustomClass::sendTemplateNotice($lot->owner_id, 5, 0, $lot->id, 0);
+
+    }
+
+    public function editReturnedLogisticInfo($mainCategoryId, $lotId)
+    {
+        $lot = $this->lotService->getLot($lotId);
+        $logisticInfo = $this->lotService->getLogisticInfo($lot, 1);
+        $with = [
+            'mainCategoryId'=>$mainCategoryId,
+            'lot'=>$lot,
+            'logisticInfo'=>$logisticInfo
+        ];
+        return CustomClass::viewWithTitle(view('expert.returned_lot_logistic_infos.edit')->with($with), '查看 / 填寫運送資訊');
+    }
+
+    public function updateReturnedLogisticInfo(Request $request, $mainCategoryId, $lotId)
+    {
+        $input = $request->all();
+
+        $rules = [
+            "company_name" => 'required',
+            "tracking_code" => 'required',
+        ];
+
+        $messages = [
+            'company_name.required'=>'未填寫物流公司名稱',
+            'tracking_code.required'=>'未填寫物流追蹤碼',
+        ];
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->all()]);
+        }
+
+        $this->lotService->returnLot($request, $lotId, 1);
 
         $lot = $this->lotService->getLot($lotId);
         CustomClass::sendTemplateNotice($lot->owner_id, 4, 0, $lot->id, 0);
-
     }
 }

@@ -46,7 +46,11 @@ class MemberOrderActionPresenter
                     ';
             case 21:
                 return '
-                        <button uk-toggle="target: #confirm-complete-'.$order->id.'" type="button" class="uk-button custom-button-1">完成訂單</button>
+                    <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
+                        <div>
+                            <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>
+                        </div>
+                    </div>
                     ';
             default:
                 return '<a>&nbsp;</a>';

@@ -46,8 +46,8 @@ class UserSeeder extends Seeder
             'bank_branch_name'=>'桃園分行',
             'bank_account_number'=>'0000145623',
             'bank_account_name'=>'鄒瑜',
-            'premium_rate'=> 2,
-            'commission_rate'=> 3
+            'premium_rate'=> 0.02,
+            'commission_rate'=> 0.03
         ]);
 
         DB::table('users')->insert([
@@ -58,8 +58,8 @@ class UserSeeder extends Seeder
             'role' => 3,
             'email_verified_at'=>Carbon::now(),
             'phone_verified_at'=>Carbon::now(),
-            'premium_rate'=> 2,
-            'commission_rate'=> 3
+            'premium_rate'=> 0.02,
+            'commission_rate'=> 0.03
         ]);
 
     }

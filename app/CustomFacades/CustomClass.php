@@ -10,7 +10,7 @@ class CustomClass
 {
     public static function viewWithTitle($viewWithParams, $title)
     {
-        return $viewWithParams->with('head', $title)->with('title', $title.' - '.env("APP_NAME"));
+        return $viewWithParams->with('head', $title)->with('title', $title.' - '.config('app.name'));
     }
 
     public static function sendTemplateNotice($userId, $type, $code, $targetId, $withEmail=null)

@@ -55,8 +55,11 @@ class MemberLotIndexPresenter
                 return '競標成功 - 等待買家完成交易';
             }
 
-        }  elseif($lot->status == 23) {
+        }  elseif($lot->status == 31) {
             $logisticInfo = $lot->logisticRecords->where('type', 2)->first();
+            return $this->lotStatusPresenter->present($lot->status) . ' - ' . $logisticInfo->company_name . ': ' . $logisticInfo->tracking_code;
+        } elseif($lot->status == 34) {
+            $logisticInfo = $lot->logisticRecords->where('type', 1)->first();
             return $this->lotStatusPresenter->present($lot->status) . ' - ' . $logisticInfo->company_name . ': ' . $logisticInfo->tracking_code;
         }
         else {
@@ -80,8 +83,8 @@ class MemberLotIndexPresenter
                 return '<button class="uk-button custom-button-1 edit-lot" lotId="'.$lot->id.'">修改</button>';
             case $lot->status == 2:
                 return '<button class="uk-button custom-button-1 application-logistic-info uk-text-nowrap" lotId="'.$lot->id.'">查看/填寫運送資訊</button>';
-            case $lot->status == 23 || $lot->status == 24:
-                return '<button class="uk-button custom-button-1 unsold-lot-process" lotId="'.$lot->id.'">流標處理</button>';
+            case $lot->status == 23 || $lot->status == 24 || $lot->status == 25:
+                return '<button class="uk-button custom-button-1 unsold-lot-process" lotId="'.$lot->id.'">流標/棄標 處理</button>';
             case $lot->status == 22:
                 $order = $lot->order;
                 switch ($order->status) {
@@ -117,6 +120,8 @@ class MemberLotIndexPresenter
                     default:
                         return '以 NT$'.number_format($lot->current_bid).' 賣出';
                 }
+            case $lot->status == 32:
+                return '<button class="uk-button custom-button-1 returned-lot-logistic-info uk-text-nowrap" lotId="'.$lot->id.'">填寫物品退還資訊</button>';
             case $lot->status == 40:
                 return '以 NT$'.number_format($lot->current_bid).' 賣出';
             case $lot->status == 41:
