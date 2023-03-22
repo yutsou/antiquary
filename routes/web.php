@@ -125,7 +125,6 @@ Route::prefix('expert/dashboard')->middleware(EnsureIsExpert::class)->group(func
     Route::get('/main-categories/{mainCategoryId}/lots/{lotId}/returned-logistic-info', [ExpertController::class, 'editReturnedLogisticInfo'])->name('expert.returned_lot_logistic_info.edit');
     Route::post('/main-categories/{mainCategoryId}/lots/{lotId}/returned-logistic-info', [ExpertController::class, 'updateReturnedLogisticInfo'])->name('expert.returned_lot_logistic_info.update');
 
-
     Route::get('/main-categories/{mainCategoryId}/lots/{lotId}/logistic-info', [ExpertController::class, 'createUnsoldLotLogisticInfo'])->name('expert.unsold_lot_logistic_info.create');
     Route::post('/main-categories/{mainCategoryId}/lots/{lotId}/logistic-info', [ExpertController::class, 'storeUnsoldLotLogisticInfo'])->name('expert.unsold_lot_logistic_info.store');
 });
@@ -209,6 +208,12 @@ Route::prefix('account')->middleware('auth')->group(function () {
     Route::post('/seller/update', [MemberController::class, 'updateSeller'])->name('account.seller.update');
     Route::post('/ajax/notices/read', [MemberController::class, 'readNotices'])->name('account.notices.read');
 });
+
+Route::get('/about-antiquary', [MartController::class, 'showAbout'])->name('mart.about_antiquary.show');
+Route::get('/antiquary-guaranty', [MartController::class, 'showGuaranty'])->name('mart.antiquary_guaranty.show');
+Route::get('/consignment-auction-notes', [MartController::class, 'showConsignmentAuctionNotes'])->name('mart.consignment_auction_notes.show');
+Route::get('/consignment-auction-terms', [MartController::class, 'showConsignmentAuctionTerms'])->name('mart.consignment_auction_terms.show');
+Route::get('/bidding-notes', [MartController::class, 'showBiddingNotes'])->name('mart.bidding-notes.show');
 
 Route::get('/test/delete/{lotId}', [MemberController::class, 'testDelete']);
 Route::get('/test/schedule', [MemberController::class, 'testSchedule']);

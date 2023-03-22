@@ -108,6 +108,31 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 
+    public function showAbout()
+    {
+        return CustomClass::viewWithTitle(view('about_us'), '關於我們');
+    }
+
+    public function showGuaranty()
+    {
+        return CustomClass::viewWithTitle(view('antiquary_guaranty'), '我們的保證');
+    }
+
+    public function showConsignmentAuctionNotes()
+    {
+        return CustomClass::viewWithTitle(view('consignment_auction_notes'), '委託拍賣須知');
+    }
+
+    public function showConsignmentAuctionTerms()
+    {
+        return CustomClass::viewWithTitle(view('consignment_auction_terms'), '委託拍賣條款');
+    }
+
+    public function showBiddingNotes()
+    {
+        return CustomClass::viewWithTitle(view('bidding_notes'), '競標須知');
+    }
+
     public function test()
     {
         #$this->lotService->test();

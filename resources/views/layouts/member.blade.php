@@ -239,32 +239,28 @@
             <div class="uk-container">
                 <div class="uk-grid-match uk-child-width-1-3@m" uk-grid>
                     <div>
-                        <h4>Jason 拍賣場</h4>
-                        <ul class="uk-list">
-                            <li>關於 Jason Auction</li>
-                            <li>List item 2</li>
-                            <li>List item 3</li>
+                        <h4>關於 Antiquary</h4>
+                        <ul class="uk-list uk-link-text">
+                            <li><a href="{{ route('mart.about_antiquary.show') }}">關於我們</a></li>
+                            <li><a href="{{ route('mart.antiquary_guaranty.show') }}">我們的保證</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>關於委賣</h4>
+                        <ul class="uk-list uk-link-text">
+                            <li><a href="{{ route('mart.consignment_auction_notes.show') }}">委託拍賣須知</a></li>
+                            <li><a href="{{ route('mart.consignment_auction_terms.show') }}">委託拍賣條款</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4>關於競標</h4>
-                        <ul class="uk-list">
-                            <li>List item 1</li>
-                            <li>List item 2</li>
-                            <li>List item 3</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4>與我們合作</h4>
                         <ul class="uk-list uk-link-text">
-                            <li><a href="">也有物品想賣嗎？聯絡我們！</a></li>
-                            <li>List item 2</li>
-                            <li>List item 3</li>
+                            <li><a href="{{ route('mart.bidding-notes.show') }}">競標須知</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="uk-margin-large">
-                    <div class="uk-text-center uk-child-width-1-1">Copyright © 2021 Jason 拍賣場</div>
+                    <div class="uk-text-center uk-child-width-1-1">© {{ now()->year }} Antiquary</div>
                 </div>
             </div>
         </div>

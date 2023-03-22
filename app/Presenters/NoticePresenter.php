@@ -57,7 +57,13 @@ class NoticePresenter
                     0 => ['下架的物品已寄出', '物品編號 No.'.$notice->target_id.' ，已寄出。'.$logisticInfo->company_name.': '.$logisticInfo->tracking_code],
                 };
             case 5:
-                $logisticInfo = $notice->lot->logisticRecords->where('type',2)->first();
+                $lot = $notice->lot;
+                if( $lot->status == 30) {
+                    $type = 2;
+                } else { #35
+                    $type = 3;
+                }
+                $logisticInfo = $lot->logisticRecords->where('type',$type)->first();
                 return match ($notice->code) {
                     0 => ['流標的物品已寄出', '物品編號 No.'.$notice->target_id.' ，已寄出。'.$logisticInfo->company_name.': '.$logisticInfo->tracking_code],
                 };

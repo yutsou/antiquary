@@ -46,7 +46,7 @@ class MemberLotIndexPresenter
 
     protected function getStatus($lot)
     {
-        if($lot->status == 1) {
+        /*if($lot->status == 1) {
             return $this->lotStatusPresenter->present($lot->status).' <span uk-icon="icon: question" uk-tooltip="title: 點擊修改查看專家建議; pos: top-right"></span>';
         } elseif($lot->status == 22) {
             if($lot->entrust == 0) {
@@ -64,6 +64,27 @@ class MemberLotIndexPresenter
         }
         else {
             return $this->lotStatusPresenter->present($lot->status);
+        }*/
+        switch (true) {
+            case $lot->status == 1:
+                return $this->lotStatusPresenter->present($lot->status).' <span uk-icon="icon: question" uk-tooltip="title: 點擊修改查看專家建議; pos: top-right"></span>';
+            case $lot->status == 22:
+                if($lot->entrust == 0) {
+                    return '競標成功 - '.$this->orderStatusPresenter->present($lot->order);
+                } else {
+                    return '競標成功 - 等待買家完成交易';
+                }
+            case $lot->status == 31:
+                $logisticInfo = $lot->logisticRecords->where('type', 2)->first();
+                return $this->lotStatusPresenter->present($lot->status) . ' - ' . $logisticInfo->company_name . ': ' . $logisticInfo->tracking_code;
+            case $lot->status == 34:
+                $logisticInfo = $lot->logisticRecords->where('type', 1)->first();
+                return $this->lotStatusPresenter->present($lot->status) . ' - ' . $logisticInfo->company_name . ': ' . $logisticInfo->tracking_code;
+            case $lot->status == 36:
+                $logisticInfo = $lot->logisticRecords->where('type', 3)->first();
+                return $this->lotStatusPresenter->present($lot->status) . ' - ' . $logisticInfo->company_name . ': ' . $logisticInfo->tracking_code;
+            default:
+                return $this->lotStatusPresenter->present($lot->status);
         }
     }
 

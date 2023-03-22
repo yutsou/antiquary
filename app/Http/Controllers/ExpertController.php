@@ -270,7 +270,12 @@ class ExpertController extends Controller
     public function createUnsoldLotLogisticInfo($mainCategoryId, $lotId)
     {
         $lot = $this->lotService->getLot($lotId);
-        $logisticInfo = $this->lotService->getLogisticInfo($lot, 2);
+        if( $lot->status == 30) {
+            $type = 2;
+        } else { #35
+            $type = 3;
+        }
+        $logisticInfo = $this->lotService->getLogisticInfo($lot, $type);
         $with = [
             'mainCategoryId'=>$mainCategoryId,
             'lot'=>$lot,
@@ -298,9 +303,15 @@ class ExpertController extends Controller
             return response()->json(['error' => $validator->errors()->all()]);
         }
 
-        $this->lotService->returnLot($request, $lotId, 2);
-
         $lot = $this->lotService->getLot($lotId);
+        if( $lot->status == 30) {
+            $type = 2;
+        } else { #35
+            $type = 3;
+        }
+        $this->lotService->returnLot($request, $lotId, $type);
+
+
         CustomClass::sendTemplateNotice($lot->owner_id, 5, 0, $lot->id, 0);
 
     }

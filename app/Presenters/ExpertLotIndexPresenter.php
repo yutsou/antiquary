@@ -43,7 +43,7 @@ class ExpertLotIndexPresenter
                                 <a href="#take-down-lot-'.$lot->id.'" rel="modal:open" class="uk-button custom-button-2">下架</a>
                             </div>
                         ';
-            case $lot->status == 30:
+            case $lot->status == 30 || $lot->status == 35:
                 return '
                         <a href="'.route('expert.unsold_lot_logistic_info.create', [$mainCategory->id, $lot->id]).'" class="uk-button custom-button-1">查看 / 填寫 退還資訊</a>
                     ';

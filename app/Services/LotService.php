@@ -218,7 +218,7 @@ class LotService extends LotRepository
 
     public function getReturnedLots($user)
     {
-        return $user->ownLots->whereBetween('status',[30, 34]);
+        return $user->ownLots->whereBetween('status',[30, 36]);
     }
 
     public function getFinishedLots($user)

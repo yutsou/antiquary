@@ -301,7 +301,7 @@ class UserService extends UserRepository
                 }
             }
         }
-        $count += UserRepository::getLotNoticeCount([23, 25], $userId);
+        $count += UserRepository::getLotNoticeCount([23, 24, 25], $userId);
         return $count;
 
     }

@@ -638,7 +638,7 @@
                 if (bidderId === e.bidderId.toString()) {
                     newBid = '<tr><td>你</td><td>' + e.created_at + '</td><td>NT$' + number_format(e.bid) + '</td></tr>';
                 } else {
-                    newBid = '<tr><td>競標者 ' + e.bidderAlias + '</td><td>' + e.created_at + '</td><td>NT$' + number_format(e.bid) + '</td></tr>';
+                    newBid = '<tr><td>競標者 ' + e.bidderAlias + '</td><td style="font-size: 0.8em">' + e.created_at + '</td><td>NT$' + number_format(e.bid) + '</td></tr>';
                 }
 
                 $('#bidHistories').prepend(newBid);
