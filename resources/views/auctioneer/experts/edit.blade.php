@@ -17,7 +17,7 @@
         });
     </script>
 @endif
-@inject('auctioneerPresenter', 'App\Presenters\auctioneerPresenter')
+@inject('auctioneerPresenter', 'App\Presenters\AuctioneerPresenter')
 <form class="uk-form-stacked" method="POST" action="{{ route('auctioneer.experts.update', ['userId'=> $expert->id]) }}">
     @csrf
     <div class="uk-margin">
