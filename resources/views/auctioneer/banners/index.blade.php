@@ -24,15 +24,17 @@
                 <h3 class="uk-card-title uk-form-label">Banner 順序</h3>
                 <div class="uk-margin">
                     <ul class="uk-grid-small uk-child-width-1-2 uk-child-width-1-4@s" uk-sortable="handle: .uk-card" uk-grid>
-                        @foreach($banners as $banner)
-                            <li>
-                                <div class="uk-card uk-card-default uk-card-body uk-text-center"
-                                     style="background-image: url('{{ $banner->image->url }}'); background-position: center; background-repeat: no-repeat; background-size: cover; position: relative;">
-                                    <a aria-label="Close" uk-close style="position: absolute; bottom: 80%; left: 90%; height: 30px; line-height: 30px; width: 30px; border-radius: 50%; background-color: #d62828; color: white; text-align: center; cursor: pointer;" class="delete-buttons" banner-id="{{ $banner->id }}"></a>
-                                    <input type="text" name="ids[]" value="{{ $banner->id }}" hidden>
-                                </div>
-                            </li>
-                        @endforeach
+                        @if($banners->count() != 0)
+                            @foreach($banners as $banner)
+                                <li>
+                                    <div class="uk-card uk-card-default uk-card-body uk-text-center"
+                                         style="background-image: url('{{ $banner->image->url }}'); background-position: center; background-repeat: no-repeat; background-size: cover; position: relative;">
+                                        <a aria-label="Close" uk-close style="position: absolute; bottom: 80%; left: 90%; height: 30px; line-height: 30px; width: 30px; border-radius: 50%; background-color: #d62828; color: white; text-align: center; cursor: pointer;" class="delete-buttons" banner-id="{{ $banner->id }}"></a>
+                                        <input type="text" name="ids[]" value="{{ $banner->id }}" hidden>
+                                    </div>
+                                </li>
+                            @endforeach
+                        @endif
                     </ul>
                 </div>
                 <div class="uk-margin">

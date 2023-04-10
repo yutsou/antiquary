@@ -19,15 +19,17 @@
 @section('sub-content')
     <div class="uk-position-relative uk-visible-toggle uk-light uk-visible@l" tabindex="-1" uk-slideshow="autoplay: true; animation: slide">
         <ul class="uk-slideshow-items" uk-height-viewport>
-            @foreach($banners as $banner)
-                <li>
-                    <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
-                    <div class="uk-position-center uk-position-medium uk-text-center uk-light">
-                        <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
-                        <hr class="hr">
-                    </div>
-                </li>
-            @endforeach
+            @if($banners->count() != 0)
+                @foreach($banners as $banner)
+                    <li>
+                        <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
+                        <div class="uk-position-center uk-position-medium uk-text-center uk-light">
+                            <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
+                            <hr class="hr">
+                        </div>
+                    </li>
+                @endforeach
+            @endif
         </ul>
         <a class="uk-position-center-left uk-position-small uk-hidden-hover" uk-slidenav-previous
            uk-slideshow-item="previous"></a>
