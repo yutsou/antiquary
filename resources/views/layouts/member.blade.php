@@ -227,7 +227,7 @@
 
         @yield('sub-content')
 
-        <div class="uk-section">
+        <div class="uk-section" style="padding-top: 80px">
             <div class="uk-container">
                 @yield('content')
             </div>
