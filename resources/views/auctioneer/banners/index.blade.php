@@ -55,7 +55,7 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="form-stacked-text">Banner 內容</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" id="form-stacked-text" type="text" name="slogan" required>
+                        <input class="uk-input" id="form-stacked-text" type="text" name="slogan">
                     </div>
                 </div>
                 <div class="uk-margin">

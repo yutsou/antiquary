@@ -23,10 +23,12 @@
                 @foreach($banners as $banner)
                     <li>
                         <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
-                        <div class="uk-position-center uk-position-medium uk-text-center uk-light">
-                            <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
-                            <hr class="hr">
-                        </div>
+                        @if($banner->slogan != '')
+                            <div class="uk-position-center uk-position-medium uk-text-center uk-light">
+                                <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
+                                <hr class="hr">
+                            </div>
+                        @endif
                     </li>
                 @endforeach
             @endif
