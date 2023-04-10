@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -61,6 +62,10 @@ class UserSeeder extends Seeder
             'premium_rate'=> 0.02,
             'commission_rate'=> 0.03
         ]);
+
+        User::factory()
+            ->count(50)
+            ->create();
 
     }
 }

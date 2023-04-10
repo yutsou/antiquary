@@ -213,3 +213,26 @@ input:checked + .uk-switch-slider.uk-switch-big:before {
         'GRAD' 0,
         'opsz' 48
 }
+
+.my-element {
+   height: 100vh; /* Fallback for browsers that do not support Custom Properties */
+   height: calc(var(--vh, 1vh) * 100);
+}
+
+.fixed-top {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+}
+
+.img-fitness {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    will-change: transform,opacity;
+    touch-action: pan-y;
+}

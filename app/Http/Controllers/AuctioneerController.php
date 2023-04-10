@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\BannerService;
 use App\Services\LotService;
 use App\Services\OrderService;
 use App\Services\PromotionService;
@@ -16,9 +17,9 @@ use App\Services\DomainService;
 
 class AuctioneerController extends Controller
 {
-    private $userService, $categoryService, $imageService, $domainService, $orderService, $lotService;
+    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService;
 
-    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService)
+    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService, BannerService $bannerService)
     {
         $this->userService = $userService;
         $this->categoryService = $categoryService;
@@ -27,6 +28,7 @@ class AuctioneerController extends Controller
         $this->orderService = $orderService;
         $this->lotService = $lotService;
         $this->promotionService = $promotionService;
+        $this->bannerService = $bannerService;
     }
 
     static function showDashboard()
@@ -240,5 +242,37 @@ class AuctioneerController extends Controller
                 'errors' => false
             ), 200);
         }
+    }
+
+    public function indexBanners()
+    {
+        $banners = $this->bannerService->getAllBanners()->sortBy('index');
+        return CustomClass::viewWithTitle(view('auctioneer.banners.index')->with("banners", $banners), 'Banner管理');
+    }
+
+    public function createBanner(Request $request)
+    {
+        $newBannerId = $this->bannerService->createBanner($request);
+        $file = $request->image;
+        $folderName = '/banners';
+        $alt = $request->slogan;
+        $imageable_id = $newBannerId;
+        $imageable_type = 'App\Models\Banner';
+        $this->imageService->handleStoreOrUpdateImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+        return back()->with('notification', '創建成功');
+    }
+
+    public function updateBannerIndexes(Request $request)
+    {
+
+        $this->bannerService->updateBannerIndexes($request);
+        return back()->with('notification', '保存成功');
+    }
+
+    public function deleteBanner($id)
+    {
+        $imageId = $this->bannerService->getBanner($id)->image->id;
+        $this->imageService->deleteImage($imageId);
+        $this->bannerService->deleteBanner($id);
     }
 }

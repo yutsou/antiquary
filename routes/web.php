@@ -94,6 +94,11 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
 
     Route::get('/promotions', [AuctioneerController::class, 'indexPromotions'])->name('auctioneer.promotions.index');
     Route::post ('/promotions', [AuctioneerController::class, 'updatePromotion'])->name('auctioneer.promotions.update');
+
+    Route::get('/banners', [AuctioneerController::class, 'indexBanners'])->name('auctioneer.banners.index');
+    Route::post('/banners', [AuctioneerController::class, 'createBanner'])->name('auctioneer.banners.create');
+    Route::post('/banners/indexes', [AuctioneerController::class, 'updateBannerIndexes'])->name('auctioneer.banner_indexes.update');
+    Route::post('/banners/{id}', [AuctioneerController::class, 'deleteBanner'])->name('auctioneer.banner.delete');
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');
@@ -160,8 +165,8 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class, Ensure
 
 
 });
-
-Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->group(function () {
+#Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->group(function () {
+Route::prefix('account')->group(function () {
     Route::get('/', [MemberController::class, 'showDashboard'])->name('account');
 
 

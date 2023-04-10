@@ -2,6 +2,8 @@
 
 namespace App\Presenters;
 
+use Carbon\Carbon;
+
 class NoticePresenter
 {
     public function transferNotice($notice)
@@ -38,7 +40,7 @@ class NoticePresenter
                 };
             case 2:
                 return match ($notice->code) {
-                    0 => ['已安排競標', '物品 No.'.$notice->target_id.' ，安排於'.$notice->lot->auction_start_at_format.'開始競標。'],
+                    0 => ['已安排競標', '物品 No.'.$notice->target_id.' ，安排於 '.Carbon::createFromFormat('Y-m-d H:i:s', new Carbon($notice->content))->format('Y-m-d H:i').' 開始競標。'],
                     1 => ['競標成功', '物品 No.'.$notice->target_id.' ，以 NT$'.number_format($notice->lot->current_bid).'賣出'],
                     2 => ['流標', '物品 No.'.$notice->target_id.' ，為達底價流標，請至平台選擇處理方式。'],
                     3 => ['流標', '物品 No.'.$notice->target_id.' ，無人競標流標，請至平台選擇處理方式。'],

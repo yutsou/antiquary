@@ -13,13 +13,14 @@ class CustomClass
         return $viewWithParams->with('head', $title)->with('title', $title.' - '.config('app.name'));
     }
 
-    public static function sendTemplateNotice($userId, $type, $code, $targetId, $withEmail=null)
+    public static function sendTemplateNotice($userId, $type, $code, $targetId, $withEmail=null, $content=null)
     {
         $notice = Notice::create([
             'user_id'=>$userId,
             'type'=>$type,
             'code'=>$code,
-            'target_id'=>$targetId
+            'target_id'=>$targetId,
+            'content'=>$content
         ]);
 
         if($withEmail !== null) {

@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <title>{{ $title }}</title>
-        <!-- {{ $version = '31' }} -->
+        <!-- {{ $version = '32' }} -->
         <!-- Meta -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,7 +44,7 @@
     </head>
     <body>
         <div class="uk-visible@s">
-            <div style="height:80px; background-color: #fff;" uk-sticky>
+            <div style="height:80px; background-color: #fff;" class="fixed-top">
                 <div class="uk-container">
                     <nav class="uk-navbar-container" uk-navbar style="background-color: #fff;">
                         <div class="uk-navbar-left">
@@ -130,7 +130,7 @@
             </div>
         </div>
         <div class="uk-hidden@s">
-            <div style="box-shadow: 0 8px 6px -6px #ced4da; background-color: #fff" uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky">
+            <div style="box-shadow: 0 8px 6px -6px #ced4da; background-color: #fff" class="fixed-top">
                 <nav class="uk-container" uk-navbar>
                     <div class="uk-navbar-left">
                         <ul class="uk-navbar-nav">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\CustomFacades\CustomClass;
 use App\Services\AuctionService;
+use App\Services\BannerService;
 use App\Services\CategoryService;
 use App\Services\EcpayService;
 use App\Services\LotService;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 
 class MartController extends Controller
 {
-    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService;
+    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService;
 
     public function __construct(
         LotService $lotService,
@@ -22,12 +23,14 @@ class MartController extends Controller
         EcpayService $ecpayService,
         OrderService $orderService,
         CategoryService $categoryService,
+        BannerService $bannerService
     ) {
         $this->lotService = $lotService;
         $this->auctionService = $auctionService;
         $this->ecpayService = $ecpayService;
         $this->orderService = $orderService;
         $this->categoryService = $categoryService;
+        $this->bannerService = $bannerService;
     }
 
     public function showAuction($auctionId)
@@ -47,8 +50,9 @@ class MartController extends Controller
 
     public function showHomepage()
     {
+        $banners = $this->bannerService->getAllBanners()->sortBy('index');
         $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
-        return view('home_page')->with('auctions', $auctions)->with('head', 'Home Page')->with('title', 'Jason Auction');
+        return view('home_page')->with('auctions', $auctions)->with('head', 'Home Page')->with('title', 'Antiquary')->with('banners', $banners);
     }
 
     public function payEcpayReceive(Request $request)

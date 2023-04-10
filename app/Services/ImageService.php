@@ -71,7 +71,7 @@ class ImageService extends ImageRepository
         }
     }
 
-    public function deleteLotImage($imageId)
+    public function deleteImage($imageId)
     {
         $oldImagePath = $this->getImagePath($imageId);
         $this->removeStorageImage($oldImagePath);

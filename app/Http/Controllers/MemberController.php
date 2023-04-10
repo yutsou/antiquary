@@ -310,7 +310,7 @@ class MemberController extends Controller
         if (isset($request->mainImage)) {
             $mianImageId = $lot->main_image->id;
             $lot->blImages()->detach($mianImageId);
-            $this->imageService->deleteLotImage($mianImageId);
+            $this->imageService->deleteImage($mianImageId);
             $file = $request->mainImage;
             $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
             $alt = null;
@@ -327,7 +327,7 @@ class MemberController extends Controller
             $lot->blImages()->detach($olderImageIds);
             foreach($olderImageIds as $imageId)
             {
-                $this->imageService->deleteLotImage($imageId);
+                $this->imageService->deleteImage($imageId);
             }
             $newImageIds = array();
             foreach ($request->images as $file) {

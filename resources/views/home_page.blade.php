@@ -1,9 +1,56 @@
 @extends('layouts.member')
+
 @inject('carbonPresenter', 'App\Presenters\CarbonPresenter')
+@push('scripts')
+    <script>
+        // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
+        let vh = window.innerHeight * 0.01;
+        // Then we set the value in the --vh custom property to the root of the document
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+        // We listen to the resize event
+        window.addEventListener('resize', () => {
+            // We execute the same script as before
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        });
+    </script>
+@endpush
 @section('sub-content')
-    <div class="uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light"
-         data-src="/images/web/home_page/banner/banner-1.jpg" uk-img style="height: 720px;">
-        <h1>拍賣都交由專家管理</h1>
+    <div class="uk-position-relative uk-visible-toggle uk-light uk-visible@l" tabindex="-1" uk-slideshow="autoplay: true; animation: slide">
+        <ul class="uk-slideshow-items" uk-height-viewport>
+            @foreach($banners as $banner)
+                <li>
+                    <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
+                    <div class="uk-position-center uk-position-medium uk-text-center uk-light">
+                        <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
+                        <hr class="hr">
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+        <a class="uk-position-center-left uk-position-small uk-hidden-hover" uk-slidenav-previous
+           uk-slideshow-item="previous"></a>
+        <a class="uk-position-center-right uk-position-small uk-hidden-hover" uk-slidenav-next
+           uk-slideshow-item="next"></a>
+    </div>
+
+    <div class="uk-position-relative uk-visible-toggle uk-light uk-hidden@l" tabindex="-1" uk-slideshow="autoplay: false; animation: slide;">
+        <ul class="uk-slideshow-items my-element" >
+            @foreach($banners as $banner)
+                <li>
+                    <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
+                    <div class="uk-position-bottom uk-position-medium uk-text-center uk-light">
+                        <h3 class="uk-margin-remove">{{ $banner->slogan }}</h3>
+                        <hr class="hr">
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+        <a class="uk-position-center-left uk-position-small uk-hidden-hover" uk-slidenav-previous
+           uk-slideshow-item="previous"></a>
+        <a class="uk-position-center-right uk-position-small uk-hidden-hover" uk-slidenav-next
+           uk-slideshow-item="next"></a>
     </div>
 @endsection
 

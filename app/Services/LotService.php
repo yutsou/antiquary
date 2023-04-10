@@ -305,7 +305,7 @@ class LotService extends LotRepository
                     'auction_start_at'=>$auctionStartAt,
                     'auction_end_at'=>$auctionEndAt
                 ]);
-            CustomClass::sendTemplateNotice($lot->owner_id, 2, 0, $lot->id);
+            CustomClass::sendTemplateNotice($lot->owner_id, 2, 0, $lot->id, null, $auctionStartAt);
         }
 
         HandleAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap));
