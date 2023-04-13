@@ -51,36 +51,64 @@
         <form method="post" action="{{ route('auctioneer.banners.create') }}" enctype="multipart/form-data">
             @csrf
             <div class="uk-card uk-card-default uk-card-body">
-                <h3 class="uk-card-title uk-form-label">上傳Banner圖片 (1920x1080)</h3>
+                <h3 class="uk-card-title uk-form-label">製作Banner</h3>
                 <div class="uk-margin">
-                    <label class="uk-form-label" for="form-stacked-text">Banner 內容</label>
+                    <label class="uk-form-label" for="banner-content">Banner 內容</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" id="form-stacked-text" type="text" name="slogan">
+                        <input class="uk-input" id="banner-content" type="text" name="slogan">
                     </div>
                 </div>
                 <div class="uk-margin">
-                    <div class="uk-margin" id="output-section" hidden>
-                        <div class="uk-flex uk-flex-center">
-                            <div>
-                                <figure class="uk-box-shadow-medium">
-                                    <img class="image-no-known" id="output" uk-img width="960px" height="540px">
-                                </figure>
-                            </div>
-
+                    <label class="uk-form-label" for="banner-link">Banner 鏈結</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="banner-link" type="text" name="link">
+                    </div>
+                </div>
+                <div class="uk-margin">
+                    <div class="uk-margin">
+                        <label class="uk-form-label" for="desktop-banner">桌面版 Banner (1920x1080)</label>
+                        <div uk-form-custom>
+                            <input class="image-inputs" platform="desktop" type="file" accept="image/*" name="desktopBanner" required>
+                            <button class="uk-button uk-button-default" type="button" tabindex="-1">選擇圖片</button>
                         </div>
                     </div>
-                    <div uk-grid>
-                        <div class="uk-flex uk-flex-left uk-width-expand">
-                            <div class="js-upload" uk-form-custom>
-                                <input type="file" accept="image/*" onchange="loadFile(event)" name="image" required>
-                                <button class="uk-button uk-button-default" type="button" tabindex="-1">選擇圖片</button>
+                    <div class="uk-margin">
+                        <div class="uk-margin" id="desktop-output-section" hidden>
+                            <div class="uk-flex uk-flex-center">
+                                <div>
+                                    <figure class="uk-box-shadow-medium">
+                                        <img class="image-no-known" id="desktop-output" uk-img width="960px" height="540px">
+                                    </figure>
+                                </div>
+
                             </div>
                         </div>
-                        <div class="uk-flex uk-flex-right">
-                            <div>
-                                <button class="uk-button custom-button-1">上傳圖片</button>
+                    </div>
+                </div>
+                <div class="uk-margin">
+                    <div class="uk-margin">
+                        <label class="uk-form-label" for="mobile-banner">手機版 Banner (1080x1080)</label>
+                        <div uk-form-custom>
+                            <input class="image-inputs" platform="mobile" type="file" accept="image/*" name="mobile-banner" required>
+                            <button class="uk-button uk-button-default" type="button" tabindex="-1">選擇圖片</button>
+                        </div>
+                    </div>
+                    <div class="uk-margin">
+                        <div class="uk-margin" id="mobile-output-section" hidden>
+                            <div class="uk-flex uk-flex-center">
+                                <div>
+                                    <figure class="uk-box-shadow-medium">
+                                        <img class="image-no-known" id="mobile-output" uk-img width="960px" height="540px">
+                                    </figure>
+                                </div>
+
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="uk-margin">
+                    <div class="uk-flex uk-flex-right">
+                        <button class="uk-button custom-button-1">製作</button>
                     </div>
                 </div>
             </div>
@@ -89,11 +117,13 @@
 @endsection
 @push('scripts')
     <script>
-        var loadFile = function(event) {
-            let outputSection = $("#output-section");
+        let loadImage = function(event) {
+            let outputSection = $("#d-output-section");
             outputSection.prop("hidden", false);
-            var output = document.getElementById('output');
-            output.src = URL.createObjectURL(event.target.files[0]);
+
+            let output = $('#d-output');
+            output.attr('src', URL.createObjectURL(event.target.files[0]))
+
             output.onload = function() {
                 URL.revokeObjectURL(output.src) // free memory
             }
@@ -101,6 +131,18 @@
     </script>
     <script>
         $(function () {
+            $('.image-inputs').on('change', function() {
+                let platform = $(this).attr('platform');
+                let outputSection = $("#"+platform+"-output-section");
+                outputSection.prop("hidden", false);
+
+                let output = $("#"+platform+"-output");
+                output.attr('src', URL.createObjectURL(event.target.files[0]))
+
+                output.onload = function() {
+                    URL.revokeObjectURL(output.src) // free memory
+                }
+            });
             $('.delete-buttons').click(function() {
                 let bannerId = $(this).attr('banner-id');
                 let url = '{{ route("auctioneer.banner.delete", ":id") }}';

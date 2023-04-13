@@ -17,7 +17,8 @@ return new class extends Migration
             $table->id();
             $table->tinyInteger('index');
             $table->string('slogan')->nullable();
-            $table->boolean('visible');
+            $table->string('link')->nullable();
+            $table->boolean('type');
             $table->timestamps();
         });
     }

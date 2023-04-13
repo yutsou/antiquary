@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\PromotionService;
+use App\Services\SmsService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -33,6 +33,6 @@ class SendSms implements ShouldQueue
      */
     public function handle()
     {
-        app(PromotionService::class)->smsSend($this->phone, $this->message);
+        app(SmsService::class)->smsSend($this->phone, $this->message);
     }
 }

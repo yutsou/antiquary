@@ -140,22 +140,24 @@
                         </ul>
                     </div>
                     <div class="uk-navbar-right">
-                        <ul class="uk-navbar-nav">
-                            <li>
-                                <a href="{{ route('account.unread_notices.index') }}">
+                        @auth
+                            <ul class="uk-navbar-nav">
+                                <li>
+                                    <a href="{{ route('account.unread_notices.index') }}">
                                     <span id="notification-status" class="google-icon">
                                         <span class="material-symbols-outlined" uk-tooltip="title: 沒有未讀的通知; pos: top-left">notifications</span>
                                     </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('account.favorites.index') }}">
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('account.favorites.index') }}">
                                     <span class="google-icon">
                                         <span class="material-symbols-outlined uk-text-middle">favorite</span>
                                     </span>
-                                </a>
-                            </li>
-                        </ul>
+                                    </a>
+                                </li>
+                            </ul>
+                        @endauth
                         <a class="uk-navbar-toggle" uk-navbar-toggle-icon href="#toggle-animation" uk-toggle="target: #toggle-animation; animation: uk-animation-fade" style="margin-right: 10px;"></a>
                     </div>
                 </nav>
@@ -227,7 +229,7 @@
 
         @yield('sub-content')
 
-        <div class="uk-section" style="padding-top: 80px">
+        <div class="uk-section" style="padding-top: 100px">
             <div class="uk-container">
                 @yield('content')
             </div>

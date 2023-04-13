@@ -252,6 +252,7 @@ class AuctioneerController extends Controller
 
     public function createBanner(Request $request)
     {
+        dd($request);
         $newBannerId = $this->bannerService->createBanner($request);
         $file = $request->image;
         $folderName = '/banners';
