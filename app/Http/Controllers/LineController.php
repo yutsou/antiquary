@@ -343,6 +343,11 @@ class LineController extends Controller
         return response()->json(['success' => true, 'timestamp' => time(), 'statusCode' => 200, 'reason' => 'OK', 'detail' => '200']);
     }
 
+    public function test()
+    {
+        dd('123');
+    }
+
     public function createLotTemplate($lot, $user, $text='')
     {
         $nextBids = $this->bidService->getNextBids($lot->current_bid);

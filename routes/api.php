@@ -21,3 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/line/webhook', [LineController::class, 'webhook'])->name('line.webhook');
 Route::post('/line/webhook-verify', [LineController::class, 'webhookVerify']);
+Route::get('/line/test', [LineController::class, 'test']);
