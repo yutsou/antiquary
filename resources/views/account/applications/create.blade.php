@@ -330,6 +330,7 @@
 
             $('#submit-form').click(function () {
                 //e.preventDefault();
+                Swal.showLoading()
                 let inputData = new FormData($('#lot-form')[0]);
 
                 $.ajax({
