@@ -18,7 +18,6 @@ return new class extends Migration
             $table->tinyInteger('index');
             $table->string('slogan')->nullable();
             $table->string('link')->nullable();
-            $table->boolean('type');
             $table->timestamps();
         });
     }

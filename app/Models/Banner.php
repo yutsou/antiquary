@@ -11,8 +11,23 @@ class Banner extends Model
 
     protected $guarded = ['id'];
 
-    public function image()
+    public function images()
     {
-        return $this->morphOne(Image::class, 'imageable');
+        return $this->morphMany(Image::class, 'imageAble');
+    }
+
+    public function blImages()
+    {
+        return $this->belongsToMany(Image::class, 'banner_image', 'banner_id', 'image_id');
+    }
+
+    public function getMobileBannerAttribute()
+    {
+        return  $this->blImages()->wherePivot('mobile', 1)->first();
+    }
+
+    public function getDesktopBannerAttribute()
+    {
+        return  $this->blImages()->wherePivot('mobile', null)->first();
     }
 }

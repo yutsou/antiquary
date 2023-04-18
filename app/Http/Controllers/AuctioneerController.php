@@ -252,14 +252,27 @@ class AuctioneerController extends Controller
 
     public function createBanner(Request $request)
     {
-        dd($request);
         $newBannerId = $this->bannerService->createBanner($request);
-        $file = $request->image;
+        $file = $request->desktopBanner;
         $folderName = '/banners';
         $alt = $request->slogan;
         $imageable_id = $newBannerId;
         $imageable_type = 'App\Models\Banner';
-        $this->imageService->handleStoreOrUpdateImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+        $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+        $syncImageId1 = array($imageId);
+
+        $file = $request->mobileBanner;
+        $folderName = '/banners';
+        $alt = $request->slogan;
+        $imageable_id = $newBannerId;
+        $imageable_type = 'App\Models\Banner';
+        $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+        $syncImageId2 = array($imageId => ['mobile'=>1]);
+
+        $syncImageIds = $syncImageId1 + $syncImageId2;
+
+        $this->bannerService->syncBannerImages($newBannerId, $syncImageIds);
+
         return back()->with('notification', '創建成功');
     }
 
@@ -270,10 +283,13 @@ class AuctioneerController extends Controller
         return back()->with('notification', '保存成功');
     }
 
-    public function deleteBanner($id)
+    public function deleteBanner ($id)
     {
-        $imageId = $this->bannerService->getBanner($id)->image->id;
-        $this->imageService->deleteImage($imageId);
+        $imageIds = $this->bannerService->getBanner($id)->images->pluck('id');
+        $this->bannerService->detachImages($id);
+        foreach($imageIds as $imageId) {
+            $this->imageService->deleteImage($imageId);
+        }
         $this->bannerService->deleteBanner($id);
     }
 }

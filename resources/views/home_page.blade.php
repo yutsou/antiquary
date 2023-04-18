@@ -22,13 +22,15 @@
             @if($banners->count() != 0)
                 @foreach($banners as $banner)
                     <li>
-                        <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
-                        @if($banner->slogan != '')
-                            <div class="uk-position-center uk-position-medium uk-text-center uk-light">
-                                <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
-                                <hr class="hr">
-                            </div>
-                        @endif
+                        <a href="{{ $banner->link }}">
+                            <img src="{{ $banner->desktop_banner->url }}" alt="{{ $banner->slogan }}" uk-cover>
+                            @if($banner->slogan != '')
+                                <div class="uk-position-center uk-position-medium uk-text-center uk-light">
+                                    <h2 class="uk-margin-remove">{{ $banner->slogan }}</h2>
+                                    <hr class="hr">
+                                </div>
+                            @endif
+                        </a>
                     </li>
                 @endforeach
             @endif
@@ -43,11 +45,13 @@
         <ul class="uk-slideshow-items my-element" >
             @foreach($banners as $banner)
                 <li>
-                    <img src="{{ $banner->image->url }}" alt="{{ $banner->slogan }}" uk-cover>
-                    <div class="uk-position-bottom uk-position-medium uk-text-center uk-light">
-                        <h3 class="uk-margin-remove">{{ $banner->slogan }}</h3>
-                        <hr class="hr">
-                    </div>
+                    <a href="{{ $banner->link }}">
+                        <img src="{{ $banner->mobile_banner->url }}" alt="{{ $banner->slogan }}" uk-cover>
+                        <div class="uk-position-bottom uk-position-medium uk-text-center uk-light">
+                            <h3 class="uk-margin-remove">{{ $banner->slogan }}</h3>
+                            <hr class="hr">
+                        </div>
+                    </a>
                 </li>
             @endforeach
         </ul>

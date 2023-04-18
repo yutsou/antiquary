@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Banner;
 use App\Repositories\BannerRepository;
 
 class BannerService extends BannerRepository
@@ -9,7 +10,6 @@ class BannerService extends BannerRepository
     public function createBanner($request)
     {
         $input = $request->all();
-        $input['visible'] = 1;
         $input['index'] = BannerRepository::all()->count();
         $newBanner = BannerRepository::create($input);
         return $newBanner->id;
@@ -46,5 +46,16 @@ class BannerService extends BannerRepository
         foreach ($banners as $key => $banner) {
             $banner->update(['index'=> $key]);
         }
+    }
+
+    public function syncBannerImages($bannerId, $imageIds)
+    {
+        BannerRepository::find($bannerId)->blImages()->sync($imageIds);
+    }
+
+    public function detachImages($id)
+    {
+        $banner = $this->getBanner($id);
+        $banner->blImages()->detach();
     }
 }

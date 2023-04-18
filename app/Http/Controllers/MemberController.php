@@ -253,7 +253,7 @@ class MemberController extends Controller
 
         $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
 
-        $syncImageIds = array($imageId=>['main'=>true]);
+        $syncImageIds = array($imageId=>['main'=>1]);
 
         foreach ($request->images as $file) {
             $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;

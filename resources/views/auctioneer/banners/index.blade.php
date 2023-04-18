@@ -28,7 +28,7 @@
                             @foreach($banners as $banner)
                                 <li>
                                     <div class="uk-card uk-card-default uk-card-body uk-text-center"
-                                         style="background-image: url('{{ $banner->image->url }}'); background-position: center; background-repeat: no-repeat; background-size: cover; position: relative;">
+                                         style="background-image: url('{{ $banner->desktop_banner->url }}'); background-position: center; background-repeat: no-repeat; background-size: cover; position: relative;">
                                         <a aria-label="Close" uk-close style="position: absolute; bottom: 80%; left: 90%; height: 30px; line-height: 30px; width: 30px; border-radius: 50%; background-color: #d62828; color: white; text-align: center; cursor: pointer;" class="delete-buttons" banner-id="{{ $banner->id }}"></a>
                                         <input type="text" name="ids[]" value="{{ $banner->id }}" hidden>
                                     </div>
@@ -89,7 +89,7 @@
                     <div class="uk-margin">
                         <label class="uk-form-label" for="mobile-banner">手機版 Banner (1080x1080)</label>
                         <div uk-form-custom>
-                            <input class="image-inputs" platform="mobile" type="file" accept="image/*" name="mobile-banner" required>
+                            <input class="image-inputs" platform="mobile" type="file" accept="image/*" name="mobileBanner" required>
                             <button class="uk-button uk-button-default" type="button" tabindex="-1">選擇圖片</button>
                         </div>
                     </div>
