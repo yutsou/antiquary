@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->nullable();
             $table->text('description')->nullable();
+            $table->decimal('estimated_price', 11)->nullable();
             $table->decimal('reserve_price', 11)->nullable();
             $table->decimal('current_bid', 11)->default(0);
             $table->unsignedBigInteger('owner_id');

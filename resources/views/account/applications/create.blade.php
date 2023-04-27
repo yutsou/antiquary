@@ -23,6 +23,14 @@
                     <li>
                         <div class="uk-margin">
                             <div class="uk-card uk-card-default uk-card-body">
+                                <h3 class="uk-card-title uk-form-label">商品名稱</h3>
+                                <div class="uk-form-controls">
+                                    <input class="uk-input" id="lot-name" type="text" name="name" placeholder="請精簡介紹您的特色物品作為標題">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-margin">
+                            <div class="uk-card uk-card-default uk-card-body">
                                 <h3 class="uk-card-title uk-form-label">為您的物品選擇分類</h3>
                                 <div class="uk-form-controls">
                                     <select class="uk-select" id="main-category" name="mainCategoryId">

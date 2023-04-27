@@ -25,6 +25,7 @@ class LotService extends LotRepository
 {
     public function createLot($request)
     {
+        $input['name'] = $request->name;
         $input['owner_id'] = Auth::user()->id;
         $input['description'] = $request->description;
 
@@ -245,7 +246,10 @@ class LotService extends LotRepository
         if($request->subCategoryId !== null) {
             $this->syncCategoryLot($lotId, [$request->mainCategoryId, $request->subCategoryId]);
         }
-        $lot->update(['suggestion' => $request->suggestion]);
+        $lot->update([
+            'estimated_price' => $request->estimatedPrice,
+            'suggestion' => $request->suggestion
+        ]);
         $lot->status = 1;
         $lot->save();
         return $lot;
@@ -262,6 +266,7 @@ class LotService extends LotRepository
     {
         $lot = $this->getLot($lotId);
         $lot->update([
+            'name'=>$request->name,
             'description'=>$request->description,
             'reserve_price'=>$request->reserve_price,
             'status'=>0

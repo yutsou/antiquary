@@ -214,6 +214,10 @@
                                         </div>
                                         <hr>
                                         <div class="uk-margin">
+                                            <label>預估價格 - NT$<span id="currentBid">{{ number_format($lot->estimated_price) }}</span></label>
+                                        </div>
+                                        <hr>
+                                        <div class="uk-margin">
                                             <label>目前價格 - NT$<span id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
                                         </div>
                                         <hr>

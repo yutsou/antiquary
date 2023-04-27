@@ -186,6 +186,7 @@ class MemberController extends Controller
         $input = $request->all();
 
         $rules = [
+            'name' => 'required',
             'mainCategoryId' => 'required',
             'specificationValues.*' => 'required',
             'description' => 'required',
@@ -210,6 +211,7 @@ class MemberController extends Controller
             $rules['deliveryMethods'] = 'required';
         }
         $messages = [
+            'name.required'=>'未填寫商品名稱',
             'mainCategoryId.required'=>'未選擇物品分類',
             'specificationValues.*.required' => '規格未填寫完整',
             'description.required' => '未填寫描述',

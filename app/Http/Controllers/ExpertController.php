@@ -165,7 +165,7 @@ class ExpertController extends Controller
                 return response()->json(['error' => $validator->errors()->all()]);
             }
 
-            $this->lotService->updateLotName($lotId, $request);
+            #$this->lotService->updateLotName($lotId, $request);
 
             $lot = $this->lotService->updateApplication($lotId, $request);
 
@@ -174,12 +174,12 @@ class ExpertController extends Controller
             $input = $request->all();
 
             $rules = [
-                "name" => 'required',
+                "estimatedPrice" => 'required',
                 "subCategoryId" => 'required'
             ];
 
             $messages = [
-                'name.required'=>'未填寫商品名稱',
+                "estimatedPrice.required" => '未填寫預估價格',
                 "subCategoryId.required" => '為選擇商品分類'
             ];
             $validator = Validator::make($input, $rules, $messages);
@@ -188,7 +188,7 @@ class ExpertController extends Controller
                 return response()->json(['error' => $validator->errors()->all()]);
             }
 
-            $this->lotService->updateLotName($lotId, $request);
+            #$this->lotService->updateLotName($lotId, $request);
             $this->lotService->updateApplication($lotId, $request);
             $noticeData = $this->lotService->grantLot($lotId);
 

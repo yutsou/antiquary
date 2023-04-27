@@ -29,6 +29,14 @@
         <li>
             <div class="uk-margin">
                 <div class="uk-card uk-card-default uk-card-body">
+                    <h3 class="uk-card-title uk-form-label">商品名稱</h3>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="lot-name" type="text" value="{{ $lot->name }}" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-margin">
+                <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-form-label">為您的物品選擇分類</h3>
                     <div class="uk-form-controls">
                         <select class="uk-select" id="main-category" name="mainCategoryId" disabled>
@@ -205,13 +213,6 @@
         <div class="uk-card uk-card-default uk-card-body custom-color-group-2">
             <h3 class="uk-card-title font-white">商品審核表</h3>
             <div class="uk-margin">
-                <label class="uk-form-label font-white">設定商品名稱</label>
-                <div class="uk-inline" style="display: block;">
-                    <span class="uk-form-icon" uk-icon="icon: info"></span>
-                    <input class="uk-input" type="text" id="name" value="{{ $lot->name ?? null }}">
-                </div>
-            </div>
-            <div class="uk-margin">
                 <label class="uk-form-label font-white">設定商品子分類</label>
                 <div class="uk-form-controls">
                     <select class="uk-select" id="sub-category-id" name="subCategoryId">
@@ -221,6 +222,10 @@
                         @endforeach
                     </select>
                 </div>
+            </div>
+            <div class="uk-margin">
+                <label class="uk-form-label font-white">預估價格</label>
+                <input class="uk-input" type="number" id="estimated-price" name="estimated_price" value="{{ intval($lot->estimated_price) ?? null }}">
             </div>
             <div class="uk-margin">
                 <label class="uk-form-label font-white">給予修改建議</label>
@@ -270,7 +275,7 @@
             redirectUrl = redirectUrl.replace(':lotId', lotId);
 
             let action = $(this).attr('action');
-            let name = $('#name').val();
+            let estimatedPrice = $('#estimated-price').val();
             let subCategoryId = $('#sub-category-id').val();
             let suggestion = $('#suggestion').val();
 
@@ -280,7 +285,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 type: "post",
-                data: { action:action, name:name, subCategoryId:subCategoryId, suggestion:suggestion, mainCategoryId:mainCategoryId },
+                data: { action:action, estimatedPrice:estimatedPrice, subCategoryId:subCategoryId, suggestion:suggestion, mainCategoryId:mainCategoryId },
                 url: url,
                 success: function (data) {
                     $.modal.close();
