@@ -119,6 +119,30 @@ class UserService extends UserRepository
         return  $datatable;
     }
 
+    public function ajaxMembers()
+    {
+        $usersWhoIsMember = UserRepository::all()->where('role', '>', 1);
+
+        #$expert = UserRepository::find(3)->experts;
+        #dd($expert);
+        $datatable = DataTables::of($usersWhoIsMember)
+            ->addColumn('id', function ($user)
+            {
+                return $user->id;
+            })
+            ->addColumn('name', function ($user)
+            {
+                return $user->name;
+            })
+            ->addColumn('action', function ($user)
+            {
+                return '<a href="" class="uk-button custom-button-1">設定</a>';
+            })
+            ->rawColumns(['id', 'name', 'action'])
+            ->toJson();
+        return  $datatable;
+    }
+
     public function getFavorites($userId)
     {
         $user = $this->getUser($userId);

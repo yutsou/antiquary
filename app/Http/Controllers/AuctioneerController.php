@@ -292,4 +292,15 @@ class AuctioneerController extends Controller
         }
         $this->bannerService->deleteBanner($id);
     }
+
+    public function indexMembers()
+    {
+        return CustomClass::viewWithTitle(view('auctioneer.members.index'), '會員管理');
+    }
+
+    public function ajaxMembers()
+    {
+        $datatable = $this->userService->ajaxMembers();
+        return $datatable;
+    }
 }

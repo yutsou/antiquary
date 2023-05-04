@@ -99,10 +99,13 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::post('/banners', [AuctioneerController::class, 'createBanner'])->name('auctioneer.banners.create');
     Route::post('/banners/indexes', [AuctioneerController::class, 'updateBannerIndexes'])->name('auctioneer.banner_indexes.update');
     Route::post('/banners/{id}', [AuctioneerController::class, 'deleteBanner'])->name('auctioneer.banner.delete');
+
+    Route::get('/members', [AuctioneerController::class, 'indexMembers'])->name('auctioneer.members.index');
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');
     Route::get('/ajax/orders', [AuctioneerController::class, 'ajaxGetOrders'])->name('ajax.auctioneer.orders.get');
+    Route::get('/ajax/members', [AuctioneerController::class, 'ajaxMembers'])->name('ajax.members.get');
 });
 ############################################################# Expert #############################################################
 Route::prefix('expert/dashboard')->middleware(EnsureIsExpert::class)->group(function () {
