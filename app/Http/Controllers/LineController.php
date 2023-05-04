@@ -213,40 +213,15 @@ class LineController extends Controller
                             foreach ($contents_chunks as $contents_chunk) {
                                 $tmpMessageBuilder =
                                     FlexMessageBuilder::builder()
-                                        ->setAltText('參與的競標')
+                                        ->setAltText('追蹤的物品')
                                         ->setContents(
                                             CarouselContainerBuilder::builder()->setContents($contents_chunk)
                                         );
                                 $messageBuilder->add($tmpMessageBuilder);
                             }
-
                         } else {
                             $messageBuilder = new TextMessageBuilder("沒有參與的競標");
                         }
-                        /*$lotsCount = count($lots);
-                        if($lotsCount != 0) {
-                            if($lotsCount <= 10) {
-                                $contents = array();
-                                foreach($lots as $lot)
-                                {
-                                    $content = $this->createLotTemplate($lot, $user);
-                                    $contents[] = $content;
-                                }
-
-                                $messageBuilder =
-                                    FlexMessageBuilder::builder()
-                                        ->setAltText('參與的競標')
-                                        ->setContents(
-                                            CarouselContainerBuilder::builder()->setContents($contents)
-                                        );
-                            } else {
-                                $multiMessageBuilder = new MultiMessageBuilder();
-
-                            }
-
-                        } else {
-                            $messageBuilder = new TextMessageBuilder("沒有參與的競標");
-                        }*/
 
                         break;
 
@@ -254,8 +229,10 @@ class LineController extends Controller
 
                         $lineUserId = $request['events'][0]['source']['userId'];
                         $user = $this->userService->getUserByOauth('line', $lineUserId);
-                        $favorites =$user->favoriteLots()->where('process', 3)->get();
-                        if(count($favorites) != 0) {
+                        $favorites =$user->favoriteLots()->whereIn('status', [20, 21])->get();
+                        $favoritesCount = count($favorites);
+                        if($favoritesCount != 0) {
+                            $messageBuilder = new MultiMessageBuilder();
                             $contents = array();
                             foreach($favorites as $lot)
                             {
@@ -263,12 +240,18 @@ class LineController extends Controller
                                 $contents[] = $content;
                             }
 
-                            $messageBuilder =
-                                FlexMessageBuilder::builder()
-                                    ->setAltText('追蹤的物品')
-                                    ->setContents(
-                                        CarouselContainerBuilder::builder()->setContents($contents)
-                                    );
+                            $contents_chunks = array_chunk($contents, 10);
+
+                            foreach ($contents_chunks as $contents_chunk) {
+                                $tmpMessageBuilder =
+                                    FlexMessageBuilder::builder()
+                                        ->setAltText('追蹤的物品')
+                                        ->setContents(
+                                            CarouselContainerBuilder::builder()->setContents($contents_chunk)
+                                        );
+                                $messageBuilder->add($tmpMessageBuilder);
+                            }
+
                         } else {
                             $messageBuilder = new TextMessageBuilder("沒有追蹤的物品");
                         }

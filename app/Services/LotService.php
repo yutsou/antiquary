@@ -233,7 +233,7 @@ class LotService extends LotRepository
         $lots = array();
         foreach($lotIds as $lotId) {
             $lot = $this->getLot($lotId);
-            if($lot->process === 3 && $lot->status ===1) {
+            if($lot->status === 21) {
                 array_push($lots, $lot);
             }
         }
