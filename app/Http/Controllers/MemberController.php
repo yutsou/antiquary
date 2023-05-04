@@ -64,7 +64,7 @@ class MemberController extends Controller
     public function showFavorites()
     {
         $user = Auth::user();
-        $favorites =$user->favoriteLots()->where('status', [20, 21])->get();
+        $favorites =$user->favoriteLots()->whereIn('status', [20, 21])->get();
         $customView = CustomClass::viewWithTitle(view('account.favorites.index')->with('favorites', $favorites), '感興趣的物品');
         return $customView;
     }
