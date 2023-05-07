@@ -45,11 +45,11 @@ class HandlePaymentNotice implements ShouldQueue
                 HandlePaymentNotice::dispatch($order, 1)->delay(Carbon::now()->addSeconds(120));
             } else {#type 1
                 if ($order->user->status === 0) {
-                    HandleUserStatus::dispatch(1, $order->user);
-                    #HandleUserStatus::dispatch(0, $order->user)->delay(Carbon::now()->addSeconds(180));
+                    HandleUserStatus::dispatch(1, $order->user);#第一階短暫封鎖
+                    HandleUserStatus::dispatch(2, $order->user)->delay(Carbon::now()->addSeconds(180));#第一階封鎖解鎖
                     CustomClass::sendTemplateNotice($order->user_id, 6, 1, $order->id, 1);
-                } else { #status 2
-                    HandleUserStatus::dispatch(2, $order->user);
+                } elseif($order->user->status === 2) { #status 2
+                    HandleUserStatus::dispatch(3, $order->user);#第二階永久封鎖
                     CustomClass::sendTemplateNotice($order->user_id, 6, 2, $order->id, 1);
                 }
                 CustomClass::sendTemplateNotice($order->lot->owner->id, 2, 4, $order->id, 1);

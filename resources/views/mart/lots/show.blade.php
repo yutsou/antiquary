@@ -518,6 +518,14 @@
                     showConfirmButton: false,
                     timer: 2000
                 })
+            } else if (error.response.data.errors.bidderStatus) {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'error',
+                    title: error.response.data.errors.bidderStatus[0],
+                    showConfirmButton: false,
+                    timer: 2000
+                })
             }
         }
 

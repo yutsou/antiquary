@@ -9,6 +9,8 @@
         <tr>
             <th>ID</th>
             <th>名稱</th>
+            <th>信箱</th>
+            <th>狀態</th>
             <th class="uk-width-small">動作</th>
         </tr>
         </thead>
@@ -50,6 +52,8 @@
                     [
                         {"data": "id", "orderable": false},
                         {"data": "name", "orderable": false},
+                        {"data": "email", "orderable": false},
+                        {"data": "status", "orderable": true},
                         {"data": "action", "orderable": false},
                     ]
             });

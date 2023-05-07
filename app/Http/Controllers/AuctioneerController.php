@@ -303,4 +303,34 @@ class AuctioneerController extends Controller
         $datatable = $this->userService->ajaxMembers();
         return $datatable;
     }
+
+    public function showMember($userId)
+    {
+        $user = $this->userService->getUser($userId);
+        return CustomClass::viewWithTitle(view('auctioneer.members.show')->with('user', $user), '會員管理 - '.$user->name);
+    }
+
+    public function ajaxRoleUpgradeMember(Request $request)
+    {
+        $user = $this->userService->getUser($request->userId);
+        $this->userService->roleUpdate($user, 2);
+    }
+
+    public function ajaxRoleDowngradeMember(Request $request)
+    {
+        $user = $this->userService->getUser($request->userId);
+        $this->userService->roleUpdate($user, 3);
+    }
+
+    public function ajaxBlockMember(Request $request)
+    {
+        $user = $this->userService->getUser($request->userId);
+        $this->userService->statusUpdate($user, 4);
+    }
+
+    public function ajaxUnblockMember(Request $request)
+    {
+        $user = $this->userService->getUser($request->userId);
+        $this->userService->statusUpdate($user, 0);
+    }
 }

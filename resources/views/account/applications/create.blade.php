@@ -367,6 +367,7 @@
                         }, 1500);
                     },
                     error: function (response) {
+                        Swal.close()
                         let errors = merge_errors(response)
                         let validatorAlert = $('#validator-alert');
                         validatorAlert.empty();

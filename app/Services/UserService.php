@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\SendEmail;
 use App\Jobs\SendSms;
 use App\Models\User;
+use App\Presenters\UserPresenter;
 use App\Repositories\UserRepository;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -130,15 +131,24 @@ class UserService extends UserRepository
             {
                 return $user->id;
             })
+            ->addColumn('email', function ($user)
+            {
+                return $user->email;
+            })
             ->addColumn('name', function ($user)
             {
                 return $user->name;
             })
+            ->addColumn('status', function ($user)
+            {
+                $userPresenter = new UserPresenter();
+                return $userPresenter->presentStatus($user->status);
+            })
             ->addColumn('action', function ($user)
             {
-                return '<a href="" class="uk-button custom-button-1">設定</a>';
+                return '<a href="'.route('auctioneer.members.show', $user).'" class="uk-button custom-button-1">查看</a>';
             })
-            ->rawColumns(['id', 'name', 'action'])
+            ->rawColumns(['id', 'email', 'name', 'status', 'action'])
             ->toJson();
         return  $datatable;
     }
@@ -343,5 +353,15 @@ class UserService extends UserRepository
     public function updateAccountStatus($type, $user)#1: temporary,2: forever
     {
         UserRepository::update(['status'=>$type], $user->id);
+    }
+
+    public function roleUpdate($user, $role)
+    {
+        UserRepository::update(['role'=>$role], $user->id);
+    }
+
+    public function statusUpdate($user, $status)
+    {
+        UserRepository::update(['status'=>$status], $user->id);
     }
 }

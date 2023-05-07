@@ -456,18 +456,21 @@ class MemberController extends Controller
         $lot = $this->lotService->getLot($lotId);
         $input = $request->all();
         $input['bidTime'] = Carbon::now();
+        $input['bidderStatus'] = $this->userService->getUser($request->bidderId)->status;
         $nextBid = $lot->current_bid + $this->bidService->bidRule($lot->current_bid);
         $rules = [
             'bidTime' => 'after:'.$lot->auction_start_at.'|before:'.$lot->auction_end_at,
             'bid' => 'required|gte:'.$nextBid,
-            'bidderId' => Rule::notIn([$lot->owner_id])
+            'bidderId' => Rule::notIn([$lot->owner_id]),
+            'bidderStatus' => Rule::notIn([1,3])
         ];
         $messages = [
             'bid.required'=>'請輸入價格',
             'bid.gte'=>'出價必須大於下一個最小出價金額',
             'bidTime.after' => '必須在拍賣會時間內出價',
             'bidTime.before' => '必須在拍賣會時間內出價',
-            'bidderId.not_in' => '您不能對自己的物品出價'
+            'bidderId.not_in' => '您不能對自己的物品出價',
+            'bidderStatus.not_in' => '帳號已被封鎖，目前無法競標'
         ];
 
         ###判斷maxAutoBid是不是自己
@@ -513,18 +516,21 @@ class MemberController extends Controller
         $lot = $this->lotService->getLot($lotId);
         $input = $request->all();
         $input['bidTime'] = Carbon::now();
+        $input['bidderStatus'] = $this->userService->getUser($request->bidderId)->status;
         $nextBid = $lot->current_bid + $this->bidService->bidRule($lot->current_bid);
         $rules = [
             'bidTime' => 'after:'.$lot->auction_start_at.'|before:'.$lot->auction_end_at,
             'bid' => 'required|gte:'.$nextBid,
-            'bidderId' => Rule::notIn([$lot->owner_id])
+            'bidderId' => Rule::notIn([$lot->owner_id]),
+            'bidderStatus' => Rule::notIn([1,3]),
         ];
         $messages = [
             'bid.required'=>'請輸入價格',
             'bid.gte'=>'出價必須大於下一個最小出價金額',
             'bidTime.after' => '必須在拍賣會時間內出價',
             'bidTime.before' => '必須在拍賣會時間內出價',
-            'bidderId.not_in' => '您不能對自己的物品出價'
+            'bidderId.not_in' => '您不能對自己的物品出價',
+            'bidderStatus.not_in' => '帳號已被封鎖，目前無法競標',
         ];
 
         if($request->bid > $lot->next_bid) {

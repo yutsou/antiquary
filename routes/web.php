@@ -101,11 +101,17 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::post('/banners/{id}', [AuctioneerController::class, 'deleteBanner'])->name('auctioneer.banner.delete');
 
     Route::get('/members', [AuctioneerController::class, 'indexMembers'])->name('auctioneer.members.index');
+    Route::get('/members/{userId}', [AuctioneerController::class, 'showMember'])->name('auctioneer.members.show');
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');
     Route::get('/ajax/orders', [AuctioneerController::class, 'ajaxGetOrders'])->name('ajax.auctioneer.orders.get');
     Route::get('/ajax/members', [AuctioneerController::class, 'ajaxMembers'])->name('ajax.members.get');
+    Route::post('/ajax/members/{id}/role-upgrade', [AuctioneerController::class, 'ajaxRoleUpgradeMember'])->name('ajax.members.role-upgrade');
+    Route::post('/ajax/members/{id}/role-downgrade', [AuctioneerController::class, 'ajaxRoleDowngradeMember'])->name('ajax.members.role-downgrade');
+    Route::post('/ajax/members/{id}/block', [AuctioneerController::class, 'ajaxBlockMember'])->name('ajax.members.block');
+    Route::post('/ajax/members/{id}/unblock', [AuctioneerController::class, 'ajaxUnblockMember'])->name('ajax.members.unblock');
+
 });
 ############################################################# Expert #############################################################
 Route::prefix('expert/dashboard')->middleware(EnsureIsExpert::class)->group(function () {
