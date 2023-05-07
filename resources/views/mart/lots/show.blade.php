@@ -213,10 +213,13 @@
                                             </ul>
                                         </div>
                                         <hr>
-                                        <div class="uk-margin">
-                                            <label>預估價格 - NT$<span id="currentBid">{{ number_format($lot->estimated_price) }}</span></label>
-                                        </div>
-                                        <hr>
+                                        @if($lot->estimated_price != null)
+                                            <div class="uk-margin">
+                                                <label>預估價格 - NT$<span id="currentBid">{{ number_format($lot->estimated_price) }}</span></label>
+                                            </div>
+                                            <hr>
+                                        @endif
+
                                         <div class="uk-margin">
                                             <label>目前價格 - NT$<span id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
                                         </div>
