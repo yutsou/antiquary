@@ -174,12 +174,10 @@ class ExpertController extends Controller
             $input = $request->all();
 
             $rules = [
-                "estimatedPrice" => 'required',
                 "subCategoryId" => 'required'
             ];
 
             $messages = [
-                "estimatedPrice.required" => '未填寫預估價格',
                 "subCategoryId.required" => '為選擇商品分類'
             ];
             $validator = Validator::make($input, $rules, $messages);
