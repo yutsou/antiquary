@@ -298,23 +298,23 @@ class LotService extends LotRepository
 
     public function setLotAuction($lotIds, $auction, $auctionStartAt, $auctionEndAt)
     {
-        $now = Carbon::now();
         $startGap = Carbon::now()->diffInSeconds( $auctionStartAt);
         $endGap = Carbon::now()->diffInSeconds($auctionEndAt);
 
-        foreach ($lotIds as $lotId) {
+        foreach ($lotIds as $index => $lotId) {
+            $auctionEndAtCarbon = Carbon::create($auctionEndAt);
             $lot = $this->getLot($lotId);
             $lot->update([
                     'status'=>20,
                     'auction_id'=>$auction->id,
                     'auction_start_at'=>$auctionStartAt,
-                    'auction_end_at'=>$auctionEndAt
+                    'auction_end_at'=>$auctionEndAtCarbon->addMinutes($index*3)
                 ]);
             CustomClass::sendTemplateNotice($lot->owner_id, 2, 0, $lot->id, null, $auctionStartAt);
+            HandleAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->addMinutes($index*3)->addSecond());
         }
 
         HandleAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap));
-        HandleAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->addSeconds(5));
     }
 
     public function handleFavorite($user, $lotId)
