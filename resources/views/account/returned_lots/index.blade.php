@@ -25,7 +25,7 @@
         $(function () {
             $('.returned-lot-logistic-info').on('click', function() {
                 let lotId = $(this).attr('lotId');
-                let url = '{{ route("account.returned_lots.edit", ":id") }}';
+                let url = '{{ route("account.returned_lots.index", ":id") }}';
                 url = url.replace(':id', lotId);
                 window.location.assign(url);
                 return false;
