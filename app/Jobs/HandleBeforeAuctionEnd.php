@@ -2,10 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Lot;
 use App\Services\LineService;
 use App\Services\UserService;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class HandleAuctionStart implements ShouldQueue
+class HandleBeforeAuctionEnd implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $auction;
@@ -36,18 +34,17 @@ class HandleAuctionStart implements ShouldQueue
     public function handle(LineService $lineService, UserService $userService)
     {
         $lots = $this->auction->lots;
+        $tmpUserIds = collect();
+        foreach ($lots as $lot) {
+            $tmpUserIds =  $tmpUserIds->merge($lot->favorites->pluck('user_id'));
+            $tmpUserIds =  $tmpUserIds->merge($lot->bidRecords->pluck('bidder_id'));
+        }
+        $uniqueUserIds =  $tmpUserIds->unique();
 
-        $this->auction->update(['status'=>1]);
-
-
-        foreach($lots as $lot) {
-            $lot->update([
-                'status'=>21#auction in progress
-            ]);
-            $favoriteUserIds = $lot->favorites()->pluck('user_id');
-            foreach ($favoriteUserIds as $favoriteUserId) {
-                $user = $userService->getUser($favoriteUserId);
-                $messageBuilder = $lineService->buildMultiLotsTemplate($user, $lots, '競標開始', '競標開始');
+        foreach ($uniqueUserIds as $userId) {
+            $user = $userService->getUser($userId);
+            if($user->line_id != null) {
+                $messageBuilder = $lineService->buildAuctionMessage($this->auction, $user, '有一個您感興趣的拍賣會將於10分鐘後結束');
                 $response = $lineService->pushMessage($user->line_id, $messageBuilder);
 
                 if ($response->isSucceeded()) {
@@ -57,5 +54,6 @@ class HandleAuctionStart implements ShouldQueue
                 }
             }
         }
+
     }
 }

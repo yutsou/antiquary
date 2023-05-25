@@ -31,8 +31,7 @@ class Notice extends Mailable
      */
     public function build()
     {
-        $noticePresenter = new NoticePresenter();
-        $transferedNotice = $noticePresenter->transferTemplateNotice($this->emailContent['notice']);
+        $transferedNotice = app(NoticePresenter::class)->transferTemplateNotice($this->emailContent['notice']);
         return $this->view('emails.notice')
             ->with(
                 [

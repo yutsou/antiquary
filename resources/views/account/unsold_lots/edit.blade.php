@@ -107,25 +107,25 @@
                     data: data,
                     success: function (response) {
                         $.modal.close();
-                        if (typeof (response.error) !== 'undefined') {
-                            let errors = Object.values(response.error)
-                            $('#validator-alert').prop('hidden', false);
-                            let validatorAlertUl = $('#validator-alert-ul');
-                            validatorAlertUl.empty();
-                            errors.forEach(i => validatorAlertUl.append($("<li></li>").text(i)));
-                            $('html,body').animate({scrollTop: 0}, 500);
-                        } else {
-                            Swal.fire({
-                                position: 'center',
-                                icon: 'success',
-                                title: '已送出',
-                                showConfirmButton: false,
-                            })
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: '已送出',
+                            showConfirmButton: false,
+                        })
 
-                            setTimeout(function() {
-                                window.location.assign('{{ route('account.returned_lots.index') }}');
-                            }, 1000);
-                        }
+                        setTimeout(function() {
+                            window.location.assign(response.success);
+                        }, 1000);
+                    },
+                    error: function (response) {
+                        $.modal.close();
+                        let errors = merge_errors(response)
+                        let validatorAlert = $('#validator-alert');
+                        validatorAlert.empty();
+                        validatorAlert.prop('hidden', false);
+                        validatorAlert.append(errors);
+                        $('html,body').animate({scrollTop: 0}, 500);
                     }
                 });
             });

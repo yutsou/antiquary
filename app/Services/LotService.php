@@ -5,8 +5,11 @@ namespace App\Services;
 use App\CustomFacades\CustomClass;
 use App\Jobs\HandleAuctionEnd;
 use App\Jobs\HandleAuctionStart;
+use App\Jobs\HandleBeforeAuctionEnd;
+use App\Jobs\HandleBeforeAuctionStart;
 use App\Jobs\LineNotice;
 use App\Jobs\OrderCreate;
+use App\Jobs\SendLine;
 use App\Models\AutoBid;
 use App\Models\Favorite;
 use App\Events\NewBid;
@@ -310,11 +313,12 @@ class LotService extends LotRepository
                     'auction_start_at'=>$auctionStartAt,
                     'auction_end_at'=>$auctionEndAtCarbon->addMinutes($index*3)
                 ]);
-            CustomClass::sendTemplateNotice($lot->owner_id, 2, 0, $lot->id, null, $auctionStartAt);
+            CustomClass::sendTemplateNotice($lot->owner_id, 2, 0, $lot->id, null, null, $auctionStartAt);
             HandleAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->addMinutes($index*3)->addSecond());
         }
-
-        HandleAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap));
+        HandleBeforeAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->subMinutes(2));###要改10
+        HandleAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->addSeconds(2));
+        HandleBeforeAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->subMinutes(2));###要改10
     }
 
     public function handleFavorite($user, $lotId)

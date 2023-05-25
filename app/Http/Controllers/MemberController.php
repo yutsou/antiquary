@@ -450,10 +450,8 @@ class MemberController extends Controller
         return response('success', 200);
     }
 
-    public function manualBid(Request $request)
+    public function manualBidValidation($request, $lot)
     {
-        $lotId = $request->lotId;
-        $lot = $this->lotService->getLot($lotId);
         $input = $request->all();
         $input['bidTime'] = Carbon::now();
         $input['bidderStatus'] = $this->userService->getUser($request->bidderId)->status;
@@ -474,24 +472,21 @@ class MemberController extends Controller
         ];
 
         ###判斷maxAutoBid是不是自己
-        $lotMaxAutoBid = $this->bidService->getLotMaxAutoBid($lotId);
+        $lotMaxAutoBid = $this->bidService->getLotMaxAutoBid($lot->id);
         if(isset($lotMaxAutoBid) && $lotMaxAutoBid->user_id == $request->bidderId) {
             $rules['bid'] = 'required|gte:'.$lotMaxAutoBid->bid;
-            $messages['bid.gte'] =  '出價必須大於已設定的自動出價';
+            $messages['bid.gt'] =  '出價必須大於已設定的自動出價';
         }
 
-        if($request->bid < $lot->reserve_price) {
-            $type = 'warning';
-            $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
-        } else {
-            $type = 'success';
-            $successMessage = '';
-        }
+        return Validator::make($input, $rules, $messages);
+    }
 
+    public function manualBid(Request $request)
+    {
+        $lotId = $request->lotId;
+        $lot = $this->lotService->getLot($lotId);
 
-
-        $validator = Validator::make($input, $rules, $messages);
-
+        $validator = $this->manualBidValidation($request, $lot);
         if ($validator->fails()) {
             return Response::json(array(
                 'success' => false,
@@ -499,9 +494,17 @@ class MemberController extends Controller
             ), 400); // 400 being the HTTP code for an invalid request.
         } else {
             $bidderId = $request->bidderId;
-            $lotId = $request->lotId;
             $bid = $request->bid;
             $this->bidService->manualBidLot($lotId, $bidderId, $bid);
+
+            if($request->bid < $lot->reserve_price) {
+                $type = 'warning';
+                $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
+            } else {
+                $type = 'success';
+                $successMessage = '';
+            }
+
             return Response::json(array(
                 'type' => $type,
                 'text' => $successMessage,
@@ -510,10 +513,8 @@ class MemberController extends Controller
         }
     }
 
-    public function autoBid(Request $request)
+    public function autoBidValidation($request, $lot)
     {
-        $lotId = $request->lotId;
-        $lot = $this->lotService->getLot($lotId);
         $input = $request->all();
         $input['bidTime'] = Carbon::now();
         $input['bidderStatus'] = $this->userService->getUser($request->bidderId)->status;
@@ -535,19 +536,18 @@ class MemberController extends Controller
 
         if($request->bid > $lot->next_bid) {
             $rules['bid'] = 'required|gte:'.$this->bidService->getBidderLotAutoBid($request->bidderId, $lot);
-            $messages['bid.gte'] =  '自動出價必須大於已設定的自動出價';
+            $messages['bid.gt'] =  '自動出價必須大於已設定的自動出價';
         }
 
-        if($request->bid < $lot->reserve_price) {
-            $type = 'warning';
-            $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
-        } else {
-            $type = 'success';
-            $successMessage = '';
-        }
+        return Validator::make($input, $rules, $messages);
+    }
 
-        $validator = Validator::make($input, $rules, $messages);
+    public function autoBid(Request $request)
+    {
+        $lotId = $request->lotId;
+        $lot = $this->lotService->getLot($lotId);
 
+        $validator = $this->autoBidValidation($request, $lot);
         if ($validator->fails()) {
             return Response::json(array(
                 'success' => false,
@@ -555,9 +555,16 @@ class MemberController extends Controller
             ), 400); // 400 being the HTTP code for an invalid request.
         } else {
             $bidderId = $request->bidderId;
-            $lotId = $request->lotId;
             $bid = $request->bid;
             $this->bidService->autoBidLot($lotId, $bidderId, $bid);
+
+            if($request->bid < $lot->reserve_price) {
+                $type = 'warning';
+                $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
+            } else {
+                $type = 'success';
+                $successMessage = '';
+            }
 
             return Response::json(array(
                 'type' => $type,
@@ -710,36 +717,46 @@ class MemberController extends Controller
 
     public function handleUnsoldLot(Request $request, $lotId)
     {
-        $input = $request->all();
-
         if($request->unsold_method == 'logistic') {
-            $rules = [
-                "addressee_name" => 'required',
-                "addressee_phone" => 'required',
-                "county" => 'required',
-                "district" => 'required',
-                "address" => 'required',
-            ];
+            if($request->unsold_method == 'logistic') {
+                $input = $request->all();
 
-            $messages = [
-                'addressee.required'=>'未填寫收件人姓名',
-                'addressee_phone.required'=>'未填寫收件人電話',
-                'county.required'=>'未選擇縣市',
-                'district.required'=>'未選擇鄉鎮市',
-                'address.required'=>'未填寫地址'
-            ];
-            $validator = Validator::make($input, $rules, $messages);
+                $rules = [
+                    "addressee_name" => 'required',
+                    "addressee_phone" => 'required',
+                    "county" => 'required',
+                    "district" => 'required',
+                    "address" => 'required',
+                ];
 
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()->all()]);
+                $messages = [
+                    'addressee_name.required'=>'未填寫收件人姓名',
+                    'addressee_phone.required'=>'未填寫收件人電話',
+                    'county.required'=>'未選擇縣市',
+                    'district.required'=>'未選擇鄉鎮市',
+                    'address.required'=>'未填寫地址'
+                ];
+                $validator = Validator::make($input, $rules, $messages);
+                if ($validator->fails()) {
+                    return Response::json(array(
+                        'success' => false,
+                        'errors' => $validator->getMessageBag()->toArray()
+                    ), 400); // 400 being the HTTP code for an invalid request.
+                }
+                $this->lotService->unsoldLotLogistic($request, $lotId);
+                $url = route('account.returned_lots.index');
             }
+        } else {
+            $this->lotService->reBiding($lotId);
+            $url = route('account.selling_lots.index');
         }
 
-        if($request->unsold_method == 'logistic') {
-            $this->lotService->unsoldLotLogistic($request, $lotId);
-        } else {#keep bidding
-            $this->lotService->reBiding($lotId);
-        }
+        return Response::json(array(
+            'success' => $url,
+            'errors' => false
+        ), 200);
+
+
     }
 
     public function indexBiddingLots()

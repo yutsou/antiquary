@@ -51,6 +51,8 @@ return [
         'authorize_base_url' => 'https://access.line.me/oauth2/v2.1/authorize',
         'get_token_url' => 'https://api.line.me/oauth2/v2.1/token',
         'get_user_profile_url' => 'https://api.line.me/v2/profile',
+        'line_bot_richmenu_id' => env('LINE_BOT_RICHMENU_ID'),
+        'line_bot_admin_id' => env("LINE_BOT_ADMIN_ID")
     ],
 
 ];

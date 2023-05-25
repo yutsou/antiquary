@@ -119,9 +119,14 @@ class AuthController extends Controller
         }
     }
 
+    public function generateLineBidLink($request)
+    {
+        return "https://access.line.me/dialog/bot/accountLink?linkToken=".$request->linkToken."&nonce=".$request->nonce;
+    }
+
     public function showLineBindConfirm(Request $request)
     {
-        $link = "https://access.line.me/dialog/bot/accountLink?linkToken=".$request->linkToken."&nonce=".$request->nonce;
+        $link = $this->generateLineBidLink($request);
         $customView = CustomClass::viewWithTitle(view('auth.line_bind_confirm')->with('link', $link), '綁定確認');
         return $customView;
     }

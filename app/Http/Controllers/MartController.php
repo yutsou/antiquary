@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\CustomFacades\CustomClass;
+use App\Jobs\HandleAuctionStart;
+use App\Jobs\HandleBeforeAuctionStart;
 use App\Services\AuctionService;
 use App\Services\BannerService;
 use App\Services\CategoryService;
@@ -12,6 +14,7 @@ use App\Services\OrderService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 
 class MartController extends Controller
 {
@@ -139,10 +142,38 @@ class MartController extends Controller
 
     public function test()
     {
-        #$this->lotService->test();
-        #$this->transactionRecordService->test();
-        $lot = $this->lotService->getLot(1);
-        $carbon = Carbon::now();
-        return CustomClass::viewWithTitle(view('test')->with('lot', $lot)->with('carbon', $carbon), 'Test');
+        $request = new Request();
+        $request->setMethod('POST');
+        $request->request->add([
+            'lotId' => 6,
+            'bidderId' => 4,
+            'bid' => 25
+        ]);
+
+        $lotId = $request->lotId;
+        $lot = $this->lotService->getLot($lotId);
+
+        $validator = app(MemberController::class)->autoBidValidation($request, $lot);
+
+
+
+        if($request->bid < $lot->reserve_price) {
+            $type = 'warning';
+            $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
+        } else {
+            $type = 'success';
+            $successMessage = '';
+        }
+
+        if ($validator->fails()) {
+            dd($validator->getMessageBag()->all());
+        } else {
+            return array(
+                'type' => $type,
+                'text' => $successMessage,
+                'errors' => false
+            );
+        }
+
     }
 }

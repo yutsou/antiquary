@@ -241,7 +241,6 @@ class ExpertController extends Controller
             return response()->json(['error' => $validator->errors()->all()]);
         }
 
-
         $auction = $this->auctionService->createAuction($request);
         $this->lotService->setLotAuction($request->lots, $auction, $request->auction_start_at, $request->auction_end_at);
         return response('success', 200);
@@ -310,7 +309,7 @@ class ExpertController extends Controller
         $this->lotService->returnLot($request, $lotId, $type);
 
 
-        CustomClass::sendTemplateNotice($lot->owner_id, 5, 0, $lot->id, 0);
+        CustomClass::sendTemplateNotice($lot->owner_id, 5, 0, $lot->id);
 
     }
 
@@ -348,6 +347,6 @@ class ExpertController extends Controller
         $this->lotService->returnLot($request, $lotId, 1);
 
         $lot = $this->lotService->getLot($lotId);
-        CustomClass::sendTemplateNotice($lot->owner_id, 4, 0, $lot->id, 0);
+        CustomClass::sendTemplateNotice($lot->owner_id, 4, 0, $lot->id);
     }
 }
