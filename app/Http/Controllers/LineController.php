@@ -132,6 +132,13 @@ class LineController extends Controller
                             $messageBuilder = $this->lineService->buildMessage('NT$' . number_format($bid) . ' 出價成功');
                         }
                         break;
+                    case 'showAllAuction':
+                        $lineUserId = $request['events'][0]['source']['userId'];
+                        $user = $this->userService->getUserByOauth('line', $lineUserId);
+                        $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
+
+                        $messageBuilder = $this->lineService->buildMultiAuctionsTemplate($user, $auctions, '所有拍賣會');
+                        break;
                     case 'showBiddingLot':
                         $lineUserId = $request['events'][0]['source']['userId'];
                         $user = $this->userService->getUserByOauth('line', $lineUserId);

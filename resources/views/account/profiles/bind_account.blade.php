@@ -56,7 +56,7 @@
                                             <span id="verify-code" class="custom-font-medium"></span>
                                         </li>
                                         <li>
-                                            在 LINE 聊天室選單中選取綁定帳號，我們將會傳一個連結給您，點開連結並輸入上方產生的驗證碼進行綁定。
+                                            在 LINE 聊天室輸入驗證碼並送訊息，我們將會進行綁定。
                                         </li>
 
                                     </ul>
@@ -98,7 +98,7 @@
                     url: '{{ route('auth.line_verify_code.generate') }}',
                     type: "get",
                     success: function (code) {
-                        $('#verify-code').text('驗證碼：'+code);
+                        $('#verify-code').text('驗證碼：link'+code);
                     }
                 });
             });

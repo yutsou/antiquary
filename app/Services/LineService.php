@@ -252,6 +252,35 @@ class LineService
         }
     }
 
+    public function buildMultiAuctionsTemplate($user, $auctions, $altText)
+    {
+        $auctionsCount = count($auctions);
+        if ($auctionsCount != 0) {
+            $messageBuilder = new MultiMessageBuilder();
+            $contents = array();
+            foreach ($auctions as $auction) {
+                $content = $this->createAuctionTemplate($auction, $user);
+                $contents[] = $content;
+            }
+
+            $contents_chunks = array_chunk($contents, 10);
+
+            foreach ($contents_chunks as $contents_chunk) {
+                $tmpMessageBuilder =
+                    FlexMessageBuilder::builder()
+                        ->setAltText($altText)
+                        ->setContents(
+                            CarouselContainerBuilder::builder()->setContents($contents_chunk)
+                        );
+                $messageBuilder->add($tmpMessageBuilder);
+            }
+
+            return $messageBuilder;
+        } else {
+            return new TextMessageBuilder("沒有拍賣會");
+        }
+    }
+
     public function confirmSetAutoBid($lotId, $user, $bidderId)
     {
         $user->lineMode()->updateOrCreate([
@@ -434,6 +463,7 @@ class LineService
 
     private function createAuctionTemplate($auction, $user)
     {
+        $carbonPresenter = new CarbonPresenter;
         $bodyContents =
             [
                 BoxComponentBuilder::builder()
@@ -453,10 +483,11 @@ class LineService
                     ->setPaddingBottom('10px')
                     ->setContents([
                         TextComponentBuilder::builder()
-                            ->setText('於 10分鐘後 開始')
+                            ->setText($carbonPresenter->lotPresent($auction->start_at, $auction->expect_end_at))
                             ->setWrap(true)
                             ->setWeight(ComponentFontWeight::BOLD)
-                            ->setSize(ComponentFontSize::SM),
+                            ->setSize(ComponentFontSize::SM)
+                            ->setFlex(1),
                     ]),
                 SeparatorComponentBuilder::builder(),
             ];
