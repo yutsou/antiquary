@@ -116,7 +116,7 @@ class LineService
 
     public function uploadRichMenuImage()
     {
-        $imagePath = '/var/www/jasonAuction/public/images/api/linebot/richmenu.png';
+        $imagePath = '/var/www/antiquary/public/images/api/linebot/richmenu.png';
         $contentType = 'image/png';
         return $this->bot->uploadRichMenuImage($this->richMenuId, $imagePath, $contentType);
     }
