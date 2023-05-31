@@ -55,7 +55,7 @@ class NoticePresenter
             case 3:
                 $model = Order::find($notice->target_id);
                 return match ($notice->code) {
-                    0 => ['已得標', '物品 No.'.$model->lot_id.' ，以 NT$'.number_format($model->subtotal).'得標'],
+                    0 => ['已得標', '物品 No.'.$model->lot->name.' ，以 NT$'.number_format($model->subtotal).'得標'],
                     1 => ['已收到匯款', '訂單 No.'.$model->id.' ，已收到匯款'],
                     2 => ['訂單已完成', '訂單 No.'.$model->id.' ，已完成'],
                     3 => ['已完成委賣', '訂單 No.'.$model->id.' ，已匯款'],

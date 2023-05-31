@@ -492,13 +492,19 @@ class LineService
                 SeparatorComponentBuilder::builder(),
             ];
 
-        $bodyContents[] = ButtonComponentBuilder::builder()
-            ->setStyle(ComponentButtonStyle::PRIMARY)
-            ->setHeight(ComponentButtonHeight::SM)
-            ->setColor('#003a6c')
-            ->setAction(
-                new PostbackTemplateActionBuilder("查看拍賣會物品", 'showAuctionAllLots,'.$auction->id.','.$user->id)
-            );
+        $bodyContents[] = BoxComponentBuilder::builder()
+            ->setLayout(ComponentLayout::VERTICAL)
+            ->setPaddingTop('10px')
+            ->setContents([
+                ButtonComponentBuilder::builder()
+                    ->setStyle(ComponentButtonStyle::PRIMARY)
+                    ->setHeight(ComponentButtonHeight::SM)
+                    ->setColor('#003a6c')
+                    ->setAction(
+                        new PostbackTemplateActionBuilder("查看拍賣會物品", 'showAuctionAllLots,'.$auction->id.','.$user->id)
+                    )
+            ]);
+
 
         $body = BoxComponentBuilder::builder()
             ->setLayout(ComponentLayout::VERTICAL)
@@ -544,7 +550,7 @@ class LineService
                             ->setContents([
                                 BoxComponentBuilder::builder()
                                     ->setLayout(ComponentLayout::VERTICAL)
-                                    ->setPaddingBottom('20px')
+                                    ->setPaddingBottom('10px')
                                     ->setContents([
                                         TextComponentBuilder::builder()
                                             ->setText('您好 '.$user->name.'，確定綁定帳號嗎？')
@@ -556,8 +562,7 @@ class LineService
                                 SeparatorComponentBuilder::builder(),
                                 BoxComponentBuilder::builder()
                                     ->setLayout(ComponentLayout::VERTICAL)
-                                    ->setPaddingTop('20px')
-                                    ->setPaddingBottom('20px')
+                                    ->setPaddingTop('10px')
                                     ->setContents([
                                         ButtonComponentBuilder::builder()
                                             ->setStyle(ComponentButtonStyle::PRIMARY)
