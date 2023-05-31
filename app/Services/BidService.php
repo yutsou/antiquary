@@ -43,7 +43,7 @@ class BidService
     public function getLotMaxAutoBid($lotId)
     {
         $lot = $this->getLot($lotId);
-        return $lot->autoBids()->orderBy('bid', 'desc')->first();
+        return $lot->autoBids()->orderBy('bid', 'desc')->orderBy('updated_at')->first();
     }
 
     public function getNextBids($bid)
@@ -130,22 +130,27 @@ class BidService
                 if($nextBid >= $maxAutoBid->bid) {
                     $bid = $maxAutoBid->bid;
                     $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
-                    $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
+                    $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
+                    Log::channel('line')->info('1');
                 } else {
                     $bid = $nextBid;
                     $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
-                    $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
+                    $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
                 }
                 $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '出價已經被超過，');#提醒出價者被自動出價超過
-            } elseif ($maxAutoBid->bid == $inputBid) {
+                Log::channel('line')->info('2');
+            } elseif ($inputBid == $maxAutoBid->bid) {
                 $bid = $maxAutoBid->bid;
                 $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
-                $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
+                $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
+                Log::channel('line')->info('3');
                 $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '有人更早提出相同的出價，');
+            } else {
+                $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
             }
         } else {
-            #dd('123');
-            $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $inputBid, 0, '出價已經被超過，');
+            $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
+            Log::channel('line')->info('4');
         }
     }
 
@@ -170,9 +175,11 @@ class BidService
             if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
                 $bid = $lot->reserve_price;
                 $this->bidLot($lotId, $bidderId, $bid);
+                Log::channel('line')->info('5');
             } else {
                 $bid = $inputAutoBid;
                 $this->bidLot($lotId, $bidderId, $bid);
+                Log::channel('line')->info('6');
             }
         } else {#不是第一個出價者
 
@@ -182,19 +189,29 @@ class BidService
                 if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
                     if($lot->current_bid >= $lot->reserve_price) {#當現在價格大於等於底價時
                         $bid = $this->regularAutoBid($lotId, $lot, $bidderId, $topBidderId, $inputAutoBid);
+//                        Log::channel('line')->info('7');
+//                        if($topBidderId != $bidderId) {
+//                            $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
+//                        }
                     } else {#當現有價格小於底價時
                         #dd(5);
                         $bid = $lot->reserve_price;
                         $this->bidLot($lotId, $bidderId, $bid);#直達底價
-                        $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
+                        Log::channel('line')->info('8');
                     }
                 } else {#自動出價小於等於底價
                     $bid = $inputAutoBid;
                     $this->bidLot($lotId, $bidderId, $bid);#直達最頂
-                    $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
+                    Log::channel('line')->info('9');
+                    if($topBidderId != $bidderId) {
+                        $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
+                    } else {
+                        $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價未達底價，');
+                    }
                 }
             } else {#沒有底價
                 $bid = $this->regularAutoBid($lotId, $lot, $bidderId, $topBidderId, $inputAutoBid);
+                Log::channel('line')->info('10');
             }
 
         }
@@ -224,6 +241,7 @@ class BidService
                         #dd(0);
                         $bid = false;
                         $lotMaxAutoBid->update(['bid'=>$inputAutoBid]);
+                        Log::channel('line')->info('11');
                     }
                     else {
                         #通知已有的自動出價者出價
@@ -231,6 +249,7 @@ class BidService
                         $bid = $lotMaxAutoBid->bid+$this->bidRule($lotMaxAutoBid->bid);
                         $this->bidLot($lotId, $bidderId, $bid);#目前最高出價的下一個出價####wrong
                         $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
+                        Log::channel('line')->info('12');
                     }
 
                 } else {#當自動出價小於目前最高出價的下一個出價
@@ -240,6 +259,7 @@ class BidService
                     $this->bidLot($lotId, $bidderId, $bid);#直達最頂
                     $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
                     #通知已有的動出價者
+                    Log::channel('line')->info('13');
                 }
 
             } else {#當自動出價小於已有的自動出價#########
@@ -247,18 +267,21 @@ class BidService
                 #dd(3);
                 $bid = $inputAutoBid;
                 $this->bidLot($lotId, $bidderId, $bid);#直達最頂(自動出價金額)
-                $this->dispatchLineNotice($lot, $bidderId, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
+                Log::channel('line')->info('14');
+                #$this->dispatchLineNotice($lot, $bidderId, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
                 #已有的自動出價者出價
                 if($inputAutoBid+$this->bidRule($inputAutoBid) >= $lotMaxAutoBid->bid) {#當自動出價的下的一個出價大於等於目前自動出價者最高出價
-                    $bid = $lotMaxAutoBid->bid;
-                    $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#目前最高自動出價者的出價
-                    $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
-                    $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '出價已經被超過，');
+                    $currentMaxBidderMaxAutoBid = $lotMaxAutoBid->bid;
+                    $this->bidLot($lotId, $lotMaxAutoBid->user_id, $currentMaxBidderMaxAutoBid);#目前最高自動出價者的出價
+                    #$this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
+                    $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '其他拍賣者比您更早設置了相同的出價，');
+                    Log::channel('line')->info('15');
                 } else {#當自動出價的下一個出價小於目前自動出價者的最高出價
-                    $bid = $inputAutoBid+$this->bidRule($inputAutoBid);
-                    $this->bidLot($lotId, $lotMaxAutoBid->user_id, $bid);#自動出價的下一個出價
-                    $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
+                    $currentMaxBidderInputAutoBidNextBid = $inputAutoBid+$this->bidRule($inputAutoBid);
+                    $this->bidLot($lotId, $lotMaxAutoBid->user_id, $currentMaxBidderInputAutoBidNextBid);#自動出價的下一個出價
+                    #$this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
                     $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '出價已經被超過，');
+                    Log::channel('line')->info('16');
                 }
             }
 
@@ -266,10 +289,12 @@ class BidService
             #dd(4);
             if($bidderId == $topBidderId) {
                 $bid = false;
+                Log::channel('line')->info('17');
             } else {
                 $bid = $lot->current_bid + $this->bidRule($lot->current_bid);
                 $this->bidLot($lotId, $bidderId, $bid);
-                $this->dispatchLineNotice($lot, $topBidderId, $bidderId, $bid, 0, '出價已經被超過，');
+                $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
+                Log::channel('line')->info('18');
             }
 
         }

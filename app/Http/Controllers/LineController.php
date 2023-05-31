@@ -9,6 +9,7 @@ use App\Services\LineService;
 use App\Services\LotService;
 use App\Services\UserService;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -115,22 +116,40 @@ class LineController extends Controller
                         $bidderId = $data[2];
                         $bid = $data[3];
                         $lot = $this->lotService->getLot($lotId);
-                        $nextBid = $lot->current_bid + $this->bidService->bidRule($lot->current_bid);
 
-                        $messageBuilder = $this->lineService->confirmLineBid($lotId, $bidderId, $bid, $lot, $nextBid);
+                        $validRequest = new Request();
+                        $validRequest->setMethod('POST');
+                        $validRequest->request->add([
+                            'lotId' => $lotId,
+                            'bidderId' => $bidderId,
+                            'bid' => $bid
+                        ]);
+
+                        $validator = app(MemberController::class)->manualBidValidation($validRequest, $lot);
+
+                        if ($validator->fails()) {
+                            $messageBuilder = $this->lineService->buildMessage($validator->getMessageBag()->first());
+                        } else {
+                            $nextBid = $lot->current_bid + $this->bidService->bidRule($lot->current_bid);
+
+                            $messageBuilder = $this->lineService->confirmLineBid($lotId, $bidderId, $bid, $lot, $nextBid);
+                        }
                         break;
                     case 'lineBid':
                         $lotId = $data[1];
                         $bidderId = $data[2];
                         $bid = $data[3];
+
                         $this->bidService->manualBidLot($lotId, $bidderId, $bid);#遇上更高的自動出價沒提醒####################
                         $lot = $this->lotService->getLot($lotId);
                         if ($bid < $lot->reserve_price) {
-                            $messageBuilder = $this->lineService->buildMessage('NT$' . number_format($bid) . ' 出價成功，出價未達底價，需到達底價物品才會被拍賣。');
+                            $message = 'NT$' . number_format($bid) . ' 出價成功，出價未達底價，需到達底價物品才會被拍賣。';
 
                         } else {
-                            $messageBuilder = $this->lineService->buildMessage('NT$' . number_format($bid) . ' 出價成功');
+                            $message = 'NT$' . number_format($bid) . ' 出價成功';
                         }
+
+                        $messageBuilder = $this->lineService->buildMessage($message);
                         break;
                     case 'showAllAuction':
                         $lineUserId = $request['events'][0]['source']['userId'];
@@ -172,34 +191,37 @@ class LineController extends Controller
                         $lotId = $data[1];
                         $bidderId = $data[2];
                         $autoBid = $data[3];
-                        $bid = $this->bidService->autoBidLot($lotId, $bidderId, $autoBid);
+
                         $lot = $this->lotService->getLot($lotId);
                         $user = $this->userService->getUser($bidderId);
 
-                        $request = new Request();
-                        $request->setMethod('POST');
-                        $request->request->add([
+                        $validRequest = new Request();
+                        $validRequest->setMethod('POST');
+                        $validRequest->request->add([
                             'lotId' => $lotId,
                             'bidderId' => $bidderId,
                             'bid' => $autoBid
                         ]);
 
-                        $validator = app(MemberController::class)->autoBidValidation($request, $lot);
+                        $validator = app(MemberController::class)->autoBidValidation($validRequest, $lot);
 
                         if ($validator->fails()) {
                             $message = $validator->getMessageBag()->first();
                         } else {
+                            $bid = $this->bidService->autoBidLot($lotId, $bidderId, $autoBid);
                             if ($bid !== false) {
                                 $message = '已設置自動出價 NT$' . number_format($autoBid) . '，已幫您出價 NT$' . number_format($bid);
-
+                                if ($bid < $lot->reserve_price) {
+                                    $message .= '，出價成功，出價未達底價，需到達底價物品才會被拍賣。';
+                                } else {
+                                    $message .= '，出價成功。';
+                                    if($lot->top_bidder_id == $bidderId) {
+                                        $message .= '您目前是最高出價者。';
+                                    }
+                                }
                             } else {
                                 $message = '已修改自動出價金額為 NT$' . number_format($autoBid);
-                            }
 
-                            if ($bid < $lot->reserve_price) {
-                                $message .= '，出價成功，出價未達底價，需到達底價物品才會被拍賣。';
-                            } else {
-                                $message .= '，出價成功。';
                             }
                         }
 

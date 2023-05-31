@@ -48,7 +48,7 @@ class NoticePresenter
                 return match ($notice->code) {
                     0 => ['已安排競標', '物品 No.'.$model->id.' ，安排於 '.Carbon::createFromFormat('Y-m-d H:i:s', new Carbon($notice->content))->format('Y-m-d H:i').' 開始競標。'],
                     1 => ['競標成功', '物品 No.'.$model->id.' ，以 NT$'.number_format($notice->lot->current_bid).'賣出'],
-                    2 => ['流標', '物品 No.'.$model->id.' ，為達底價流標，請至平台選擇處理方式。'],
+                    2 => ['流標', '物品 No.'.$model->id.' ，未達底價流標，請至平台選擇處理方式。'],
                     3 => ['流標', '物品 No.'.$model->id.' ，無人競標流標，請至平台選擇處理方式。'],
                     4 => ['棄標', '物品 No.'.$model->id.' ，遭到棄標，請至平台選擇處理方式。'],
                 };

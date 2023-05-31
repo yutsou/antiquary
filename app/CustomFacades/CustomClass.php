@@ -36,7 +36,7 @@ class CustomClass
         }
 
         if($withLine !== null) {
-            $text = app(NoticePresenter::class)->transferTemplateNotice($notice);
+            $text = app(NoticePresenter::class)->transferTemplateNotice($notice)[1];
             SendLine::dispatch(null, $user->id, null, 1, $text);
         }
     }

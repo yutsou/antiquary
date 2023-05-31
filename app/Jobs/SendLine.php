@@ -58,6 +58,7 @@ class SendLine implements ShouldQueue
                 Log::channel('line')->info('Succeeded!');
             } else {
                 Log::channel('line')->warning($response->getHTTPStatus() . ' ' . $response->getRawBody());
+                Log::channel('line')->warning($this->text);
             }
         }
     }

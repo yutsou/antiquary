@@ -215,7 +215,7 @@
                                         <hr>
                                         @if($lot->estimated_price != null)
                                             <div class="uk-margin">
-                                                <label>預估價格 - NT$<span id="currentBid">{{ number_format($lot->estimated_price) }}</span></label>
+                                                <label>預估價格 - NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
                                             </div>
                                             <hr>
                                         @endif

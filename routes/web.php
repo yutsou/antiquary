@@ -174,8 +174,8 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class, Ensure
 
 
 });
-#Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->group(function () {
-Route::prefix('account')->group(function () {
+Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->group(function () {
+#Route::prefix('account')->group(function () {
     Route::get('/', [MemberController::class, 'showDashboard'])->name('account');
 
 

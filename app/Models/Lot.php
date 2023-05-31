@@ -149,6 +149,15 @@ class Lot extends Model
         return Carbon::createFromFormat('Y-m-d H:i:s', $this->auction_start_at)->format('Y-m-d H:i');
     }
 
+    public function getTopBidderIdAttribute()
+    {
+        if($this->bidRecords->count() != 0) {
+            return $this->bidRecords()->latest()->first()->bidder_id;
+        } else {
+            return null;
+        }
+    }
+
     public function toSearchableArray()
     {
         return [

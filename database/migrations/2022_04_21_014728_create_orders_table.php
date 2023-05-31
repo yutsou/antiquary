@@ -29,10 +29,10 @@ return new class extends Migration
             $table->decimal('delivery_cost', 11)->nullable();
             $table->decimal('total', 11)->nullable();
             $table->text('remark')->nullable();
-            $table->decimal('owner_real_take')->nullable();
-            $table->decimal('commission')->nullable();
-            $table->decimal('premium')->nullable();
-            $table->decimal('earning')->nullable();
+            $table->decimal('owner_real_take', 11)->nullable();
+            $table->decimal('commission', 11)->nullable();
+            $table->decimal('premium', 11)->nullable();
+            $table->decimal('earning', 11)->nullable();
             $table->timestamps();
         });
     }
