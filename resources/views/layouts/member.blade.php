@@ -182,7 +182,7 @@
                     <ul class="uk-nav-default uk-nav-parent-icon uk-nav-left" uk-nav>
                         <li>
                             <a href="#">分類</a>
-                            <div uk-dropdown class="uk-width-1-1">
+                            <div uk-dropdown class="uk-width-1-1" style="overflow: auto; height: 60vh;">
                                 <div class="uk-child-width-1-5@s uk-text-center uk-grid-small" uk-grid>
                                     @foreach($categories as $category)
                                         <div>
