@@ -229,7 +229,8 @@ Route::get('/consignment-auction-notes', [MartController::class, 'showConsignmen
 Route::get('/consignment-auction-terms', [MartController::class, 'showConsignmentAuctionTerms'])->name('mart.consignment_auction_terms.show');
 Route::get('/bidding-notes', [MartController::class, 'showBiddingNotes'])->name('mart.bidding-notes.show');
 
-Route::get('/test/delete/{lotId}', [MemberController::class, 'testDelete']);
+Route::get('/test-lot/delete/{lotId}', [MemberController::class, 'testLotDelete']);
+Route::get('/test-user/delete/{userId}', [MemberController::class, 'testUserDelete']);
 Route::get('/test/schedule', [MemberController::class, 'testSchedule']);
 Route::post('postTest', [MemberController::class, 'postTest']);
 Route::get('/testOrder', [MartController::class, 'test']);

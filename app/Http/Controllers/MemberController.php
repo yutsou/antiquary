@@ -766,9 +766,15 @@ class MemberController extends Controller
          return CustomClass::viewWithTitle(view('account.bidding_lots.index')->with('lots', $lots), '您的競標');
     }
 
-    public function testDelete($lotId)
+    public function testLotDelete($lotId)
     {
         $lot = $this->lotService->getLot($lotId);
         $lot->delete();
+    }
+
+    public function testUserDelete($userId)
+    {
+        $user = $this->userService->getUser($userId);
+        $user->delete();
     }
 }
