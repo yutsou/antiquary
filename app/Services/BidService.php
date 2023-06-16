@@ -146,7 +146,9 @@ class BidService
                 $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
             }
         } else {
-            $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
+            if($lot->top_bidder_id != $bidderId) {
+                $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
+            }
         }
     }
 

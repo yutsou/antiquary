@@ -225,39 +225,15 @@
                                         </div>
                                         <hr>
                                         <div class="uk-margin">
-                                            <div class="uk-margin">
-                                                <label>下一個最低出價 - NT$<span
-                                                        id="nextBid">{{ number_format($lot->next_bid) }}</span></label>
-                                            </div>
                                             <div class="uk-grid-small" uk-grid>
-                                                <div class="uk-width-expand">
-                                                    <input id="bidInput" class="uk-input" placeholder="手動出價">
-                                                </div>
-                                                <div class="uk-width-auto">
+                                                <div>
                                                     @auth
-                                                        <div id="confirmManualBid" class="modal">
-                                                            <h3 id="confirmManualBidTitle"></h3>
-                                                            <p class="uk-text-right">
-                                                                <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
-                                                                <a id="bid" class="uk-button custom-button-1">確認</a>
-                                                            </p>
-                                                        </div>
-                                                        <a href="#confirmManualBid" id="confirmManualBidButton" class="uk-button custom-button-1">出價</a>
+                                                        <input id="bidInput" hidden>
+                                                        <div id="next-bids-field" class="uk-width-1-1"></div>
+
                                                     @endauth
                                                     @guest
-                                                        <a class="uk-button custom-button-1" href="#bid-login-notice" uk-toggle>
-                                                            出價
-                                                        </a>
-                                                        <div id="bid-login-notice" class="uk-flex-top" uk-modal>
-                                                            <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
-                                                                <button class="uk-modal-close-default" type="button" uk-close></button>
-                                                                <h2 class="uk-modal-title">出價前需要先登入</h2>
-                                                                <div class="uk-flex uk-flex-right">
-                                                                    <a class="uk-button custom-button-1"
-                                                                       href="{{ route('login.show', ['redirectUrl'=>'lots_'.$lot->id]) }}">登入</a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+
                                                     @endguest
                                                 </div>
                                             </div>
@@ -265,7 +241,7 @@
                                         <div class="uk-margin">
                                             <div class="uk-grid-small" uk-grid>
                                                 <div class="uk-width-expand">
-                                                    <input id="autoBidInput" class="uk-input" placeholder="自動出價">
+                                                    <input id="autoBidInput" class="uk-input" placeholder="自動出價：最低NT${{ number_format($lot->next_bid) }}">
                                                 </div>
                                                 <div class="uk-width-auto">
                                                     @auth
@@ -452,6 +428,39 @@
             } else if (bid >= 1000001) {
                 return 100000;
             }
+        }
+
+        let getNextBids = function (bid) {
+            let firstBid = bid+bidRule(bid);
+            let secondBid = firstBid+bidRule(firstBid);
+            let thirdBid = secondBid+bidRule(secondBid);
+            return [firstBid, secondBid, thirdBid];
+        }
+
+        let generateModalwithButton = function (bid) {
+            return '' +
+            '<a data-modal="#confirm-manual-bid-modal-'+bid+'" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="'+bid+'">出價NT$'+number_format(bid)+'</a>' +
+            '<div id="confirm-manual-bid-modal-'+bid+'" class="modal">' +
+                '<h3>確認出價 NT$'+number_format(bid)+'</h3>' +
+                '<p class="uk-text-right">' +
+                    '<a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>' +
+                    '<a class="uk-button custom-button-1 bids">確認</a>' +
+                '</p>' +
+            '</div>';
+        }
+
+        let setNextBids = function(bid) {
+            let nextBids = getNextBids(bid);
+            let nextBidsField = $('#next-bids-field');
+            nextBidsField.empty();
+
+            nextBids.forEach(function(bid){
+                nextBidsField.append(
+                    generateModalwithButton(bid)
+                );
+            });
+
+            $('#bidInput').val();
         }
 
         let addFavorite = function (lotId) {
@@ -656,6 +665,7 @@
                     newBid = '<tr><td>競標者 ' + e.bidderAlias + '</td><td style="font-size: 0.8em">' + e.created_at + '</td><td>NT$' + number_format(e.bid) + '</td></tr>';
                 }
 
+                setNextBids(parseInt(e.bid));
                 $('#bidHistories').prepend(newBid);
                 $('#currentBid').text(number_format(e.bid));
                 $('#nextBid').text(number_format(parseInt(e.bid) + bidRule(parseInt(e.bid))));
@@ -685,14 +695,16 @@
 
             setAuctionCountdown();
 
+            setNextBids({{ $lot->current_bid }});
+
             $("#favorite").click(function () {
                 addFavorite({{ $lot->id }});
             });
 
-            $("#confirmManualBidButton").click(function(event) {
-                $(this).modal();
-                let bidInput = $('#bidInput').val();
-                $('#confirmManualBidTitle').text('確認出價 NT$'+number_format(bidInput));
+            $(document).on('click', '.confirm-manual-bid-buttons', function() {
+                let bid = $(this).attr('bid');
+                $('#confirm-manual-bid-modal-'+bid).modal();
+                $('#bidInput').val(bid);
                 return false;
             });
 
@@ -703,7 +715,7 @@
                 return false;
             });
 
-            $("#bid").click(function () {
+            $(document).on('click', '.bids', function() {
                 let bidInput = $('#bidInput')
                 bid({{ $lot->id }}, bidInput.val());
                 bidInput.val('');
