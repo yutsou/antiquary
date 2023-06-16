@@ -455,7 +455,7 @@ class MemberController extends Controller
         $input = $request->all();
         $input['bidTime'] = Carbon::now();
         $input['bidderStatus'] = $this->userService->getUser($request->bidderId)->status;
-        $nextBid = $lot->current_bid + $this->bidService->bidRule($lot->current_bid);
+        $nextBid = $lot->next_bid;
         $rules = [
             'bidTime' => 'after:'.$lot->auction_start_at.'|before:'.$lot->auction_end_at,
             'bid' => 'required|gte:'.$nextBid,
@@ -475,7 +475,7 @@ class MemberController extends Controller
         $lotMaxAutoBid = $this->bidService->getLotMaxAutoBid($lot->id);
         if(isset($lotMaxAutoBid) && $lotMaxAutoBid->user_id == $request->bidderId) {
             $rules['bid'] = 'required|gte:'.$lotMaxAutoBid->bid;
-            $messages['bid.gt'] =  '出價必須大於已設定的自動出價';
+            $messages['bid.gte'] =  '已設定更高的自動出價';
         }
 
         return Validator::make($input, $rules, $messages);
@@ -536,7 +536,7 @@ class MemberController extends Controller
 
         if($request->bid > $lot->next_bid) {
             $rules['bid'] = 'required|gte:'.$this->bidService->getBidderLotAutoBid($request->bidderId, $lot);
-            $messages['bid.gt'] =  '自動出價必須大於已設定的自動出價';
+            $messages['bid.gte'] =  '已設定更高的自動出價';
         }
 
         return Validator::make($input, $rules, $messages);
