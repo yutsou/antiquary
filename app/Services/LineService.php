@@ -576,4 +576,15 @@ class LineService
                     )
             );
     }
+
+    public function bidNotAchieveReservePrice($lot, $user, $message)
+    {
+//        $messageBuilder = new MultiMessageBuilder();
+//        $textBuilder = $this->buildMessage($message);
+//        $lotMessageBuilder = $this->buildLotMessage($lot, $user, '未達底標，');
+//        $messageBuilder->add($textBuilder);
+//        $messageBuilder->add($lotMessageBuilder);
+        $messageBuilder = $this->buildLotMessage($lot, $user, $message);
+        return $messageBuilder;
+    }
 }

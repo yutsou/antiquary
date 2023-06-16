@@ -143,13 +143,17 @@ class LineController extends Controller
                         $this->bidService->manualBidLot($lotId, $bidderId, $bid);#遇上更高的自動出價沒提醒####################
                         $lot = $this->lotService->getLot($lotId);
                         if ($bid < $lot->reserve_price) {
-                            $message = 'NT$' . number_format($bid) . ' 出價成功，出價未達底價，需到達底價物品才會被拍賣。';
+                            $message = '出價成功，出價未達底價，需到達底價物品才會被拍賣。';
+
+                            $user = $this->userService->getUser($bidderId);
+                            $messageBuilder = $this->lineService->bidNotAchieveReservePrice($lot, $user, $message);
 
                         } else {
                             $message = 'NT$' . number_format($bid) . ' 出價成功';
+                            $messageBuilder = $this->lineService->buildMessage($message);
                         }
 
-                        $messageBuilder = $this->lineService->buildMessage($message);
+
                         break;
                     case 'showAllAuction':
                         $lineUserId = $request['events'][0]['source']['userId'];
@@ -207,25 +211,31 @@ class LineController extends Controller
 
                         if ($validator->fails()) {
                             $message = $validator->getMessageBag()->first();
+                            $messageBuilder = $this->lineService->buildMessage($message);
                         } else {
                             $bid = $this->bidService->autoBidLot($lotId, $bidderId, $autoBid);
                             if ($bid !== false) {
+
                                 $message = '已設置自動出價 NT$' . number_format($autoBid) . '，已幫您出價 NT$' . number_format($bid);
                                 if ($bid < $lot->reserve_price) {
                                     $message .= '，出價成功，出價未達底價，需到達底價物品才會被拍賣。';
+
+                                    $lot->refresh();
+                                    $messageBuilder = $this->lineService->bidNotAchieveReservePrice($lot, $user, $message);
                                 } else {
                                     $message .= '，出價成功。';
                                     if($lot->top_bidder_id == $bidderId) {
                                         $message .= '您目前是最高出價者。';
                                     }
+                                    $messageBuilder = $this->lineService->buildMessage($message);
                                 }
                             } else {
                                 $message = '已修改自動出價金額為 NT$' . number_format($autoBid);
-
+                                $messageBuilder = $this->lineService->buildMessage($message);
                             }
                         }
 
-                        $messageBuilder = $this->lineService->buildMessage($message);
+
                         $this->lineService->initMode($user);
                         break;
                     case 'showAuctionAllLots':
