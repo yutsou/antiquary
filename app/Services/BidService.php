@@ -115,39 +115,38 @@ class BidService
         $lot = $this->getLot($lotId);
         $maxAutoBid = $this->getLotMaxAutoBid($lotId);
 
-        if($lot->bidRecords->count() != 0) {
-            $topBidderId = $lot->bidRecords()->latest()->first()->bidder_id;
+        if($lot->bidRecords->count() == 0) {
+            $this->bidLot($lotId, $bidderId, $inputBid);
         } else {
-            $topBidderId = null;
-        }
+            $topBidderId = $lot->bidRecords()->latest()->first()->bidder_id;
+            $this->bidLot($lotId, $bidderId, $inputBid);
 
-        $this->bidLot($lotId, $bidderId, $inputBid);
-
-        #自動出價
-        if($this->checkCurrentAutoBidIsValid($lot, $maxAutoBid)) {
-            if($inputBid < $maxAutoBid->bid) {
-                $nextBid = $inputBid+$this->bidRule($inputBid);
-                if($nextBid >= $maxAutoBid->bid) {
+            #自動出價
+            if($this->checkCurrentAutoBidIsValid($lot, $maxAutoBid)) {
+                if($inputBid < $maxAutoBid->bid) {
+                    $nextBid = $inputBid+$this->bidRule($inputBid);
+                    if($nextBid >= $maxAutoBid->bid) {
+                        $bid = $maxAutoBid->bid;
+                        $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
+                        $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
+                    } else {
+                        $bid = $nextBid;
+                        $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
+                        $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
+                    }
+                    $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '出價已經被超過，');#提醒出價者被自動出價超過
+                } elseif ($inputBid == $maxAutoBid->bid) {
                     $bid = $maxAutoBid->bid;
                     $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
                     $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
+                    $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '有人更早提出相同的出價，');
                 } else {
-                    $bid = $nextBid;
-                    $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
-                    $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
+                    $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
                 }
-                $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '出價已經被超過，');#提醒出價者被自動出價超過
-            } elseif ($inputBid == $maxAutoBid->bid) {
-                $bid = $maxAutoBid->bid;
-                $this->bidLot($lotId, $maxAutoBid->user_id, $bid);
-                $this->dispatchLineNotice($lot, $maxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).' 你仍是最高出價者');
-                $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '有人更早提出相同的出價，');
             } else {
-                $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
-            }
-        } else {
-            if($lot->top_bidder_id != $bidderId) {
-                $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
+                if($lot->top_bidder_id != $bidderId) {
+                    $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
+                }
             }
         }
     }
