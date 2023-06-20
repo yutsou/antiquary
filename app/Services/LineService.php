@@ -367,7 +367,17 @@ class LineService
                     ->setPaddingBottom('10px')
                     ->setContents([
                         TextComponentBuilder::builder()
-                            ->setText($text.'目前 NT$'.number_format($lot->current_bid).'，需要繼續競標嗎？')
+                            ->setText($text.' ')
+                            ->setWrap(true)
+                            ->setWeight(ComponentFontWeight::BOLD)
+                            ->setSize(ComponentFontSize::SM),
+                    ]),
+                BoxComponentBuilder::builder()
+                    ->setLayout(ComponentLayout::VERTICAL)
+                    ->setPaddingBottom('10px')
+                    ->setContents([
+                        TextComponentBuilder::builder()
+                            ->setText('目前 NT$'.number_format($lot->current_bid).'，需要繼續競標嗎？')
                             ->setWrap(true)
                             ->setWeight(ComponentFontWeight::BOLD)
                             ->setSize(ComponentFontSize::SM),
@@ -483,7 +493,7 @@ class LineService
                     ->setPaddingBottom('10px')
                     ->setContents([
                         TextComponentBuilder::builder()
-                            ->setText($carbonPresenter->lotPresent($auction->start_at, $auction->expect_end_at))
+                            ->setText($carbonPresenter->lotPresent($auction->start_at, $auction->end_at))
                             ->setWrap(true)
                             ->setWeight(ComponentFontWeight::BOLD)
                             ->setSize(ComponentFontSize::SM)
@@ -575,16 +585,5 @@ class LineService
                             ])
                     )
             );
-    }
-
-    public function bidNotAchieveReservePrice($lot, $user, $message)
-    {
-//        $messageBuilder = new MultiMessageBuilder();
-//        $textBuilder = $this->buildMessage($message);
-//        $lotMessageBuilder = $this->buildLotMessage($lot, $user, '未達底標，');
-//        $messageBuilder->add($textBuilder);
-//        $messageBuilder->add($lotMessageBuilder);
-        $messageBuilder = $this->buildLotMessage($lot, $user, $message);
-        return $messageBuilder;
     }
 }

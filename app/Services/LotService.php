@@ -317,9 +317,9 @@ class LotService extends LotRepository
             HandleAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->addMinutes($index*3)->addSecond());
         }
         if(config('app.env') == 'production') {
-            HandleBeforeAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->subMinutes(10));###要改10
+            HandleBeforeAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->subMinutes(10));
             HandleAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->addSeconds(2));
-            HandleBeforeAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->subMinutes(10));###要改10
+            HandleBeforeAuctionEnd::dispatch($auction)->delay(Carbon::now()->addSeconds($endGap)->subMinutes(10));
         } else {
             HandleBeforeAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->subMinutes(2));
             HandleAuctionStart::dispatch($auction)->delay(Carbon::now()->addSeconds($startGap)->addSeconds(2));

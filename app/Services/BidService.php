@@ -144,7 +144,7 @@ class BidService
                     $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
                 }
             } else {
-                if($lot->top_bidder_id != $bidderId) {
+                if($topBidderId != $bidderId) {
                     $this->dispatchLineNotice($lot, $topBidderId, $inputBid, 0, '出價已經被超過，');
                 }
             }
@@ -198,8 +198,6 @@ class BidService
                     $this->bidLot($lotId, $bidderId, $bid);#直達最頂
                     if($topBidderId != $bidderId) {
                         $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價已經被超過，');
-                    } else {
-                        $this->dispatchLineNotice($lot, $topBidderId, $bid, 0, '出價未達底價，');
                     }
                 }
             } else {#沒有底價

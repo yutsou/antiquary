@@ -77,7 +77,7 @@
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $auction->name }}</h3>
-                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->expect_end_at) }}</p>
+                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -103,7 +103,7 @@
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $auction->name }}</h3>
-                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->expect_end_at) }}</p>
+                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -127,7 +127,7 @@
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $auction->name }}</h3>
-                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->expect_end_at) }}</p>
+                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</p>
                                     </div>
                                 </div>
                             </li>
@@ -153,7 +153,7 @@
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $auction->name }}</h3>
-                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->expect_end_at) }}</p>
+                                        <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</p>
                                     </div>
                                 </div>
                             </div>

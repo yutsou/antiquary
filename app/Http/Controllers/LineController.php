@@ -146,7 +146,7 @@ class LineController extends Controller
                             $message = '出價成功，出價未達底價，需到達底價物品才會被拍賣。';
 
                             $user = $this->userService->getUser($bidderId);
-                            $messageBuilder = $this->lineService->bidNotAchieveReservePrice($lot, $user, $message);
+                            $messageBuilder = $this->lineService->buildLotMessage($lot, $user, $message);
 
                         } else {
                             $message = 'NT$' . number_format($bid) . ' 出價成功';
@@ -221,7 +221,7 @@ class LineController extends Controller
                                     $message .= '，出價成功，出價未達底價，需到達底價物品才會被拍賣。';
 
                                     $lot->refresh();
-                                    $messageBuilder = $this->lineService->bidNotAchieveReservePrice($lot, $user, $message);
+                                    $messageBuilder = $this->lineService->buildLotMessage($lot, $user, $message);
                                 } else {
                                     $message .= '，出價成功。';
                                     if($lot->top_bidder_id == $bidderId) {

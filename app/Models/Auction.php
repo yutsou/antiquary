@@ -24,6 +24,11 @@ class Auction extends Model
         return $this->belongsToMany(User::class)->withPivot('alias');
     }
 
+    public function getEndAtAttribue()
+    {
+        return $this->lots->sortBy('auction_end_at')->last()->auction_end_at;
+    }
+
     public function getStartAtFormatAttribute()
     {
         return Carbon::createFromFormat('Y-m-d H:i:s', $this->start_at)->format('Y-m-d H:i');
