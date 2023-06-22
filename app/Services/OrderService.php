@@ -173,7 +173,7 @@ class OrderService extends OrderRepository
     {
         $order = OrderRepository::updateOrderStatus(40, $orderId);
         $order->lot->update(['status'=>40]);
-        CustomClass::sendTemplateNotice(1, 3, 2, $order->id);
+        CustomClass::sendTemplateNotice(1, 3, 1, $order->id);
     }
 
     public function noticeRemit($request, $orderId, $type)
@@ -203,7 +203,7 @@ class OrderService extends OrderRepository
                 'payee_account'=>$owner->bank_name.$owner->bank_branch_name.$owner->bank_account_name.$owner->bank_account_number
             ];
             $order->lot()->update(['status'=>41]);
-            CustomClass::sendTemplateNotice($order->lot->owner_id, 3, 3, $orderId);
+            CustomClass::sendTemplateNotice($order->lot->owner_id, 3, 2, $orderId);
         }
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
 
@@ -218,7 +218,7 @@ class OrderService extends OrderRepository
             $status = 13;
         }
         $order = OrderRepository::updateOrderStatus($status, $orderId);
-        CustomClass::sendTemplateNotice($order->user_id, 3, 1, $order->id, 1);
+        CustomClass::sendTemplateNotice($order->user_id, 3, 0, $order->id, 1);
     }
 
     public function sendMessage($request, $orderId)

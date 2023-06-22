@@ -50,7 +50,7 @@ class HandleAuctionEnd implements ShouldQueue
                         OrderCreate::dispatch($lot);
                         $lot->refresh();
                         CustomClass::sendTemplateNotice($lot->owner_id, 2, 1, $lot->id);
-                        CustomClass::sendTemplateNotice($winnerId, 3, 0, $lot->order->id, 1, 1);
+                        CustomClass::sendTemplateNotice($winnerId, 2, 2, $lot->id, 1, 1);
                     } elseif ($lot->current_bid === 0){
                         $lot->update([
                             'status'=>23#無人競標流標
@@ -60,7 +60,7 @@ class HandleAuctionEnd implements ShouldQueue
                         $lot->update([
                             'status'=>24#未達底價流標
                         ]);
-                        CustomClass::sendTemplateNotice($lot->owner_id, 2, 2, $lot->id);
+                        CustomClass::sendTemplateNotice($lot->owner_id, 2, 4, $lot->id);
                     }
                 }
             } else {
