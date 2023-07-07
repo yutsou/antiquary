@@ -290,7 +290,7 @@ class LineService
             'extra_info' => $lotId . ',' . $bidderId
         ]);
 
-        return new TextMessageBuilder('請輸入您的自動出價，我們將會再接下來的步驟與您確認出價。');
+        return new TextMessageBuilder('請輸入您的自動出價，我們將會在接下來的步驟與您確認出價。');
     }
 
     public function initMode($user)
