@@ -43,12 +43,14 @@ class SendLine implements ShouldQueue
 
         #'出價已經被超過，'
         if($lineUser !== null) {
+            $text = preg_replace('~<a href="~', "", $this->text);
+            $text = preg_replace('~">連結</a>~', "", $text);
             switch ($this->type) {
                 case 0:
-                    $messageBuilder = $lineService->buildLotMessage($this->lot, $user, $this->text);
+                    $messageBuilder = $lineService->buildLotMessage($this->lot, $user, $text);
                     break;
                 case 1:
-                    $messageBuilder = $lineService->buildMessage($this->text);
+                    $messageBuilder = $lineService->buildMessage($text);
                     break;
             }
 

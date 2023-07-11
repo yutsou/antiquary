@@ -142,6 +142,14 @@ class MartController extends Controller
 
     public function test()
     {
+        $order = $this->orderService->getOrder(9);
+        $text = '得標，點選此""到付款頁面進行付款。';
+        $text = preg_replace('~<a href="~', "", $text);
+        $text = preg_replace('~">連結</a>~', "", $text);
+        dd($text);
+
+        $order = $this->orderService->getOrder(7);
+        dd($order->lot->name);
         $request = new Request();
         $request->setMethod('POST');
         $request->request->add([
@@ -175,5 +183,15 @@ class MartController extends Controller
             );
         }
 
+    }
+
+    public function showPrivacyPolicy()
+    {
+        return CustomClass::viewWithTitle(view('privacy_policy'), '隱私政策');
+    }
+
+    public function showTerms()
+    {
+        return CustomClass::viewWithTitle(view('terms'), '使用者條款');
     }
 }

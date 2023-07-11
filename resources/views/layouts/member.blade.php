@@ -261,7 +261,11 @@
                         </ul>
                     </div>
                 </div>
-                <div class="uk-margin-large">
+                <hr>
+                <div class="uk-margin-medium-top uk-text-center">
+                    <span><a href="{{ route('mart.terms.show') }}" class="uk-link-text">使用者條款</a> | <a href="{{ route('mart.privacy-policy.show') }}" class="uk-link-text">隱私政策</a></span>
+                </div>
+                <div class="uk-margin">
                     <div class="uk-text-center uk-child-width-1-1">© {{ now()->year }} Antiquary</div>
                 </div>
             </div>

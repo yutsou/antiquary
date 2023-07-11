@@ -72,7 +72,7 @@ class MemberController extends Controller
     public function indexOrders()
     {
         $user = Auth::user();
-        $orders = $user->orders;
+        $orders = $user->orders->sortByDesc('created_at');
         $customView = CustomClass::viewWithTitle(view('account.orders.index')->with('orders', $orders), '已得標的物品');
         return $customView;
     }

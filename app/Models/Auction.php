@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +13,7 @@ class Auction extends Model
 
     protected $guarded = ['id'];
 
-    protected $dates = ['start_at', 'expect_end_at',];
+    protected $dates = ['start_at', 'expect_end_at','last_lot_end_at'];
 
     public function lots()
     {
@@ -24,9 +25,11 @@ class Auction extends Model
         return $this->belongsToMany(User::class)->withPivot('alias');
     }
 
-    public function getEndAtAttribue()
+    protected function lastLotEndAt(): Attribute
     {
-        return $this->lots->sortBy('auction_end_at')->last()->auction_end_at;
+        return Attribute::make(
+            get: fn () => $this->lots->sortBy('auction_end_at')->last()->auction_end_at,
+        );
     }
 
     public function getStartAtFormatAttribute()

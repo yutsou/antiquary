@@ -493,7 +493,7 @@ class LineService
                     ->setPaddingBottom('10px')
                     ->setContents([
                         TextComponentBuilder::builder()
-                            ->setText($carbonPresenter->lotPresent($auction->start_at, $auction->end_at))
+                            ->setText($carbonPresenter->lotPresent($auction->start_at, $auction->last_lot_end_at))
                             ->setWrap(true)
                             ->setWeight(ComponentFontWeight::BOLD)
                             ->setSize(ComponentFontSize::SM)

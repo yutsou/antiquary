@@ -228,6 +228,9 @@ Route::get('/antiquary-guaranty', [MartController::class, 'showGuaranty'])->name
 Route::get('/consignment-auction-notes', [MartController::class, 'showConsignmentAuctionNotes'])->name('mart.consignment_auction_notes.show');
 Route::get('/consignment-auction-terms', [MartController::class, 'showConsignmentAuctionTerms'])->name('mart.consignment_auction_terms.show');
 Route::get('/bidding-notes', [MartController::class, 'showBiddingNotes'])->name('mart.bidding-notes.show');
+Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->name('mart.privacy-policy.show');
+Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
+
 
 Route::get('/test-lot/delete/{lotId}', [MemberController::class, 'testLotDelete']);
 Route::get('/test-user/delete/{userId}', [MemberController::class, 'testUserDelete']);
