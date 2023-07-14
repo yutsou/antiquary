@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <title>{{ $title }}</title>
+        <link rel="icon" type="image/x-icon" href="{{ asset('/images/web/common/logo.ico') }}">
         <!-- {{ $version = '32' }} -->
         <!-- Meta -->
         <meta charset="utf-8">

@@ -44,7 +44,7 @@
             <div class="separator">或是</div>
             <div class="uk-margin">
                 <a class="uk-button uk-text-capitalize uk-width-1-1" href="{{ route('auth.google.handle') }}" style="background-color: #fff; color: #666; border: solid #e5e5e5 1px;">
-                    <img width="20px" style="margin-bottom:3px; margin-right:5px;" src="/images/web/common/google_login.png" />
+                    <img width="20px" style="margin-bottom:3px; margin-right:5px;" src="{{ asset('/images/web/common/google_login.png') }}" />
                     使用 Google 登入
                 </a>
             </div>
