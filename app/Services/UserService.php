@@ -21,8 +21,8 @@ class UserService extends UserRepository
     {
         $input = $request->all();
         $input['password'] = Hash::make($request->password);
-        $input['commission_rate'] = config('shop.promotion.commission_rate');
-        $input['premium_rate'] = config('shop.promotion.premium_rate');
+        $input['commission_rate'] = config('shop.registration.commission_rate');
+        $input['premium_rate'] = config('shop.registration.premium_rate');
 
         $newUser = UserRepository::create($input);
 
@@ -55,7 +55,7 @@ class UserService extends UserRepository
 
         return back()->withErrors([
             'warning' => '電子郵件或密碼錯誤',
-        ])->withInput();;
+        ])->withInput();
     }
 
     public function logout($request)

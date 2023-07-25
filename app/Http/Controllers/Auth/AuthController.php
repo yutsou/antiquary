@@ -219,7 +219,7 @@ class AuthController extends Controller
     {
         if($request->state !== csrf_token())
         {
-            return redirect()->route('warning');
+            return redirect()->route('mart.warning.show');
         }
         $code = $request->code;
         $response = $this->lineService->getLineToken($code);

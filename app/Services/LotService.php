@@ -177,7 +177,7 @@ class LotService extends LotRepository
 
     public function ajaxExpertGetAuctions($user)
     {
-        $auctions = $user->auctions->where('process', '!=', 2);
+        $auctions = $user->auctions->where('process', '!=', 2)->sortByDesc('created_at');
 
         $datatable = DataTables::of($auctions)
             ->addColumn('id', function ($auction)

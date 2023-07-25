@@ -82,6 +82,12 @@ class BidService
         if($now->between($first, $second)) {
             $lot->update(['auction_end_at'=>$now->addSeconds(90)]);
             HandleAuctionEnd::dispatch($auction)->delay($now->addSeconds(5));
+
+            #notice bidder and current winner the timing is extended.
+            SendLine::dispatch($lot, $bidderId, 0, 1, '拍賣時間已延長');
+            if($bidderId != $lot->top_bidder_id) {
+                SendLine::dispatch($lot, $lot->top_bidder_id, 0, 1, '拍賣時間已延長');
+            }
         }
 
         /*if($lot->bidRecords->count() != 0) {#notice
@@ -249,24 +255,22 @@ class BidService
                     #通知已有的動出價者
                 }
 
-            } else {#當自動出價小於已有的自動出價#########
+            } else {#當自動出價小於已有的自動出價
                 #原有的自動出價者出價
                 #dd(3);
                 $bid = $inputAutoBid;
                 $this->bidLot($lotId, $bidderId, $bid);#直達最頂(自動出價金額)
-                #$this->dispatchLineNotice($lot, $bidderId, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
                 #已有的自動出價者出價
                 if($inputAutoBid+$this->bidRule($inputAutoBid) >= $lotMaxAutoBid->bid) {#當自動出價的下的一個出價大於等於目前自動出價者最高出價
                     $currentMaxBidderMaxAutoBid = $lotMaxAutoBid->bid;
                     $this->bidLot($lotId, $lotMaxAutoBid->user_id, $currentMaxBidderMaxAutoBid);#目前最高自動出價者的出價
-                    #$this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
                     $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '其他拍賣者比您更早設置了相同的出價，');
                 } else {#當自動出價的下一個出價小於目前自動出價者的最高出價
                     $currentMaxBidderInputAutoBidNextBid = $inputAutoBid+$this->bidRule($inputAutoBid);
                     $this->bidLot($lotId, $lotMaxAutoBid->user_id, $currentMaxBidderInputAutoBidNextBid);#自動出價的下一個出價
-                    #$this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
                     $this->dispatchLineNotice($lot, $bidderId, $bid, 0, '出價已經被超過，');
                 }
+                $this->dispatchLineNotice($lot, $lotMaxAutoBid->user_id, $bid, 1, $lot->name.'，使用自動出價幫您出價 NT$'.number_format($bid).'你仍是最高出價者');
             }
 
         } else {#沒有其他自動出價，或是其他自動出價無效

@@ -132,7 +132,8 @@ class User extends Authenticatable
         'bank_account_name',
         'bank_account_number',
         'bank_account_number',
-        'commission',
+        'commission_rate',
+        'premium_rate',
         'birthday'
     ];
 

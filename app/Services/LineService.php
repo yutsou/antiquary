@@ -157,16 +157,75 @@ class LineService
         if ($validResult !== true) {
             return $validResult;
         } else {
-            $actions = [
-                new PostbackTemplateActionBuilder('取消', 'initMode'),
-                new PostbackTemplateActionBuilder('確定', 'setAutoBid,' . $lineMode->extra_info . ',' . $messageText),
-            ];
-            $confirmTemplateBuilder = new ConfirmTemplateBuilder('確定對"' . $lot->name . '" 設置自動出價 NT$' . number_format($messageText) . ' 嗎？', $actions);
-            #$confirmTemplateBuilder = new ConfirmTemplateBuilder('確定對', $actions);
-            return new TemplateMessageBuilder(
-                '確定設置自動出價嗎？',
-                $confirmTemplateBuilder
-            );
+            $bodyContents =
+                [
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::VERTICAL)
+                        ->setPaddingBottom('20px')
+                        ->setContents([
+                            TextComponentBuilder::builder()
+                                ->setText('設定自動出價')
+                                ->setWrap(false)
+                                ->setWeight(ComponentFontWeight::BOLD)
+                                ->setSize(ComponentFontSize::MD)
+                                ->setColor('#003a6c')
+                                ->setAction(new UriTemplateActionBuilder($lot->name, route('mart.lots.show', $lot)))
+                        ]),
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::VERTICAL)
+                        ->setPaddingBottom('10px')
+                        ->setContents([
+                            TextComponentBuilder::builder()
+                                ->setText('確定對"' . $lot->name . '" 設置自動出價 NT$' . number_format($messageText) . ' 嗎？')
+                                ->setWrap(true)
+                                ->setWeight(ComponentFontWeight::BOLD)
+                                ->setSize(ComponentFontSize::SM),
+                        ]),
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::VERTICAL)
+                        ->setPaddingBottom('10px')
+                        ->setContents([
+                            TextComponentBuilder::builder()
+                                ->setText('出價金額不包含運費及拍賣服務費用。')
+                                ->setWrap(true)
+                                ->setWeight(ComponentFontWeight::BOLD)
+                                ->setSize(ComponentFontSize::XXS)
+                                ->setAlign('end')
+                        ]),
+                    SeparatorComponentBuilder::builder(),
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::HORIZONTAL)
+                        #->setPaddingBottom('10px')
+                        ->setContents([
+                            ButtonComponentBuilder::builder()
+                                ->setStyle(ComponentButtonStyle::LINK)
+                                ->setHeight(ComponentButtonHeight::SM)
+                                ->setAction(
+                                    new PostbackTemplateActionBuilder('取消', 'initMode')
+                                )
+                                ->setFlex(1),
+                            ButtonComponentBuilder::builder()
+                                ->setStyle(ComponentButtonStyle::LINK)
+                                ->setHeight(ComponentButtonHeight::SM)
+                                ->setAction(
+                                    new PostbackTemplateActionBuilder('確定', 'setAutoBid,' . $lineMode->extra_info . ',' . $messageText),
+                                )
+                                ->setFlex(1),
+                        ]),
+                ];
+            $body = BoxComponentBuilder::builder()
+                ->setLayout(ComponentLayout::VERTICAL)
+                ->setSpacing(ComponentSpacing::SM)
+                ->setContents($bodyContents);
+
+            return FlexMessageBuilder::builder()
+                ->setAltText('確定設置自動出價嗎？')
+                ->setContents(
+                    BubbleContainerBuilder::builder()
+                        ->setBody(
+                            $body
+                        )
+                );
         }
     }
 
@@ -192,20 +251,75 @@ class LineService
     public function confirmLineBid($lotId, $bidderId, $bid, $lot, $nextBid)
     {
         if ($bid >= $nextBid) {
-            /*$actions = [
-                new PostbackTemplateActionBuilder("確認", 'lineBid,'.$lotId.','.$bidderId.','.$bid),
-            ];
-            $buttonTemplateBuilder = new ButtonTemplateBuilder('確認是否出價', '是否對 "'.$lot->name.'" 出價NT$'.number_format($bid), null, $actions);
-            $messageBuilder = new TemplateMessageBuilder('確認是否出價NT$'.$bid, $buttonTemplateBuilder);*/
-            $actions = [
-                new PostbackTemplateActionBuilder('取消', 'initMode'),
-                new PostbackTemplateActionBuilder("確認", 'lineBid,' . $lotId . ',' . $bidderId . ',' . $bid),
-            ];
-            $confirmTemplateBuilder = new ConfirmTemplateBuilder('是否對 "' . $lot->name . '" 出價NT$' . number_format($bid), $actions);
-            return new TemplateMessageBuilder(
-                '確認是否出價 NT$' . $bid,
-                $confirmTemplateBuilder
-            );
+            $bodyContents =
+                [
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::VERTICAL)
+                        ->setPaddingBottom('20px')
+                        ->setContents([
+                            TextComponentBuilder::builder()
+                                ->setText('手動出價')
+                                ->setWrap(false)
+                                ->setWeight(ComponentFontWeight::BOLD)
+                                ->setSize(ComponentFontSize::MD)
+                                ->setColor('#003a6c')
+                                ->setAction(new UriTemplateActionBuilder($lot->name, route('mart.lots.show', $lot)))
+                        ]),
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::VERTICAL)
+                        ->setPaddingBottom('10px')
+                        ->setContents([
+                            TextComponentBuilder::builder()
+                                ->setText('是否對 "'.$lot->name.'" 出價NT$'.number_format($bid))
+                                ->setWrap(true)
+                                ->setWeight(ComponentFontWeight::BOLD)
+                                ->setSize(ComponentFontSize::SM),
+                        ]),
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::VERTICAL)
+                        ->setPaddingBottom('10px')
+                        ->setContents([
+                            TextComponentBuilder::builder()
+                                ->setText('出價金額不包含運費及拍賣服務費用。')
+                                ->setWrap(true)
+                                ->setWeight(ComponentFontWeight::BOLD)
+                                ->setSize(ComponentFontSize::XXS)
+                                ->setAlign('end')
+                        ]),
+                    SeparatorComponentBuilder::builder(),
+                    BoxComponentBuilder::builder()
+                        ->setLayout(ComponentLayout::HORIZONTAL)
+                        #->setPaddingBottom('10px')
+                        ->setContents([
+                            ButtonComponentBuilder::builder()
+                                ->setStyle(ComponentButtonStyle::LINK)
+                                ->setHeight(ComponentButtonHeight::SM)
+                                ->setAction(
+                                    new PostbackTemplateActionBuilder('取消', 'initMode')
+                                )
+                                ->setFlex(1),
+                            ButtonComponentBuilder::builder()
+                                ->setStyle(ComponentButtonStyle::LINK)
+                                ->setHeight(ComponentButtonHeight::SM)
+                                ->setAction(
+                                    new PostbackTemplateActionBuilder("確認", 'lineBid,' . $lotId . ',' . $bidderId . ',' . $bid),
+                                )
+                                ->setFlex(1),
+                        ]),
+                ];
+            $body = BoxComponentBuilder::builder()
+                ->setLayout(ComponentLayout::VERTICAL)
+                ->setSpacing(ComponentSpacing::SM)
+                ->setContents($bodyContents);
+
+            return FlexMessageBuilder::builder()
+                ->setAltText('確認是否出價')
+                ->setContents(
+                    BubbleContainerBuilder::builder()
+                        ->setBody(
+                            $body
+                        )
+                );
         } else {
             $content = '價格已經變動';
             $nextBids = app(BidService::class)->getNextBids($lot->current_bid);

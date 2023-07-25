@@ -534,10 +534,12 @@ class MemberController extends Controller
             'bidderStatus.not_in' => '帳號已被封鎖，目前無法競標',
         ];
 
-        if($request->bid > $lot->next_bid) {
-            $rules['bid'] = 'required|gte:'.$this->bidService->getBidderLotAutoBid($request->bidderId, $lot);
-            $messages['bid.gte'] =  '已設定更高的自動出價';
+        $bidderLotAutoBid = $this->bidService->getBidderLotAutoBid($request->bidderId, $lot);
+        if($bidderLotAutoBid != 0) {
+            $rules['bid'] = 'required|gt:'.intval($bidderLotAutoBid);
+            $messages['bid.gt'] =  '已設定更高或相同的自動出價';
         }
+
 
         return Validator::make($input, $rules, $messages);
     }

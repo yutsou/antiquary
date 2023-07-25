@@ -1,8 +1,9 @@
 <?php
-
+#commission 賣家佣金抽成
+#premium 買家額外費用
 return [
-    'promotion' => [
-        'commission_rate' => 0.03,
-        'premium_rate' => 0.02,
+    'registration' => [
+        'commission_rate' => 15,
+        'premium_rate' => 10,
     ]
 ];

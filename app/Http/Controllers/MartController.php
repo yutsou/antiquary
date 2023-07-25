@@ -11,6 +11,7 @@ use App\Services\CategoryService;
 use App\Services\EcpayService;
 use App\Services\LotService;
 use App\Services\OrderService;
+use App\Services\PromotionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Response;
 
 class MartController extends Controller
 {
-    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService;
+    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService, $promotionService;
 
     public function __construct(
         LotService $lotService,
@@ -26,7 +27,8 @@ class MartController extends Controller
         EcpayService $ecpayService,
         OrderService $orderService,
         CategoryService $categoryService,
-        BannerService $bannerService
+        BannerService $bannerService,
+        PromotionService $promotionService
     ) {
         $this->lotService = $lotService;
         $this->auctionService = $auctionService;
@@ -34,6 +36,7 @@ class MartController extends Controller
         $this->orderService = $orderService;
         $this->categoryService = $categoryService;
         $this->bannerService = $bannerService;
+        $this->promotionService = $promotionService;
     }
 
     public function showAuction($auctionId)
@@ -47,8 +50,9 @@ class MartController extends Controller
     {
         $lot = $this->lotService->getLot($lotId);
         $carbon = Carbon::now();
+        $premium = $this->promotionService->getPremiumRate(Auth::user());
 
-        return CustomClass::viewWithTitle(view('mart.lots.show')->with('lot', $lot)->with('carbon', $carbon), $lot->name);
+        return CustomClass::viewWithTitle(view('mart.lots.show')->with('lot', $lot)->with('carbon', $carbon)->with('premium', $premium), $lot->name);
     }
 
     public function showHomepage()
@@ -142,6 +146,13 @@ class MartController extends Controller
 
     public function test()
     {
+        $lot = $this->lotService->getLot(11);
+        if($lot->current_bid == 0) {
+            dd('1');
+        } else {
+            dd('2');
+        }
+        dd($lot->current_bid);
         $order = $this->orderService->getOrder(9);
         $text = '得標，點選此""到付款頁面進行付款。';
         $text = preg_replace('~<a href="~', "", $text);

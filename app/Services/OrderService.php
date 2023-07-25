@@ -175,7 +175,7 @@ class OrderService extends OrderRepository
     {
         $order = OrderRepository::updateOrderStatus(40, $orderId);
         $order->lot->update(['status'=>40]);
-        CustomClass::sendTemplateNotice(1, 3, 2, $order->id);
+        CustomClass::sendTemplateNotice(1, 3, 3, $order->id);
     }
 
     public function noticeRemit($request, $orderId, $type)
@@ -205,7 +205,7 @@ class OrderService extends OrderRepository
                 'payee_account'=>$owner->bank_name.$owner->bank_branch_name.$owner->bank_account_name.$owner->bank_account_number
             ];
             $order->lot()->update(['status'=>41]);
-            CustomClass::sendTemplateNotice($order->lot->owner_id, 3, 3, $orderId);
+            CustomClass::sendTemplateNotice($order->lot->owner_id, 3, 4, $orderId);
         }
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
 
@@ -220,7 +220,7 @@ class OrderService extends OrderRepository
             $status = 13;
         }
         $order = OrderRepository::updateOrderStatus($status, $orderId);
-        CustomClass::sendTemplateNotice($order->user_id, 3, 1, $order->id, 1);
+        CustomClass::sendTemplateNotice($order->user_id, 3, 2, $order->id, 1);
     }
 
     public function sendMessage($request, $orderId)
@@ -256,20 +256,30 @@ class OrderService extends OrderRepository
     {
         $promotionStatus = Cache::get('shop.promotion.status');
         if($promotionStatus === true) {
-            return $lot->current_bid * (config('shop.promotion.commission_rate')/100);
+            $commissionRate = Cache::get('promotion.commission_rate');
+            if($commissionRate < 1) {
+                return $lot->current_bid * $commissionRate;
+            } else {
+                return $commissionRate;
+            }
         } else {
-            return $lot->current_bid * ($lot->owner->commission_rate/100);
+            return $lot->current_bid * $lot->owner->commission_rate;
         }
 
     }
 
     public function getPremium($lot)
     {
-        $promotionStatus = config('shop.promotion.status');
+        $promotionStatus = Cache::get('promotion.status');
         if($promotionStatus === true) {
-            return $lot->current_bid * (config('shop.promotion.premium_rate')/100);
+            $premiumRate = Cache::get('promotion.premium_rate');
+            if($premiumRate < 1) {
+                return $lot->current_bid * $premiumRate;
+            } else {
+                return $premiumRate;
+            }
         } else {
-            return $lot->current_bid * ($lot->owner->premium_rate/100);
+            return $lot->current_bid * $lot->winner->premium_rate;
         }
     }
 

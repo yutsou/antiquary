@@ -24,10 +24,10 @@ class CarbonPresenter
         $endTime = Carbon::create($endTime);
 
         if(Carbon::now()->lessThan($startTime)){
-            return '於 '.$startTime->diffForHumans(Carbon::now()).' 開始';
+            return '於 '.$startTime->diffForHumans(Carbon::now(), ['parts' => 3, 'join' => true]).' 開始';
         } else {
             if(Carbon::now()->lessThan($endTime)){
-                return '於 '.$endTime->diffForHumans(Carbon::now()).' 結束';
+                return '於 '.$endTime->diffForHumans(Carbon::now(), ['parts' => 3, 'join' => true]).' 結束';
             } else {
                 return '拍賣已結束';
             }

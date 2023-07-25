@@ -213,15 +213,19 @@
                                             </ul>
                                         </div>
                                         <hr>
+                                            <div class="uk-margin">
+                                                <label>拍賣手續費: {{ $premium }}</label>
+                                            </div>
+                                        <hr>
                                         @if($lot->estimated_price != null)
                                             <div class="uk-margin">
-                                                <label>預估價格 - NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
+                                                <label>預估價格: NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
                                             </div>
                                             <hr>
                                         @endif
 
                                         <div class="uk-margin">
-                                            <label>目前價格 - NT$<span id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
+                                            <label>目前價格: NT$<span id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
                                         </div>
                                         <hr>
                                         <div class="uk-margin">
@@ -247,6 +251,7 @@
                                                     @auth
                                                         <div id="confirmAutoBid" class="modal">
                                                             <h3 id="confirmAutoBidTitle"></h3>
+                                                            <p class="uk-text-left">出價金額不包含運費及拍賣服務費用。</p>
                                                             <p class="uk-text-right">
                                                                 <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
                                                                 <a id="autoBid" class="uk-button custom-button-1">確認</a>
@@ -442,6 +447,7 @@
             '<a data-modal="#confirm-manual-bid-modal-'+bid+'" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="'+bid+'">出價NT$'+number_format(bid)+'</a>' +
             '<div id="confirm-manual-bid-modal-'+bid+'" class="modal">' +
                 '<h3>確認出價 NT$'+number_format(bid)+'</h3>' +
+                '<p class="uk-text-left">出價金額不包含運費及拍賣服務費用。</p>'+
                 '<div class="uk-grid-small uk-flex uk-flex-right" uk-grid>' +
                     '<div><a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a></div>' +
                     '<div><a class="uk-button custom-button-1 bids">確認</a></div>' +

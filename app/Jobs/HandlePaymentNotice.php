@@ -60,7 +60,7 @@ class HandlePaymentNotice implements ShouldQueue
                     HandleUserStatus::dispatch(3, $order->user);#第二階永久封鎖
                     CustomClass::sendTemplateNotice($order->user_id, 6, 2, $order->id, 1, 1);
                 }
-                CustomClass::sendTemplateNotice($order->lot->owner->id, 2, 4, $order->lot->id, 1);
+                CustomClass::sendTemplateNotice($order->lot->owner->id, 2, 3, $order->lot->id, 1);
 
                 if ($order->status === 0) {
                     $status = 51;

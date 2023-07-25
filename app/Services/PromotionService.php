@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 
@@ -27,5 +28,26 @@ class PromotionService
         Cache::forget('promotion.status');
         Cache::forget('promotion.commission_rate');
         Cache::forget('promotion.premium_rate');
+    }
+
+    public function getPremiumRate()
+    {
+        $promotionStatus = Cache::get('promotion.status');
+
+        if($promotionStatus === true) {
+            $premiumRate = Cache::get('promotion.premium_rate');
+            if($premiumRate < 1) {
+                return ($premiumRate * 100).'%';
+            } else {
+                return 'NT$'.number_format($premiumRate);
+            }
+        } else {
+            if(Auth::check()) {
+                return (Auth::user()->premium_rate * 100) . '%';
+            } else {
+                return '10%';
+            }
+        }
+
     }
 }
