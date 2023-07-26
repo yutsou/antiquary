@@ -1,6 +1,6 @@
 @extends('layouts.member')
 @inject('methodPresenter', 'App\Presenters\MethodPresenter')
-@inject('orderStatusPresenter', 'App\Presenters\orderStatusPresenter')
+@inject('orderStatusPresenter', 'App\Presenters\OrderStatusPresenter')
 @inject('memberOrderActionPresenter', 'App\Presenters\MemberOrderActionPresenter')
 
 @section('content')
