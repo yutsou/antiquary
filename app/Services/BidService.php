@@ -176,7 +176,7 @@ class BidService
         if($lot->bidRecords->count() == 0) {#第一個出價者
 
             if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
-                $bid = $lot->next_bid;
+                $bid = $lot->reserve_price;
                 $this->bidLot($lotId, $bidderId, $bid);
             } else {
                 $bid = $inputAutoBid;
