@@ -240,7 +240,7 @@
 
         <div class="uk-section uk-transparent">
             <div class="uk-container">
-                <div class="uk-grid-match uk-child-width-1-3@m" uk-grid>
+                <div class="uk-grid-match uk-child-width-1-3@m uk-text-center" uk-grid>
                     <div>
                         <h4>關於 Antiquary</h4>
                         <ul class="uk-list uk-link-text">
@@ -264,6 +264,9 @@
                 </div>
                 <hr>
                 <div class="uk-margin-medium-top uk-text-center">
+                    <a href="mailto:service@antiquary.com.tw" class="uk-link-text"><span uk-icon="mail"></span> service@antiquary.com.tw</a>
+                </div>
+                <div class="uk-margin uk-text-center">
                     <span><a href="{{ route('mart.terms.show') }}" class="uk-link-text">使用者條款</a> | <a href="{{ route('mart.privacy-policy.show') }}" class="uk-link-text">隱私政策</a></span>
                 </div>
                 <div class="uk-margin">
