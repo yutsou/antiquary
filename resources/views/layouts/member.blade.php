@@ -44,13 +44,13 @@
         @stack('scripts')
     </head>
     <body>
-        <div class="uk-visible@s">
+        <div class="uk-visible@m">
             <div style="height:80px; background-color: #fff;" class="fixed-top">
                 <div class="uk-container">
                     <nav class="uk-navbar-container" uk-navbar style="background-color: #fff;">
                         <div class="uk-navbar-left">
                             <ul class="uk-navbar-nav">
-                                <a class="uk-navbar-item uk-logo" href="/" style="color: #003a6c; font-size: 1.2em">Antiquary</a>
+                                <a class="uk-navbar-item uk-logo" href="/" style="color: #003a6c; font-size: 1.2em"><img src="{{ asset('/images/web/common/logo.png') }}" alt="Antiquary" style="height: 40px"></a>
                                 <li>
                                     <a href="#">分類</a>
                                     <div uk-dropdown class="uk-width-1-1">
@@ -130,13 +130,13 @@
                 </div>
             </div>
         </div>
-        <div class="uk-hidden@s">
+        <div class="uk-hidden@m">
             <div style="box-shadow: 0 8px 6px -6px #ced4da; background-color: #fff" class="fixed-top">
                 <nav class="uk-container" uk-navbar>
                     <div class="uk-navbar-left">
                         <ul class="uk-navbar-nav">
                             <li>
-                                <a href="/" style="color: #003a6c; font-size: 1.2em">Antiquary</a>
+                                <a href="/" style="color: #003a6c; font-size: 1.2em"><img src="{{ asset('/images/web/common/logo.png') }}" alt="Antiquary" style="height: 40px"></a>
                             </li>
                         </ul>
                     </div>
