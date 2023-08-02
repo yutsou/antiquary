@@ -259,6 +259,7 @@
                         <h4>關於競標</h4>
                         <ul class="uk-list uk-link-text">
                             <li><a href="{{ route('mart.bidding-notes.show') }}">競標須知</a></li>
+                            <li><a href="{{ route('mart.bidding-rules.show') }}">競標增額</a></li>
                         </ul>
                     </div>
                 </div>

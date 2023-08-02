@@ -230,6 +230,8 @@ Route::get('/consignment-auction-terms', [MartController::class, 'showConsignmen
 Route::get('/bidding-notes', [MartController::class, 'showBiddingNotes'])->name('mart.bidding-notes.show');
 Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->name('mart.privacy-policy.show');
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
+Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
+
 
 
 Route::get('/test-lot/delete/{lotId}', [MemberController::class, 'testLotDelete']);

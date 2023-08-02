@@ -205,4 +205,9 @@ class MartController extends Controller
     {
         return CustomClass::viewWithTitle(view('terms'), '使用者條款');
     }
+
+    public function showBiddingRules()
+    {
+        return CustomClass::viewWithTitle(view('bidding_rules'), '競標增額');
+    }
 }
