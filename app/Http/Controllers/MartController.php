@@ -15,6 +15,8 @@ use App\Services\PromotionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
 class MartController extends Controller
@@ -146,54 +148,33 @@ class MartController extends Controller
 
     public function test()
     {
-        $lot = $this->lotService->getLot(11);
-        if($lot->current_bid == 0) {
-            dd('1');
-        } else {
-            dd('2');
-        }
-        dd($lot->current_bid);
-        $order = $this->orderService->getOrder(9);
-        $text = '得標，點選此""到付款頁面進行付款。';
-        $text = preg_replace('~<a href="~', "", $text);
-        $text = preg_replace('~">連結</a>~', "", $text);
-        dd($text);
-
-        $order = $this->orderService->getOrder(7);
-        dd($order->lot->name);
-        $request = new Request();
-        $request->setMethod('POST');
-        $request->request->add([
-            'lotId' => 6,
-            'bidderId' => 4,
-            'bid' => 25
+        return view('test')->with('title', 'test');
+        $response = Http::post('https://n.gomypay.asia/TestShuntClass.aspx', [
+            'Send_Type' => '0',
+            'Pay_Mode_No' => '2',
+            'CustomerId' => 'E8C95C73255ED798EC637705A80B35BC',
+            'Order_No' => '123',
+            'Amount' => '35',
+            'TransCode' => '00',
+            'Buyer_Name' => 'Yu Tsou',
+            'Buyer_Telm' => '0912649739',
+            'Buyer_Mail' => 'evilfishcoco@gmail.com',
+            'Buyer_Memo' => 'No',
+            'TransMode' => '1',
+            'Installment' => '0'
         ]);
+    }
 
-        $lotId = $request->lotId;
-        $lot = $this->lotService->getLot($lotId);
+    public function testCallback(Request $request)
+    {
+        Log::channel('ecpay')->info($request->toArray());
+        return response('success', 200);
 
-        $validator = app(MemberController::class)->autoBidValidation($request, $lot);
+    }
 
-
-
-        if($request->bid < $lot->reserve_price) {
-            $type = 'warning';
-            $successMessage = '出價未達底價，需到達底價物品才會被拍賣。';
-        } else {
-            $type = 'success';
-            $successMessage = '';
-        }
-
-        if ($validator->fails()) {
-            dd($validator->getMessageBag()->all());
-        } else {
-            return array(
-                'type' => $type,
-                'text' => $successMessage,
-                'errors' => false
-            );
-        }
-
+    public function testReturn(Request $request)
+    {
+        dd($request);
     }
 
     public function showPrivacyPolicy()

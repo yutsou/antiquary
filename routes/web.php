@@ -238,5 +238,7 @@ Route::get('/test-lot/delete/{lotId}', [MemberController::class, 'testLotDelete'
 Route::get('/test-user/delete/{userId}', [MemberController::class, 'testUserDelete']);
 Route::get('/test/schedule', [MemberController::class, 'testSchedule']);
 Route::post('postTest', [MemberController::class, 'postTest']);
-Route::get('/testOrder', [MartController::class, 'test']);
 Route::get('/test', [MartController::class, 'test']);
+Route::post('/testCallback', [MartController::class, 'testCallback'])->name('testCallback');
+Route::get('/testReturn', [MartController::class, 'testReturn'])->name('testReturn');
+

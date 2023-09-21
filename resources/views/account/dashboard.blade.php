@@ -44,6 +44,14 @@
                     <li>
                         <hr>
                     </li>
+                    <li><a href="{{ route('account.orders.index') }}">待結帳的物品</a>
+                        @if($ownerOrderNoticeCount != 0)
+                            <span class="uk-badge" style="background-color: #003a6c;">{{ $ownerOrderNoticeCount }}</span>
+                        @endif
+                    </li>
+                    <li>
+                        <hr>
+                    </li>
                     <li><a href="{{ route('account.orders.index') }}">已得標的物品</a>
                         @if($ownerOrderNoticeCount != 0)
                             <span class="uk-badge" style="background-color: #003a6c;">{{ $ownerOrderNoticeCount }}</span>

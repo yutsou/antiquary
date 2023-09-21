@@ -14,6 +14,8 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         '/pay/ecpay/receive',
         '/pay/ecpay/order-receive',
-        '/account/*'
+        '/account/*',
+        '/testCallback',
+        '/testReturn'
     ];
 }

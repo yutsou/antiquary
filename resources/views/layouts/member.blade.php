@@ -93,7 +93,7 @@
                                 </ul>
                             @endguest
                             @auth
-                                <ul class="uk-iconnav">
+                                <ul class="uk-navbar-nav">
                                     <li><a href="{{ route('account.unread_notices.index') }}">
                                             @if(Auth::user()->unreadNotices()->count() !== 0)
                                                 <div id="notification-status" class="google-icon-fill">
@@ -103,6 +103,18 @@
                                             @else
                                                 <div id="notification-status" class="google-icon">
                                                     <span class="material-symbols-outlined" uk-tooltip="title: 沒有未讀的通知; pos: top-left">notifications</span>
+                                                </div>
+                                            @endif
+                                        </a></li>
+                                    <li><a href="{{ route('account.unread_notices.index') }}">
+                                            @if(Auth::user()->unreadNotices()->count() !== 0)
+                                                <div id="cart-status" class="google-icon-fill">
+                                                    <span class="material-symbols-outlined uk-text-middle">shopping_cart</span>
+                                                    <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="unread-notices-count">{{ Auth::user()->unreadNotices()->count() }}</span>
+                                                </div>
+                                            @else
+                                                <div id="cart-status" class="google-icon">
+                                                    <span class="material-symbols-outlined" uk-tooltip="title: 購物車內沒有商品; pos: top-left">shopping_cart</span>
                                                 </div>
                                             @endif
                                         </a></li>
