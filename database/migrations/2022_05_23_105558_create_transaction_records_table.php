@@ -20,8 +20,8 @@ return new class extends Migration
             $table->index('order_record_id');
             $table->tinyInteger('status');
             $table->tinyInteger('payment_method');
-            $table->decimal('amount', 11);
-            $table->string('merchant_trade_no')->nullable();
+            $table->string('system_order_id');
+            $table->string('av_code');
             $table->unsignedBigInteger('remitter_id')->nullable();
             $table->foreign('remitter_id')->references('id')->on('users');
             $table->index('remitter_id');

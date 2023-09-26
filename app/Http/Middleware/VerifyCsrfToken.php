@@ -15,7 +15,7 @@ class VerifyCsrfToken extends Middleware
         '/pay/ecpay/receive',
         '/pay/ecpay/order-receive',
         '/account/*',
-        '/testCallback',
-        '/testReturn'
+        '/pay/gomypay/return',
+        '/pay/gomypay/callback'
     ];
 }

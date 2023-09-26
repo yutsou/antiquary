@@ -4,6 +4,19 @@
 @inject('memberOrderActionPresenter', 'App\Presenters\MemberOrderActionPresenter')
 
 @section('content')
+    @if (session('notification'))
+        <script>
+            $(function () {
+                Swal.fire({
+                    position: 'center',
+                    icon: 'success',
+                    title: '{{ session('notification') }}',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            });
+        </script>
+    @endif
     <div class="uk-margin uk-text-small">
         <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.orders.index') }}" class="custom-color-1 custom-link-mute">已得標的物品</a>
     </div>

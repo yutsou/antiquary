@@ -9,6 +9,7 @@ use App\Services\AuctionService;
 use App\Services\BannerService;
 use App\Services\CategoryService;
 use App\Services\EcpayService;
+use App\Services\GomypayService;
 use App\Services\LotService;
 use App\Services\OrderService;
 use App\Services\PromotionService;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Response;
 
 class MartController extends Controller
 {
-    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService, $promotionService;
+    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService, $promotionService, $gomypayService;
 
     public function __construct(
         LotService $lotService,
@@ -30,7 +31,8 @@ class MartController extends Controller
         OrderService $orderService,
         CategoryService $categoryService,
         BannerService $bannerService,
-        PromotionService $promotionService
+        PromotionService $promotionService,
+        GomypayService $gomypayService
     ) {
         $this->lotService = $lotService;
         $this->auctionService = $auctionService;
@@ -39,6 +41,7 @@ class MartController extends Controller
         $this->categoryService = $categoryService;
         $this->bannerService = $bannerService;
         $this->promotionService = $promotionService;
+        $this->gomypayService = $gomypayService;
     }
 
     public function showAuction($auctionId)
@@ -146,35 +149,41 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('bidding_notes'), '競標須知');
     }
 
-    public function test()
+    public function test(Request $request, $p)
     {
-        return view('test')->with('title', 'test');
-        $response = Http::post('https://n.gomypay.asia/TestShuntClass.aspx', [
-            'Send_Type' => '0',
-            'Pay_Mode_No' => '2',
-            'CustomerId' => 'E8C95C73255ED798EC637705A80B35BC',
-            'Order_No' => '123',
-            'Amount' => '35',
-            'TransCode' => '00',
-            'Buyer_Name' => 'Yu Tsou',
-            'Buyer_Telm' => '0912649739',
-            'Buyer_Mail' => 'evilfishcoco@gmail.com',
-            'Buyer_Memo' => 'No',
-            'TransMode' => '1',
-            'Installment' => '0'
-        ]);
+        dd($request, $p);
     }
 
-    public function testCallback(Request $request)
+    public function creditCardInfoCheck($orderId)
+    {
+        $order = $this->orderService->getOrder($orderId);
+        $eOrderNum = 'test1'.$orderId;
+        return CustomClass::viewWithTitle(view('account.orders.pay_by_credit_card')->with('order', $order)->with('eOrderNum', $eOrderNum), '信用卡持有人資訊確認');
+    }
+
+    public function payGomypayReturn(Request $request)
+    {
+
+        if($request->result === '1') {
+            $orderId = str_replace("test1", "", $request->e_orderno);
+            $order = $this->orderService->getOrder($orderId);
+            $result = $this->gomypayService->checkTransactionStatus($request, $order);
+
+            if($result === 1) {
+                $this->orderService->hasPaid($request, $order->id);
+                return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
+            } else {
+                dd('failed');
+            }
+        } else {
+            dd($request->ret_msg);
+        }
+    }
+
+    public function payGomypayCallback(Request $request)
     {
         Log::channel('ecpay')->info($request->toArray());
         return response('success', 200);
-
-    }
-
-    public function testReturn(Request $request)
-    {
-        dd($request);
     }
 
     public function showPrivacyPolicy()

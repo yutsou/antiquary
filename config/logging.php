@@ -125,6 +125,12 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/ecpay.log'),
             'level' => 'debug',
+        ],
+
+        'gomypay' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/gomypay.log'),
+            'level' => 'debug',
         ]
     ],
 

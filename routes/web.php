@@ -55,8 +55,13 @@ Route::get('/auth/line/confirm-bind', [AuthController::class, 'showLineBindConfi
 Route::get('/auth/google/handle', [AuthController::class, 'redirectGoogleHandle'])->name('auth.google.handle');
 Route::get('/auth/google/callback', [AuthController::class, 'googleCallback']);
 
+#ecpay
 Route::post('/pay/ecpay/receive', [MartController::class, 'payEcpayReceive'])->name('shop.pay.ecpay.receive');
 Route::post('/pay/ecpay/order-receive', [MartController::class, 'payEcpayOrderReceive'])->name('shop.pay.ecpay.order_receive');
+
+#gomypay
+Route::get('/pay/gomypay/return', [MartController::class, 'payGomypayReturn'])->name('shop.pay.gomypay.return');
+Route::post('/pay/gomypay/callback', [MartController::class, 'payGomypayCallback'])->name('shop.pay.gomypay.callback');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AuthController::class, 'switchRole'])->name('dashboard');
@@ -195,6 +200,8 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->grou
     Route::post('/orders/{orderId}/notice-shipping', [MemberController::class, 'noticeShipping'])->name('account.orders.notice_shipping');
     Route::get('/orders/{orderId}/shipping-info', [MemberController::class, 'showShippingInfo'])->name('account.orders.show_shipping_info');
     Route::post('/orders/{orderId}/notice-arrival', [MemberController::class, 'noticeArrival'])->name('account.orders.notice_arrival');
+
+    Route::get('/orders/{orderId}/credit-card-info/check', [MartController::class, 'creditCardInfoCheck'])->name('account.credit_card_info.check');
 
     Route::get('/biding-lots', [MemberController::class, 'indexBiddingLots'])->name('account.bidding_lots.index');
 

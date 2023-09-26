@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
@@ -89,6 +90,13 @@ class Lot extends Model
     {
         $this->specifications()->delete();
         // return parent::delete();
+    }
+
+    protected function order(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->orders->sortByDesc('id')->first(),
+        );
     }
 
     public function getMainCategoryAttribute()

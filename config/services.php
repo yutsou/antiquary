@@ -37,6 +37,12 @@ return [
         'merchant_id' => env('ECPAY_MERCHANT_ID')
     ],
 
+    'gomypay' => [
+        'hash_id' => env('GOMYPAY_HASH_ID'),
+        'hash_key' => env('GOMYPAY_KEY'),
+        'merchant_id' => env('GOMYPAY_MERCHANT_ID')
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

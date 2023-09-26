@@ -114,8 +114,8 @@ class OrderService extends OrderRepository
 
         $input = [
             'payment_method' => $order->payment_method,
-            'amount' => $request->TradeAmt,
-            'merchant_trade_no' => $request->MerchantTradeNo
+            'system_order_id' => $request->OrderID,
+            'av_code' => $request->AvCode,
         ];
 
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);

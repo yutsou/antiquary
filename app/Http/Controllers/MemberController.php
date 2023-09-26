@@ -7,6 +7,7 @@ use App\Services\AuctionService;
 use App\Services\BidService;
 use App\Services\CategoryService;
 use App\Services\EcpayService;
+use App\Services\GomypayService;
 use App\Services\ImageService;
 use App\Services\LotService;
 use App\Services\OrderService;
@@ -23,7 +24,7 @@ use Illuminate\Validation\Rule;
 
 class MemberController extends Controller
 {
-    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService;
+    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService;
 
     public function __construct(
         CategoryService $categoryService,
@@ -35,6 +36,7 @@ class MemberController extends Controller
         OrderService $orderService,
         EcpayService $ecpayService,
         BidService $bidService,
+        GomypayService $gomypayService,
     ) {
         $this->categoryService = $categoryService;
         $this->lotService = $lotService;
@@ -45,6 +47,7 @@ class MemberController extends Controller
         $this->orderService = $orderService;
         $this->ecpayService = $ecpayService;
         $this->bidService = $bidService;
+        $this->gomypayService = $gomypayService;
     }
 
     public function showDashboard()
@@ -165,8 +168,9 @@ class MemberController extends Controller
         $order = $this->orderService->getOrder($orderId);
         switch ($order->payment_method) {
             case 0:#信用卡付款
-                $this->ecpayService->creditCardPay($order);
-                break;
+                #$this->ecpayService->creditCardPay($order);
+                #$this->gomypayService->creditCardPay($order);
+                return redirect()->route('account.credit_card_info.check', $orderId);
             case 1:#ATM轉帳
                 return redirect()->route('account.atm_pay_info.show', $orderId);
         }
