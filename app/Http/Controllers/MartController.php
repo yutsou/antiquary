@@ -164,12 +164,12 @@ class MartController extends Controller
     public function payGomypayReturn(Request $request)
     {
 
-        if($request->result === '1') {
+        if($request->result === '1') {#paid success
             $orderId = str_replace("test1", "", $request->e_orderno);
             $order = $this->orderService->getOrder($orderId);
             $result = $this->gomypayService->checkTransactionStatus($request, $order);
 
-            if($result === 1) {
+            if($result === 1) {#check pay is valid
                 $this->orderService->hasPaid($request, $order->id);
                 return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
             } else {
