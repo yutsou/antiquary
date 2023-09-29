@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->index('user_id');
             $table->unsignedBigInteger('lot_id');
-            $table->foreign('lot_id')->references('id')->on('lots')->onDelete('cascade');;
+            $table->foreign('lot_id')->references('id')->on('lots')->onDelete('cascade');
             $table->index('lot_id');
             $table->tinyInteger('payment_method')->nullable();
             $table->tinyInteger('delivery_method')->nullable();

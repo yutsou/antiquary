@@ -240,7 +240,6 @@ Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.sho
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
 
 
-
 Route::get('/test-lot/delete/{lotId}', [MemberController::class, 'testLotDelete']);
 Route::get('/test-user/delete/{userId}', [MemberController::class, 'testUserDelete']);
 Route::get('/test/schedule', [MemberController::class, 'testSchedule']);

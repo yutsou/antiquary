@@ -98,9 +98,9 @@ class MartController extends Controller
         $this->orderService->haveRead($messageId);
     }
 
-    public function showWarning()
+    public function showWarning($title, $message)
     {
-        dd('warning');
+        return CustomClass::viewWithTitle(view('warning')->with('message', $message), $title);
     }
 
     public function searchLots(Request $request)
@@ -120,7 +120,7 @@ class MartController extends Controller
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
-        $lots = $sCategory->lots->where('process', 3);
+        $lots = $sCategory->lots->whereIn('status', [20,23]);
         return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 
@@ -149,15 +149,20 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('bidding_notes'), '競標須知');
     }
 
-    public function test(Request $request, $p)
+    public function test()
     {
-        dd($request, $p);
+        $order = $this->orderService->getOrder(1);
+        dd($order->lot);
     }
 
     public function creditCardInfoCheck($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        $eOrderNum = 'test1'.$orderId;
+        if(config('app.env') == 'production') {
+            $eOrderNum = 'antiquary'.$orderId;
+        } else {
+            $eOrderNum = 'test3'.$orderId;
+        }
         return CustomClass::viewWithTitle(view('account.orders.pay_by_credit_card')->with('order', $order)->with('eOrderNum', $eOrderNum), '信用卡持有人資訊確認');
     }
 
@@ -165,7 +170,12 @@ class MartController extends Controller
     {
 
         if($request->result === '1') {#paid success
-            $orderId = str_replace("test1", "", $request->e_orderno);
+            if(config('app.env') == 'production') {
+                $orderId = str_replace("antiquary", "", $request->e_orderno);
+            } else {
+                $orderId = str_replace("test3", "", $request->e_orderno);
+            }
+
             $order = $this->orderService->getOrder($orderId);
             $result = $this->gomypayService->checkTransactionStatus($request, $order);
 
@@ -173,10 +183,10 @@ class MartController extends Controller
                 $this->orderService->hasPaid($request, $order->id);
                 return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
             } else {
-                dd('failed');
+                return $this->showWarning('付款失敗', '付款檢查錯誤，請通知管理員');
             }
         } else {
-            dd($request->ret_msg);
+            return $this->showWarning('付款失敗', $request->ret_msg);
         }
     }
 

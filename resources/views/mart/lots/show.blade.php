@@ -212,12 +212,18 @@
                                                 @endif
                                             </ul>
                                         </div>
-                                        <hr>
-                                            <div class="uk-margin">
-                                                <label>拍賣手續費: {{ $premium }}</label>
-                                            </div>
-                                        <hr>
+
                                         <div class="uk-margin">
+                                            <label style="font-size: 14px">拍賣手續費: {{ $premium }}</label>
+                                            <br>
+                                            @if($lot->estimated_price != null)
+                                                <label style="font-size: 14px">預估價格 - NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
+                                            @endif
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="uk-margin uk-flex uk-flex-center">
                                             <label>目前價格: NT$<span id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
                                         </div>
                                         <hr>
@@ -277,21 +283,6 @@
                                                         <span id="my-auto-bid">{{ number_format(optional(Auth::user()->getLotAutoBid($lot->id))->bid) ?? '' }}</span></label>
                                                 </div>
                                             @endauth
-                                            <div class="uk-margin">
-                                                <div class="separator">OR</div>
-                                            </div>
-
-                                                <div class="uk-text-center">
-                                                    <a href="#confirm-directly-buy-modal" rel="modal:open" class="custom-link">使用 NT${{ number_format($lot->estimated_price) }}直接購買</a>
-                                                    <div id="confirm-directly-buy-modal" class="modal">
-                                                        <h3>確認以 NT${{ number_format($lot->estimated_price) }} 直接購買嗎？</h3>
-                                                        <p class="uk-text-left">此金額不包含運費及拍賣服務費用。</p>
-                                                        <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
-                                                            <div><a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a></div>
-                                                            <div><a class="uk-button custom-button-1" id="directly-buy">確認</a></div>
-                                                            </div>
-                                                        </div>
-                                                </div>
 
                                         </div>
                                         <div class="uk-overflow-auto" style="max-height: 30vh;">
@@ -318,7 +309,7 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <hr>
+
                             </div>
                         </div>
                     </div>
