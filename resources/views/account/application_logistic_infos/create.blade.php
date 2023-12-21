@@ -14,9 +14,9 @@
             <div class="uk-margin">
                 <div class="uk-card uk-card-default uk-card-body">
                     <ul class="uk-list">
-                        <li>王小名</li>
-                        <li>0912222222</li>
-                        <li>100台北市中正區重慶南路一段122號</li>
+                        <li>愛帝奎電商有限公司</li>
+                        <li>02-27186473</li>
+                        <li>105台北市松山區敦化北路222巷2號1樓</li>
                     </ul>
                 </div>
             </div>
