@@ -1,6 +1,6 @@
 @extends('layouts.member')
 @inject('methodPresenter', 'App\Presenters\MethodPresenter')
-@inject('orderStatusPresenter', 'App\Presenters\orderStatusPresenter')
+@inject('orderStatusPresenter', 'App\Presenters\OrderStatusPresenter')
 
 @section('content')
     <div class="uk-margin uk-text-small">
