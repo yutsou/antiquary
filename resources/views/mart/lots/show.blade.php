@@ -216,7 +216,7 @@
                                         <div class="uk-margin">
                                             <label style="font-size: 14px">拍賣手續費: {{ $premium }}</label>
                                             <br>
-                                            @if($lot->estimated_price != null)
+                                            @if($lot->estimated_price != 0)
                                                 <label style="font-size: 14px">預估價格 - NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
                                             @endif
                                         </div>
