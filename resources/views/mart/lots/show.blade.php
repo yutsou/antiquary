@@ -386,11 +386,7 @@
                                 @endif
                             @endforeach
                         </ul>
-
-                        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href uk-slidenav-previous uk-slider-item="previous"></a>
-                        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href uk-slidenav-next uk-slider-item="next"></a>
-
-
+                    </div>
                 </div>
 
             </div>
@@ -402,7 +398,7 @@
                 <div class="uk-margin-medium">
                     <h3>其他拍賣會</h3>
                 </div>
-                <div class="uk-slider-container-offset" uk-slider>
+                <div class="uk-slider-container-offset" uk-slider="finite: true">
                     <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
                         <ul class="uk-slider-items  uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid" >
                             @foreach($auctions->whereIn('status', [0,1]) as $auction)

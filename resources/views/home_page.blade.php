@@ -66,7 +66,7 @@
     @if($auctions->where('status', 0)->count() != 0)
         <h3 class="uk-card-title">準備開始的拍賣會</h3>
         <div class="uk-visible@m">
-            <div class="uk-slider-container-offset" uk-slider>
+            <div class="uk-slider-container-offset" uk-slider="finite: true">
                 <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
                     <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
                         @foreach($auctions->where('status', 0) as $auction)
@@ -116,7 +116,7 @@
     @if($auctions->where('status', 1)->count() != 0)
         <h3 class="uk-card-title">進行中的拍賣會</h3>
         <div class="uk-visible@m">
-            <div class="uk-slider-container-offset" uk-slider>
+            <div class="uk-slider-container-offset" uk-slider="finite: true">
                 <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
                     <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
                         @foreach($auctions->where('status', 1) as $auction)
