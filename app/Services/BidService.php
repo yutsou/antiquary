@@ -178,7 +178,7 @@ class BidService
                 $bid = $lot->reserve_price;
                 $this->bidLot($lotId, $bidderId, $bid);
             } else {#沒有底價或是小於底價
-                $bid = $inputAutoBid;
+                $bid = $this->bidRule(0);
                 $this->bidLot($lotId, $bidderId, $bid);
             }
         } else {#不是第一個出價者

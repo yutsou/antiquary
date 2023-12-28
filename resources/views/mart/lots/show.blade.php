@@ -357,7 +357,7 @@
         <div class="uk-margin-xlarge-top">
             <div class="uk-width-1-1">
                 <div class="uk-margin-medium">
-                    <h3>{{ $head }}的其他物品</h3>
+                    <h3>{{ $auction->name }}的其他物品</h3>
                 </div>
                 <div class="uk-slider-container-offset" uk-slider="finite: true">
 

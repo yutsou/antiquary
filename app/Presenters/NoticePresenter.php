@@ -52,14 +52,18 @@ class NoticePresenter
                     3 => ['棄標', '物品 No.'.$model->id.' ，遭到棄標，請至平台選擇處理方式。'],
                 };
             case 3:
-                $model = Order::find($notice->target_id);
-                return match ($notice->code) {
-                    0 => ['已得標', '物品 '.$model->lot->name.' ，以 NT$'.number_format($model->subtotal).'得標，點選此"<a href="'.route('account.orders.show', $model).'">連結</a>"到付款頁面進行付款。'],
-                    1 => ['競標成功', '物品 No.'.$model->lot->id.' ，以 NT$'.number_format($model->subtotal).'賣出。'],
-                    2 => ['已收到匯款', '訂單 No.'.$model->id.' ，已收到匯款'],
-                    3 => ['訂單已完成', '訂單 No.'.$model->id.' ，已完成'],
-                    4 => ['已完成委賣', '訂單 No.'.$model->id.' ，已匯款'],
-                };
+                try {
+                    $model = Order::find($notice->target_id);
+                    return match ($notice->code) {
+                        0 => ['已得標', '物品 ' . $model->lot->name . ' ，以 NT$' . number_format($model->subtotal) . '得標，點選此"<a href="' . route('account.orders.show', $model) . '">連結</a>"到付款頁面進行付款。'],
+                        1 => ['競標成功', '物品 No.' . $model->lot->id . ' ，以 NT$' . number_format($model->subtotal) . '賣出。'],
+                        2 => ['已收到匯款', '訂單 No.' . $model->id . ' ，已收到匯款'],
+                        3 => ['訂單已完成', '訂單 No.' . $model->id . ' ，已完成'],
+                        4 => ['已完成委賣', '訂單 No.' . $model->id . ' ，已匯款'],
+                    };
+                } catch (Exception $e) {
+                    dd($model);
+                }
 
 
             case 4:
