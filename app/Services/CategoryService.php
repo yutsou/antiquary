@@ -43,4 +43,10 @@ class CategoryService extends CategoryRepository
     {
 
     }
+
+    public function getCategories($lot)
+    {
+        $categories = $lot->categories;
+        return $categories;
+    }
 }

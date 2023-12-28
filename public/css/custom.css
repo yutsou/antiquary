@@ -85,8 +85,8 @@
 }
 
 .custom-link {
-    color: #003a6c;
-    text-decoration: none;
+    color: #003a6c !important;
+    text-decoration: none !important;
 }
 
 .custom-link:hover {

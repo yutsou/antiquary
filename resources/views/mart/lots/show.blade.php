@@ -1,4 +1,5 @@
 @extends('layouts.member')
+@inject('carbonPresenter', 'App\Presenters\CarbonPresenter')
 
 @section('content')
     @if ($errors->any())
@@ -13,6 +14,9 @@
             });
         </script>
     @endif
+    <div class="uk-margin uk-text-small">
+        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('mart.m_categories.show', $mCategory->id) }}" class="custom-color-1 custom-link-mute">{{ $mCategory->name }}</a> > <a href="{{ route('mart.s_categories.show', [$mCategory->id, $sCategory->id]) }}" class="custom-color-1 custom-link-mute">{{ $sCategory->name }}</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
+    </div>
     <div class="uk-margin">
         <div class="uk-grid-medium" uk-grid>
             <div class="uk-width-2-3@m">
@@ -346,6 +350,76 @@
                             </div>
                         </li>
                     </ul>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="uk-margin-xlarge-top">
+            <div class="uk-width-1-1">
+                <div class="uk-margin-medium">
+                    <h3>{{ $head }}的其他物品</h3>
+                </div>
+                <div class="uk-slider-container-offset" uk-slider="finite: true">
+
+                    <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
+
+                        <ul class="uk-slider-items uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid" >
+                            @foreach($auction->lots as $singleLot)
+                                @if($singleLot->id != $lot->id)
+                                    <li>
+                                        <div class="uk-card uk-card-default uk-card-hover lot-card-click" lotId="{{ $singleLot->id }}">
+                                            <div class="uk-card-media-top">
+                                                <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
+                                                     style="background-image: url({{ $singleLot->images->first()->url }});">
+                                                </div>
+                                            </div>
+                                            <div class="uk-card-body">
+                                                <div class="uk-flex uk-flex-right">
+                                                    @include('mart.components.favorite-inline', $singleLot)
+                                                </div>
+                                                <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
+                                                <label class="custom-font-medium" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
+                                                <p>{{ $carbonPresenter->lotPresent($singleLot->auction_start_at, $singleLot->auction_end_at) }}</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                @endif
+                            @endforeach
+                        </ul>
+
+                        <a class="uk-position-center-left uk-position-small uk-hidden-hover" href uk-slidenav-previous uk-slider-item="previous"></a>
+                        <a class="uk-position-center-right uk-position-small uk-hidden-hover" href uk-slidenav-next uk-slider-item="next"></a>
+
+
+                </div>
+
+            </div>
+        </div>
+        @include('mart.components.favorite-outline')
+        <hr>
+        <div class="uk-margin-xlarge-top">
+            <div class="uk-width-1-1">
+                <div class="uk-margin-medium">
+                    <h3>其他拍賣會</h3>
+                </div>
+                <div class="uk-slider-container-offset" uk-slider>
+                    <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
+                        <ul class="uk-slider-items  uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid" >
+                            @foreach($auctions->whereIn('status', [0,1]) as $auction)
+                                <li>
+                                    <div class="uk-card uk-card-default uk-card-hover auction-card-click" auctionId="{{ $auction->id }}">
+                                        <div class="uk-card-media-top">
+                                            <img src="{{ $auction->lots->first()->images->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                        </div>
+                                        <div class="uk-card-body">
+                                            <h3 class="uk-card-title">{{ $auction->name }}</h3>
+                                            <p>{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -698,7 +772,6 @@
     </script>
     <script>
         $(function () {
-
             setAuctionCountdown();
 
             setNextBids({{ $lot->current_bid }});
@@ -738,6 +811,24 @@
                 autoBid({{ $lot->id }}, autoBidInput.val());
                 autoBidInput.val('');
                 $.modal.close();
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            $(".lot-card-click").click(function(){
+                let lotId = $(this).attr('lotId');
+                let url = '{{ route("mart.lots.show", ":id") }}';
+                url = url.replace(':id', lotId);
+                window.location.assign(url);
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            $('.auction-card-click').on('click', function() {
+                let aucitonId = $(this).attr('auctionId');
+                window.location.assign('/auctions/'+aucitonId);
             });
         });
     </script>

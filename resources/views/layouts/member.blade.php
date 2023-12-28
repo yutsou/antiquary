@@ -3,7 +3,7 @@
     <head>
         <title>{{ $title }}</title>
         <link rel="icon" type="image/x-icon" href="{{ asset('/images/web/common/logo.ico') }}">
-        <!-- {{ $version = '32' }} -->
+        <!-- {{ $version = '33' }} -->
         <!-- Meta -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">

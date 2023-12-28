@@ -54,10 +54,21 @@ class MartController extends Controller
     public function showLot($lotId)
     {
         $lot = $this->lotService->getLot($lotId);
+        $categories = $this->categoryService->getCategories($lot);
         $carbon = Carbon::now();
         $premium = $this->promotionService->getPremiumRate(Auth::user());
+        $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
+        $auctionId = $lot->auction_id;
+        $auction = $this->auctionService->getAuction($auctionId);
 
-        return CustomClass::viewWithTitle(view('mart.lots.show')->with('lot', $lot)->with('carbon', $carbon)->with('premium', $premium), $lot->name);
+        return CustomClass::viewWithTitle(view('mart.lots.show')
+            ->with('mCategory', $categories[0])
+            ->with('sCategory', $categories[1])
+            ->with('lot', $lot)
+            ->with('carbon', $carbon)
+            ->with('premium', $premium)
+            ->with('auctions', $auctions)
+            ->with('auction', $auction), $lot->name);
     }
 
     public function showHomepage()
@@ -116,11 +127,11 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('mart.m_categories.show')->with('mCategory', $mCategory)->with('sCategories', $sCategories), $mCategory->name);
     }
 
-    public function showSCategory($mCategoryId, $sCategoryId)
+    public function  showSCategory($mCategoryId, $sCategoryId)
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
-        $lots = $sCategory->lots->whereIn('status', [20,23]);
+        $lots = $sCategory->lots->whereIn('status', [20,21]);
         return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 

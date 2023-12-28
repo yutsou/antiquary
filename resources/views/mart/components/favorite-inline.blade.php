@@ -1,11 +1,11 @@
 @auth
-    <a class="custom-link favorite" lotId="{{ $lot->id }}">
-        @if(Auth::user()->getFavoriteAttribute($lot->id) == false)
-            <span id="favoriteStatus-{{ $lot->id }}" class="google-icon">
+    <a class="custom-link favorite" lotId="{{ $singleLot->id }}">
+        @if(Auth::user()->getFavoriteAttribute($singleLot->id) == false)
+            <span id="favoriteStatus-{{ $singleLot->id }}" class="google-icon">
                 <span class="material-symbols-outlined uk-text-middle">favorite</span>
              </span>
         @else
-            <span id="favoriteStatus-{{ $lot->id }}" class="google-icon-fill">
+            <span id="favoriteStatus-{{ $singleLot->id }}" class="google-icon-fill">
                  <span class="material-symbols-outlined uk-text-middle">favorite</span>
             </span>
         @endif

@@ -74,7 +74,7 @@ class LotService extends LotRepository
 
     public function ajaxReviewGetLots($mainCategory)
     {
-        $lots = $mainCategory->lots;
+        $lots = $mainCategory->lots->sortByDesc('created_at');
 
         $expertLotIndexPresenter =  app(ExpertLotIndexPresenter::class);
 
