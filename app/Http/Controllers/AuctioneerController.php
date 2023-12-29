@@ -191,6 +191,7 @@ class AuctioneerController extends Controller
     public function indexMessages($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
+        $this->orderService->setAllmessageRead($order);
         return CustomClass::viewWithTitle(view('auctioneer.orders.chatroom')->with('order', $order), $order->lot->name);
     }
 

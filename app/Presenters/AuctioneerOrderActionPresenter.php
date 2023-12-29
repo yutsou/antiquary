@@ -31,7 +31,12 @@ class AuctioneerOrderActionPresenter
                     return '<p class="uk-text-right"><a href="'.route('auctioneer.orders.member_chatroom_show', $order).'" class="uk-button custom-button-1">查看對話</a></p>';
 
                 } else {
-                    return '<a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
+                    $count = $order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
+                    if ($count == 0) {
+                        return '<a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
+                    } else {
+                        return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
+                    }
                 }
             case 40:
                 return $this->modal('匯款給賣家', '匯款給賣家嗎？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));

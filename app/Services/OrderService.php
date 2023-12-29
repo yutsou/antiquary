@@ -35,7 +35,7 @@ class OrderService extends OrderRepository
             'owner_real_take' => $lot->current_bid - $commission,
             'commission' => $commission,
             'premium' => $premium,
-            'earning' => $premium + $commission
+            'earning' => $premium + $commission,
         ];
 
         $order = OrderRepository::create($input);
@@ -63,9 +63,9 @@ class OrderService extends OrderRepository
             'total'=>$request->total,
         ];
 
-        if($request->delivery_method != 0) {
-            $this->storeOrderLogisticInfo($request, $orderId);
-        }
+
+        $this->storeOrderLogisticInfo($request, $orderId);
+
 
         OrderRepository::update($input, $orderId);
         OrderRepository::updateOrderStatus(10, $orderId);
@@ -117,6 +117,7 @@ class OrderService extends OrderRepository
             'payment_method' => $order->payment_method,
             'system_order_id' => $request->OrderID,
             'av_code' => $request->AvCode,
+            'amount' => $order->total
         ];
 
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
@@ -260,7 +261,7 @@ class OrderService extends OrderRepository
 
     public function getCommission($lot)
     {
-        $promotionStatus = Cache::get('shop.promotion.status');
+        /*$promotionStatus = Cache::get('shop.promotion.status');
         if($promotionStatus === true) {
             $commissionRate = Cache::get('promotion.commission_rate');
             if($commissionRate < 1) {
@@ -270,13 +271,13 @@ class OrderService extends OrderRepository
             }
         } else {
             return $lot->current_bid * $lot->owner->commission_rate;
-        }
-
+        }*/
+        return round($lot->current_bid * 0.15);
     }
 
     public function getPremium($lot)
     {
-        $promotionStatus = Cache::get('promotion.status');
+        /*$promotionStatus = Cache::get('promotion.status');
         if($promotionStatus === true) {
             $premiumRate = Cache::get('promotion.premium_rate');
             if($premiumRate < 1) {
@@ -286,7 +287,8 @@ class OrderService extends OrderRepository
             }
         } else {
             return $lot->current_bid * $lot->winner->premium_rate;
-        }
+        }*/
+        return round($lot->current_bid * 0.1);
     }
 
     public function updateOrderStatus($status, $order)

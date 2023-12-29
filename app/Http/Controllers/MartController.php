@@ -171,23 +171,18 @@ class MartController extends Controller
     {
         $order = $this->orderService->getOrder($orderId);
         if(config('app.env') == 'production') {
-            $eOrderNum = 'antiquary'.$orderId;
+            $eOrderNum = 'antiquary'.Carbon::now()->getTimestamp().'-'.$orderId;
         } else {
-            $eOrderNum = 'test3'.$orderId;
+            $eOrderNum = 'test'.Carbon::now()->getTimestamp().'-'.$orderId;
         }
         return CustomClass::viewWithTitle(view('account.orders.pay_by_credit_card')->with('order', $order)->with('eOrderNum', $eOrderNum), '信用卡持有人資訊確認');
     }
 
     public function payGomypayReturn(Request $request)
     {
-
         if($request->result === '1') {#paid success
-            if(config('app.env') == 'production') {
-                $orderId = str_replace("antiquary", "", $request->e_orderno);
-            } else {
-                $orderId = str_replace("test3", "", $request->e_orderno);
-            }
-
+            $eOrderNo = explode("-", $request->e_orderno);
+            $orderId = $eOrderNo[1];
             $order = $this->orderService->getOrder($orderId);
             $result = $this->gomypayService->checkTransactionStatus($request, $order);
 

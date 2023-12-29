@@ -30,6 +30,7 @@ return new class extends Migration
             $table->foreign('payee_id')->references('id')->on('users');
             $table->index('payee_id');
             $table->string('payee_account')->nullable();
+            $table->decimal('amount', 11)->nullable();
             $table->timestamps();
         });
     }
