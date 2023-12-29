@@ -51,7 +51,7 @@ class HandleAuctionEnd implements ShouldQueue
                         $order = app(OrderService::class)->createOrder($lot);
 
                         $lot->refresh();
-                        CustomClass::sendTemplateNotice($lot->owner_id, 3, 1, $lot->id, 1);
+                        CustomClass::sendTemplateNotice($lot->owner_id, 3, 1, $order->id, 1);
                         CustomClass::sendTemplateNotice($winnerId, 3, 0, $order->id, 1, 1);#####
                     } elseif ($lot->current_bid == 0){
                         $lot->update([

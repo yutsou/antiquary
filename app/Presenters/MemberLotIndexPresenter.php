@@ -111,8 +111,12 @@ class MemberLotIndexPresenter
                 switch ($order->status) {
                     case 12:
                         if($lot->entrust == 0) {
-                            $count = $order->messages->where('read_at', null)->where('target_user_id', 3)->count();
-                            return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'">協調面交地點</button>';
+                            $count = $order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
+                            if($count == 0) {
+                                return '<button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'">協調面交地點</button>';
+                            } else {
+                                return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'">協調面交地點</button>';
+                            }
                         } else {
                             return '以 NT$'.number_format($lot->current_bid).' 賣出';
                         }

@@ -7,6 +7,7 @@ use App\Events\NewMessage;
 use App\Jobs\HandleMessageRead;
 use App\Jobs\HandlePaymentNotice;
 use App\Models\Message;
+use App\Models\Order;
 use App\Presenters\AuctioneerOrderActionPresenter;
 use App\Presenters\OrderStatusPresenter;
 use App\Repositories\OrderRepository;
@@ -123,7 +124,7 @@ class OrderService extends OrderRepository
 
     public function ajaxGetOrders()
     {
-        $orders = OrderRepository::all();
+        $orders = OrderRepository::all()->sortByDesc('created_at');
         $orderStatusPresenter = new OrderStatusPresenter;
         $orderActionPresenter = new AuctioneerOrderActionPresenter;
         $datatable = DataTables::of($orders)
@@ -250,6 +251,11 @@ class OrderService extends OrderRepository
     public function haveRead($messageId)
     {
         Message::find($messageId)->update(['read_at'=>Carbon::now()]);
+    }
+
+    public function setAllmessageRead(Order $order): void
+    {
+        $order->messages()->where('read_at', null)->where('user_id','!=', Auth::user()->id)->update(['read_at'=>Carbon::now()]);
     }
 
     public function getCommission($lot)

@@ -66,9 +66,13 @@
                         </div>
                         <div class="sub-field uk-margin" id="face-to-face-field" hidden>
                             @if($order->lot->entrust === 0)
-                                <p>這件物品的取貨地點需要與賣家協調</p>
+                                <label>這件物品的取貨地點需要與賣家協調</label>
                             @else
-                                <p>物品的取貨地址為：105台北市松山區敦化北路222巷2號1樓 (19世紀歐洲古董&復古收藏): 02-27186473</p>
+                                <p>取貨資訊：</p>
+                                <ul>
+                                    <li>地址: 105台北市松山區敦化北路222巷2號1樓 (19世紀歐洲古董&復古收藏)</li>
+                                    <li>電話: 02-27186473</li>
+                                </ul>
                             @endif
 
                         </div>

@@ -34,7 +34,9 @@ class MemberOrderActionPresenter
                 }
 
             case 12:
-                return '
+                $count = $order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
+                if($count == 0) {
+                    return '
                     <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
                         <div>
                             <a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交地點時間</a>
@@ -44,6 +46,19 @@ class MemberOrderActionPresenter
                         </div>
                     </div>
                     ';
+                } else {
+                    return '
+                    <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
+                        <div>
+                            <span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交地點時間</a>
+                        </div>
+                        <div>
+                            <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>
+                        </div>
+                    </div>
+                    ';
+                }
+
             case 21:
                 return '
                     <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>

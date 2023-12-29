@@ -6,6 +6,7 @@ use App\Models\Lot;
 use App\Models\Message;
 use App\Models\Order;
 use Carbon\Carbon;
+use Exception;
 
 class NoticePresenter
 {
@@ -30,10 +31,16 @@ class NoticePresenter
     {
         switch ($notice->type) {
             case 0:
-                $model = Message::find($notice->target_id);
-                return match ($notice->code) {
-                    0 => ['您有新的訊息', '訂單 No.'.$model->order_id.' ，有新的訊息。'],
-                };
+                try {
+                    $model = Message::find($notice->target_id);
+                    return match ($notice->code) {
+                        0 => ['您有新的訊息', '訂單 No.'.$model->order_id.' ，有新的訊息。'],
+                    };
+                } catch (Exception $e) {
+                    $model = Message::find($notice->target_id);
+                    dd($notice);
+                }
+
             case 1:
                 $model = Lot::find($notice->target_id);
                 return match ($notice->code) {
@@ -52,20 +59,14 @@ class NoticePresenter
                     3 => ['棄標', '物品 No.'.$model->id.' ，遭到棄標，請至平台選擇處理方式。'],
                 };
             case 3:
-                try {
-                    $model = Order::find($notice->target_id);
-                    return match ($notice->code) {
-                        0 => ['已得標', '物品 ' . $model->lot->name . ' ，以 NT$' . number_format($model->subtotal) . '得標，點選此"<a href="' . route('account.orders.show', $model) . '">連結</a>"到付款頁面進行付款。'],
-                        1 => ['競標成功', '物品 No.' . $model->lot->id . ' ，以 NT$' . number_format($model->subtotal) . '賣出。'],
-                        2 => ['已收到匯款', '訂單 No.' . $model->id . ' ，已收到匯款'],
-                        3 => ['訂單已完成', '訂單 No.' . $model->id . ' ，已完成'],
-                        4 => ['已完成委賣', '訂單 No.' . $model->id . ' ，已匯款'],
-                    };
-                } catch (Exception $e) {
-                    dd($model);
-                }
-
-
+                $model = Order::find($notice->target_id);
+                return match ($notice->code) {
+                    0 => ['已得標', '物品 No.'.$model->lot->id.' ，以 NT$'.number_format($model->subtotal).'得標，點選此"<a href="'.route('account.orders.show', $model).'">連結</a>"到付款頁面進行付款。'],
+                    1 => ['競標成功', '物品 No.'.$model->lot->id.' ，以 NT$'.number_format($model->subtotal).'賣出。'],
+                    2 => ['已收到匯款', '訂單 No.'.$model->id.' ，已收到匯款'],
+                    3 => ['訂單已完成', '訂單 No.'.$model->id.' ，已完成'],
+                    4 => ['已完成委賣', '訂單 No.'.$model->id.' ，已匯款'],
+                };
             case 4:
                 $model = Lot::find($notice->target_id);
                 $logisticInfo = $notice->lot->logisticRecords->where('type',1)->first();

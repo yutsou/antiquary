@@ -33,7 +33,7 @@ class HandleMessageRead implements ShouldQueue
     public function handle()
     {
         if($this->message->read_at === null) {
-            CustomClass::sendTemplateNotice($this->message->target_user_id, 0, 0, $this->message->order_id, 1);
+            CustomClass::sendTemplateNotice($this->message->target_user_id, 0, 0, $this->message->id, 1);
         }
     }
 }
