@@ -20,10 +20,12 @@
                     <li><a href="{{ route('expert.sub_categories.index', ['mainCategoryId'=>$domain->category->id]) }}" style="color: white;">子分類管理</a></li>
                     <li><hr></li>
                     <li><a href="{{ route('expert.lots.index', ['mainCategoryId'=>$domain->category->id]) }}" style="color: white;">商品管理</a>
-                        {!! $expertDashboardPresenter->present($domain) !!}
+                        {!! $expertDashboardPresenter->getLotManagementCount($domain) !!}
                     </li>
                     <li><hr></li>
-                    <li><a href="{{ route('expert.auctions.show', ['mainCategoryId'=>$domain->category->id])  }}" style="color: white;">拍賣會管理</a></li>
+                    <li><a href="{{ route('expert.auctions.show', ['mainCategoryId'=>$domain->category->id])  }}" style="color: white;">拍賣會管理</a>
+                        {!! $expertDashboardPresenter->getAuctionManagementCount($domain) !!}
+                    </li>
                 </ul>
             </div>
         </div>

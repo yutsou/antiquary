@@ -26,6 +26,22 @@ class Domain extends Model
         return $this->morphOne(Image::class, 'imageable');
     }
 
+    public function lots()
+    {
+        return $this->category->lots();
+    }
+
+    public function getLotManagementCountAttribute()
+    {
+
+        return  $this->lots->whereIn('status', [0, 3, 30, 35, 33])->count();
+    }
+
+    public function getAuctionManagementCountAttribute()
+    {
+        return  $this->lots->whereIn('status', [10, 11, 12, 13])->count();
+    }
+
     protected $fillable = [
         'user_id', 'domain', 'brief', 'introduction', 'experience', 'year', 'scale'
     ];

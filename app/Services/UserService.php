@@ -324,7 +324,7 @@ class UserService extends UserRepository
     {
         $count = 0;
         $user = $this->getUser($userId);
-        foreach($user->ownLots as $lot) {
+        /*foreach($user->ownLots as $lot) {
             if($lot->entrust == 0){
                 $order = $lot->order;
                 if($order != null) {
@@ -334,7 +334,7 @@ class UserService extends UserRepository
                     }
                 }
             }
-        }
+        }*/
         $count += UserRepository::getLotNoticeCount([23, 24, 25], $userId);
         return $count;
 
