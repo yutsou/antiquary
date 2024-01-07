@@ -464,7 +464,7 @@ class LineService
                     ->setPaddingBottom('10px')
                     ->setContents([
                         TextComponentBuilder::builder()
-                            ->setText($carbonPresenter->lotPresent($lot->auction_start_at, $lot->auction_end_at))
+                            ->setText($carbonPresenter->lineCardPresent($lot->auction_end_at))
                             ->setWrap(true)
                             ->setWeight(ComponentFontWeight::BOLD)
                             ->setSize(ComponentFontSize::SM)
@@ -607,7 +607,7 @@ class LineService
                     ->setPaddingBottom('10px')
                     ->setContents([
                         TextComponentBuilder::builder()
-                            ->setText($carbonPresenter->lotPresent($auction->start_at, $auction->last_lot_end_at))
+                            ->setText($carbonPresenter->lineCardPresent($auction->last_lot_end_at))
                             ->setWrap(true)
                             ->setWeight(ComponentFontWeight::BOLD)
                             ->setSize(ComponentFontSize::SM)

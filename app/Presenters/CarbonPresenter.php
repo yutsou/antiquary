@@ -18,19 +18,27 @@ class CarbonPresenter
         }
     }
 
-    public function lotPresent($startTime, $endTime)
+    public function lotPresent($singleLotId, $endTime)
     {
-        $startTime = Carbon::create($startTime);
-        $endTime = Carbon::create($endTime);
-
-        if(Carbon::now()->lessThan($startTime)){
-            return '於 '.$startTime->diffForHumans(Carbon::now(), ['parts' => 3, 'join' => true]).' 開始';
-        } else {
-            if(Carbon::now()->lessThan($endTime)){
-                return '於 '.$endTime->diffForHumans(Carbon::now(), ['parts' => 3, 'join' => true]).' 結束';
+        if(Carbon::now()->lessThan($endTime)){
+            if(Carbon::now()->diffInHours($endTime)<24) {
+                return '
+                    <div class="lot-card-countdowns" id="countdown-'.$singleLotId.'" end-at="'.$endTime->toIso8601ZuluString("millisecond").'"></div>
+                ';
             } else {
-                return '拍賣已結束';
+                return '於 '.$endTime->diffForHumans(Carbon::now(), ['parts' => 3, 'join' => true]).' 結束';
             }
+        } else {
+            return '拍賣已結束';
+        }
+    }
+
+    public function lineCardPresent($endTime)
+    {
+        if(Carbon::now()->lessThan($endTime)){
+            return '於 '.$endTime->diffForHumans(Carbon::now(), ['parts' => 3, 'join' => true]).' 結束';
+        } else {
+            return '拍賣已結束';
         }
     }
 }

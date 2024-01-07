@@ -76,9 +76,9 @@ class NoticePresenter
             case 5:
                 $lot = $notice->lot;
                 if( $lot->status == 30) {
-                    $type = 2;
+                    $type = 1;
                 } else { #35
-                    $type = 3;
+                    $type = 2;
                 }
                 $logisticInfo = $lot->logisticRecords->where('type',$type)->first();
                 return match ($notice->code) {

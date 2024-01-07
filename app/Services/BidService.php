@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\FreshLotCardPrice;
+use App\Events\FreshLotCardTime;
 use App\Events\NewBid;
 use App\Jobs\HandleAuctionEnd;
 use App\Jobs\SendLine;
@@ -81,6 +83,7 @@ class BidService
         #when time between last
         if($now->between($first, $second)) {
             $lot->update(['auction_end_at'=>$now->addSeconds(90)]);
+            $dueTime = $now->copy();
             HandleAuctionEnd::dispatch($auction)->delay($now->addSeconds(5));
 
             #notice bidder and current winner the timing is extended.
@@ -88,6 +91,10 @@ class BidService
             if($bidderId != $lot->top_bidder_id) {
                 SendLine::dispatch($lot, $lot->top_bidder_id, 0, 1, '拍賣時間已延長');
             }
+
+            #FreshLotCardTime
+            $dueTime = $dueTime->toIso8601ZuluString("millisecond");
+            FreshLotCardTime::dispatch($lotId, $dueTime);
         }
 
         /*if($lot->bidRecords->count() != 0) {#notice
@@ -113,6 +120,7 @@ class BidService
         $newBidRecord = $lot->bidRecords()->save($bidRecord);
 
         NewBid::dispatch($lotId, $newBidRecord);
+        FreshLotCardPrice::dispatch($lotId, $bid);
         #broadcast(new NewBid($lotId, $newBidHistory))->toOthers();
     }
 
@@ -174,13 +182,17 @@ class BidService
     {
         $lot = $this->getLot($lotId);
         if($lot->bidRecords->count() == 0) {#第一個出價者
-            if($inputAutoBid > $lot->reserve_price && $lot->reserve_price != null) {#自動出價大於底價
-                $bid = $lot->reserve_price;
-                $this->bidLot($lotId, $bidderId, $bid);
-            } else {#沒有底價或是小於底價
+            if($lot->reserve_price != null) {#有底價
+                if($inputAutoBid > $lot->reserve_price) {#自動出價大於底價
+                    $bid = $lot->reserve_price;
+                } else {#自動出價小於底價
+                    $bid = $inputAutoBid;
+                }
+            } else {
                 $bid = $this->bidRule(0);
-                $this->bidLot($lotId, $bidderId, $bid);
             }
+            $this->bidLot($lotId, $bidderId, $bid);
+
         } else {#不是第一個出價者
 
             $topBidderId = $lot->bidRecords()->latest()->first()->bidder_id;

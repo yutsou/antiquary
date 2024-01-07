@@ -39,7 +39,7 @@ class AuctioneerOrderActionPresenter
                     }
                 }
             case 40:
-                return $this->modal('匯款給賣家', '匯款給賣家嗎？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
+                return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
             case 13:
                 if($order->lot->entrust == 0){
                     return '';

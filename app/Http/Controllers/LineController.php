@@ -148,6 +148,9 @@ class LineController extends Controller
                             $user = $this->userService->getUser($bidderId);
                             $messageBuilder = $this->lineService->buildLotMessage($lot, $user, $message);
 
+                        } elseif ($bid <= $lot->current_bid) {
+                            $message = '已有相同或更高的出價';
+                            $messageBuilder = $this->lineService->buildMessage($message);
                         } else {
                             $message = 'NT$' . number_format($bid) . ' 出價成功';
                             $messageBuilder = $this->lineService->buildMessage($message);

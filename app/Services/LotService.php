@@ -366,7 +366,7 @@ class LotService extends LotRepository
         $results = collect();
         $words = explode(" ", $query);
         foreach($words as $word) {
-            $results->push(Lot::search($word)->where('status', 20)->get());
+            $results->push(Lot::search($word)->where('status', 21)->get());
         }
         return $results->flatten()->unique('id');
         #

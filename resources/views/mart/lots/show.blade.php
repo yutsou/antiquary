@@ -131,14 +131,10 @@
                                     <span class="custom-font-medium">競標已結束</span>
                                 @else
                                     <span class="custom-font-medium" id="auction-end-title" hidden>競標已結束</span>
-                                    @if($carbon->lt($lot->auction_start_at))
-                                        <input id="auction-status" value="0" hidden>
-                                        <div class="uk-grid-small uk-child-width-auto countdown" uk-grid
-                                             end-at="{{ $lot->auction_start_at->toIso8601ZuluString('millisecond') }}" auction-end-at="{{ $lot->auction_end_at }}">
-                                    @elseif($carbon->between($lot->auction_start_at, $lot->auction_end_at))
+                                    @if($carbon->between($lot->auction_start_at, $lot->auction_end_at))
                                         <input id="auction-status" value="1" hidden>
-                                        <div class="uk-grid-small uk-child-width-auto countdown" uk-grid
-                                             end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}" auction-end-at="{{ $lot->auction_end_at }}">
+                                        <div class="uk-grid-small uk-child-width-auto" id="lot-countdown" uk-grid
+                                             end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}" auction-end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}">
                                     @else
                                         <input id="auction-status" value="2" hidden>
                                         <div class="uk-grid-small uk-child-width-auto" uk-grid hidden>
@@ -180,11 +176,7 @@
                                             style="font-size: 1em">秒
                                         </div>
                                     </div>
-                                    @if($carbon->lt($lot->auction_start_at))
-                                        <div id="auction-countdown-action">後開始競標</div>
-                                    @else
-                                        <div>後結束競標</div>
-                                    @endif
+                                    <div>後結束競標</div>
                                     </div>
                                 @endif
                                         </div>
@@ -379,7 +371,7 @@
                                                 </div>
                                                 <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
                                                 <label class="custom-font-medium" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-                                                <p>{{ $carbonPresenter->lotPresent($singleLot->auction_start_at, $singleLot->auction_end_at) }}</p>
+                                                <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
                                             </div>
                                         </div>
                                     </li>
@@ -484,7 +476,6 @@
         }
     </script>
     <script>
-
         let bidRule = function (bid) {
             if (bid >= 0 && bid <= 500) {
                 return 50;
@@ -651,25 +642,29 @@
                 failedResponse(response);
             });
         };
-
-        let countdown;
-        let dueTime;
-        let dueDo;
-        let setAuctionCountdown = function(){
+    </script>
+    <script>
+        let setLotCountdown = function(countdown){
             const second = 1000,
                 minute = second * 60,
                 hour = minute * 60,
                 day = hour * 24;
 
-            function freshCountdown(dueTime, dueDo){
+            function freshCountdown(countdown, dueTime){
                 let now = new Date().getTime();
-
                 let distance = dueTime - now;
 
-                //do something later when date is reached
                 if (distance < 1000) {
-                    clearInterval(countdown);
-                    dueDo();
+                    clearInterval(timer);
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'warning',
+                        title: '競標結束',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                    countdown.prop('hidden', true);
+                    $('#auction-end-title').prop('hidden', false);
                 } else {
                     $(".countdown-days").text(Math.floor(distance / (day)).toString().padStart(2, '0'));
                     $(".countdown-hours").text(Math.floor((distance % (day)) / (hour)).toString().padStart(2, '0'));
@@ -677,58 +672,19 @@
                     $(".countdown-seconds").text(Math.floor((distance % (minute)) / second).toString().padStart(2, '0'));
                 }
             }
-            function nothing() {}
 
-            function auctionEnd()
-            {
-                Swal.fire({
-                    position: 'center',
-                    icon: 'warning',
-                    title: '競標結束',
-                    showConfirmButton: false,
-                    timer: 1500
-                })
-                dueDo = nothing;
-                countdown.prop('hidden', true);
-                $('#auction-end-title').prop('hidden', false);
-            }
-
-            function auctionStart()
-            {
-                Swal.fire({
-                    position: 'center',
-                    icon: 'success',
-                    title: '競標開始',
-                    showConfirmButton: false,
-                    timer: 1500
-                })
-
-                let datetime = new Date(countdown.attr('auction-end-at'));
-                countdown.attr('end-at', datetime.toISOString());
-
-                dueTime = new Date(datetime).getTime();
-                dueDo = auctionEnd;
-                $("#auction-countdown-action").text('後結束競標');
-            }
-
-            //init
-            let auctionStatus = $('#auction-status').val();
-            if(auctionStatus === "0") {
-                dueDo = auctionStart;
-            } else if (auctionStatus === "1") {
-                dueDo = auctionEnd;
-            } else {
-                dueDo = nothing;
-            }
-
-            countdown = $('.countdown');
-
-            setInterval(function() {
+            let timer = setInterval(function() {
                 let dueTimeIso = countdown.attr('end-at');
-                dueTime = new Date(dueTimeIso).getTime();
-                freshCountdown(dueTime, dueDo)
+                let dueTime = new Date(dueTimeIso).getTime();
+                freshCountdown(countdown, dueTime)
             }, 250)
         };
+
+        $(function () {
+            let lotCountdown = $('#lot-countdown');
+            setLotCountdown(lotCountdown);
+        });
+
     </script>
     <script>
         Echo.channel(`lots.{{ $lot->id }}`)
@@ -745,18 +701,15 @@
                 $('#bidHistories').prepend(newBid);
                 $('#currentBid').text(number_format(e.bid));
                 $('#nextBid').text(number_format(parseInt(e.bid) + bidRule(parseInt(e.bid))));
-                let auctionEndAt = $('.countdown');
-                if (e.auction_end_at !== auctionEndAt.attr('auction-end-at')) {
-                    auctionEndAt.attr('end-at', e.auction_end_at);
-                    let datetime = new Date(e.auction_end_at);
-                    dueTime = datetime.toISOString();
-                    countdown.attr('end-at', datetime.toISOString());
-
-                    //let datetime = new Date(Date.parse(e.auction_end_at.replace(/-/g, '/')));//fix safari
 
 
-                    /////////延長時間
 
+                let lotCountdown = $('#lot-countdown');
+                console.log(lotCountdown.attr('auction-end-at'));
+                console.log(e.auction_end_at);
+
+                if (e.auction_end_at !==  lotCountdown.attr('auction-end-at')) {
+                    lotCountdown.attr('end-at', e.auction_end_at);
                     Swal.fire({
                         icon: 'info',
                         title: '拍賣時間已延長',
@@ -768,8 +721,6 @@
     </script>
     <script>
         $(function () {
-            setAuctionCountdown();
-
             setNextBids({{ $lot->current_bid }});
 
             $("#favorite").click(function () {
@@ -825,6 +776,51 @@
             $('.auction-card-click').on('click', function() {
                 let aucitonId = $(this).attr('auctionId');
                 window.location.assign('/auctions/'+aucitonId);
+            });
+        });
+    </script>
+    <script>
+        let setLotCardCountdown = function(countdown){
+            const second = 1000,
+                minute = second * 60,
+                hour = minute * 60,
+                day = hour * 24;
+
+            function freshCountdown(countdown, dueTime){
+                let now = new Date().getTime();
+
+                let distance = dueTime - now;
+                let days = Math.floor(distance / (day)).toString().padStart(2, '0');
+                let hours = Math.floor((distance % (day)) / (hour)).toString().padStart(2, '0');
+                let minutes = Math.floor((distance % (hour)) / (minute)).toString().padStart(2, '0');
+                let seconds = Math.floor((distance % (minute)) / second).toString().padStart(2, '0');
+
+
+                //do something later when date is reached
+                if (distance < 1000) {
+                    clearInterval(timer);
+                    countdown.text('競標結束')
+                } else {
+                    if(distance > 86400000) {
+                        countdown.text('於 '+days+ '天內結束競標')
+                    } else {
+                        countdown.text('於 '+hours+ '時'+minutes+'分'+seconds+'秒 後結束')
+                    }
+                }
+            }
+
+            let timer = setInterval(function() {
+                let dueTimeIso = countdown.attr('end-at');
+                let dueTime = new Date(dueTimeIso).getTime();
+                freshCountdown(countdown, dueTime)
+            }, 500)
+        };
+
+        $(function () {
+            let lotCardCountdowns = $('.lot-card-countdowns');
+            lotCardCountdowns.each(function () {
+                let lotCardCountdown = $('#'+this.id);
+                setLotCardCountdown(lotCardCountdown);
             });
         });
     </script>

@@ -150,7 +150,7 @@ class MemberLotIndexPresenter
             case $lot->status == 40:
                 return '以 NT$'.number_format($lot->current_bid).' 賣出';
             case $lot->status == 41:
-                return '以 NT$'.number_format($lot->current_bid).' 賣出，已匯款 NT$'.number_format($lot->order->owner_real_take).'給賣家';
+                return '以 NT$'.number_format($lot->order->subtotal).' 賣出，已匯款 NT$'.number_format($lot->order->owner_real_take).'給賣家';
             default:
                 return '<span>&nbsp;</span>';
         }
