@@ -139,29 +139,30 @@ class LineController extends Controller
                         $lotId = $data[1];
                         $bidderId = $data[2];
                         $bid = $data[3];
-
-                        $this->bidService->manualBidLot($lotId, $bidderId, $bid);#遇上更高的自動出價沒提醒####################
                         $lot = $this->lotService->getLot($lotId);
-                        if ($bid < $lot->reserve_price) {
-                            $message = '出價成功，出價未達底價，需到達底價物品才會被拍賣。';
 
-                            $user = $this->userService->getUser($bidderId);
-                            $messageBuilder = $this->lineService->buildLotMessage($lot, $user, $message);
-
-                        } elseif ($bid <= $lot->current_bid) {
+                        if ($bid <= $lot->current_bid) {
                             $message = '已有相同或更高的出價';
                             $messageBuilder = $this->lineService->buildMessage($message);
                         } else {
-                            $message = 'NT$' . number_format($bid) . ' 出價成功';
-                            $messageBuilder = $this->lineService->buildMessage($message);
+                            $this->bidService->manualBidLot($lotId, $bidderId, $bid);
+
+                            if ($bid < $lot->reserve_price) {
+                                $message = '出價成功，出價未達底價，需到達底價物品才會被拍賣。';
+
+                                $user = $this->userService->getUser($bidderId);
+                                $messageBuilder = $this->lineService->buildLotMessage($lot, $user, $message);
+
+                            } else {
+                                $message = 'NT$' . number_format($bid) . ' 出價成功';
+                                $messageBuilder = $this->lineService->buildMessage($message);
+                            }
                         }
-
-
                         break;
                     case 'showAllAuction':
                         $lineUserId = $request['events'][0]['source']['userId'];
                         $user = $this->userService->getUserByOauth('line', $lineUserId);
-                        $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
+                        $auctions = $this->auctionService->getAllAuctions()->where('status', 1);
 
                         $messageBuilder = $this->lineService->buildMultiAuctionsTemplate($user, $auctions, '所有拍賣會');
                         break;

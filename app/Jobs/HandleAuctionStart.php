@@ -44,7 +44,7 @@ class HandleAuctionStart implements ShouldQueue
             $lot->update([
                 'status'=>21#auction in progress
             ]);
-            $favoriteUserIds = $lot->favorites()->pluck('user_id');
+            /*$favoriteUserIds = $lot->favorites()->pluck('user_id');
             foreach ($favoriteUserIds as $favoriteUserId) {
                 $user = $userService->getUser($favoriteUserId);
                 $messageBuilder = $lineService->buildMultiLotsTemplate($user, $lots, '競標開始', '競標開始');
@@ -55,7 +55,7 @@ class HandleAuctionStart implements ShouldQueue
                 } else {
                     Log::channel('line')->warning($response->getHTTPStatus() . ' ' . $response->getRawBody());
                 }
-            }
+            }*/
         }
     }
 }

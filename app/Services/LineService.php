@@ -559,8 +559,8 @@ class LineService
     public function validBid($lot, $user, $bid)
     {
         $now = Carbon::now();
-        $startTime = Carbon::create($lot->auction_start_at);
-        $endTime = Carbon::create($lot->auction_end_at);
+        $startTime = $lot->auction_start_at;
+        $endTime = $lot->auction_end_at;
 
         if ($now->between($startTime, $endTime) === false) {
             return new TextMessageBuilder("必須在拍賣時間內進行出價");
