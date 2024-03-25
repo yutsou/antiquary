@@ -251,6 +251,7 @@ class LotService extends LotRepository
         }
         $lot->update([
             'estimated_price' => $request->estimatedPrice,
+            'starting_price' => $request->startingPrice,
             'suggestion' => $request->suggestion
         ]);
         $lot->status = 1;

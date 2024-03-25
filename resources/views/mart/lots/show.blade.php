@@ -214,7 +214,12 @@
                                             <br>
                                             @if($lot->estimated_price != 0)
                                                 <label style="font-size: 14px">預估價格 - NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
+                                                <br>
                                             @endif
+                                            @if($lot->starting_price != 0)
+                                                <label style="font-size: 14px">起標價格 - NT$<span>{{ number_format($lot->starting_price) }}</span></label>
+                                            @endif
+                                            <input id="starting-price" value="{{ $lot->starting_price }}" hidden>
                                         </div>
 
                                         <hr>
@@ -240,7 +245,7 @@
                                         <div class="uk-margin">
                                             <div class="uk-grid-small" uk-grid>
                                                 <div class="uk-width-expand">
-                                                    <input id="autoBidInput" class="uk-input" placeholder="自動出價：最低NT${{ number_format($lot->next_bid) }}">
+                                                    <input id="autoBidInput" class="uk-input">
                                                 </div>
                                                 <div class="uk-width-auto">
                                                     @auth
@@ -497,9 +502,22 @@
         }
 
         let getNextBids = function (bid) {
-            let firstBid = bid+bidRule(bid);
-            let secondBid = firstBid+bidRule(firstBid);
-            let thirdBid = secondBid+bidRule(secondBid);
+            let startingPriceString = $("#starting-price").val();
+            let startingPriceInt = parseInt(startingPriceString);
+            let firstBid, secondBid, thirdBid = 0;
+
+            if (bid === 0 && startingPriceInt !== 0) {
+                bid = startingPriceInt;
+                firstBid = bid;
+                secondBid = bid+bidRule(bid);
+                thirdBid = secondBid+bidRule(secondBid);
+            } else {
+                firstBid = bid+bidRule(bid);
+                secondBid = firstBid+bidRule(firstBid);
+                thirdBid = secondBid+bidRule(secondBid);
+            }
+
+
             return [firstBid, secondBid, thirdBid];
         }
 
@@ -528,6 +546,21 @@
             });
 
             $('#bidInput').val();
+        }
+
+        let setInputPlaceholder = function(bid) {
+            let autoBidInput = $("#autoBidInput");
+            let startingPriceString = $("#starting-price").val();
+            let startingPriceInt = parseInt(startingPriceString);
+            let text = "";
+
+            if (bid === 0 && startingPriceInt !== 0) {
+                text = "自動出價：最低 NT$"+number_format(startingPriceInt);
+            } else {
+                text = "自動出價：最低 NT$"+(bid+bidRule(bid)).toString();
+            }
+
+            autoBidInput.attr("placeholder", text);
         }
 
         let addFavorite = function (lotId) {
@@ -698,6 +731,7 @@
                 }
 
                 setNextBids(parseInt(e.bid));
+                setInputPlaceholder(parseInt(e.bid));
                 $('#bidHistories').prepend(newBid);
                 $('#currentBid').text(number_format(e.bid));
                 $('#nextBid').text(number_format(parseInt(e.bid) + bidRule(parseInt(e.bid))));
@@ -722,6 +756,7 @@
     <script>
         $(function () {
             setNextBids({{ $lot->current_bid }});
+            setInputPlaceholder({{ $lot->current_bid }})
 
             $("#favorite").click(function () {
                 addFavorite({{ $lot->id }});

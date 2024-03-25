@@ -228,6 +228,10 @@
                 <input class="uk-input" type="number" id="estimated-price" name="estimated_price" value="{{ intval($lot->estimated_price) ?? null }}">
             </div>
             <div class="uk-margin">
+                <label class="uk-form-label font-white">起標價格</label>
+                <input class="uk-input" type="number" id="starting-price" name="starting_price" value="{{ intval($lot->starting_price) ?? null }}">
+            </div>
+            <div class="uk-margin">
                 <label class="uk-form-label font-white">給予修改建議</label>
                 <textarea class="uk-textarea" rows="5" placeholder="修改建議" id="suggestion" name="suggestion">{{ $lot->suggestion ?? null }}</textarea>
             </div>
@@ -275,6 +279,7 @@
             redirectUrl = redirectUrl.replace(':lotId', lotId);
 
             let action = $(this).attr('action');
+            let startingPrice = $('#starting-price').val();
             let estimatedPrice = $('#estimated-price').val();
             let subCategoryId = $('#sub-category-id').val();
             let suggestion = $('#suggestion').val();
@@ -285,7 +290,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 type: "post",
-                data: { action:action, estimatedPrice:estimatedPrice, subCategoryId:subCategoryId, suggestion:suggestion, mainCategoryId:mainCategoryId },
+                data: { action:action, startingPrice:startingPrice, estimatedPrice:estimatedPrice, subCategoryId:subCategoryId, suggestion:suggestion, mainCategoryId:mainCategoryId },
                 url: url,
                 success: function (data) {
                     $.modal.close();

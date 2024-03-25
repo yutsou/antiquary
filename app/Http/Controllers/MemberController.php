@@ -475,6 +475,12 @@ class MemberController extends Controller
             'bidderStatus.not_in' => '帳號已被封鎖，目前無法競標'
         ];
 
+        ###判斷起標價
+        if ($lot->current_bid == 0 &&  $request->bid < $lot->starting_price) {
+            $rules['bid'] = 'required|gte:'.$lot->starting_price;
+            $messages['bid.gte'] =  '出價必須大於起標價';
+        }
+
         ###判斷maxAutoBid是不是自己
         $lotMaxAutoBid = $this->bidService->getLotMaxAutoBid($lot->id);
         if(isset($lotMaxAutoBid) && $lotMaxAutoBid->user_id == $request->bidderId) {
@@ -537,6 +543,12 @@ class MemberController extends Controller
             'bidderId.not_in' => '您不能對自己的物品出價',
             'bidderStatus.not_in' => '帳號已被封鎖，目前無法競標',
         ];
+
+        ###判斷起標價
+        if ($lot->current_bid == 0 &&  $request->bid < $lot->starting_price) {
+            $rules['bid'] = 'required|gte:'.$lot->starting_price;
+            $messages['bid.gte'] =  '出價必須大於起標價';
+        }
 
         $bidderLotAutoBid = $this->bidService->getBidderLotAutoBid($request->bidderId, $lot);
         if($bidderLotAutoBid != 0) {

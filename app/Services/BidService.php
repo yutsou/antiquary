@@ -189,7 +189,7 @@ class BidService
                     $bid = $inputAutoBid;
                 }
             } else {
-                $bid = $this->bidRule(0);
+                $bid = $this->bidRule($lot->current_bid);
             }
             $this->bidLot($lotId, $bidderId, $bid);
 

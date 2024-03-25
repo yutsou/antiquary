@@ -163,8 +163,11 @@ class MartController extends Controller
 
     public function test()
     {
-        $order = $this->orderService->getOrder(1);
-        dd($order->lot);
+        $rules = array();
+        $rules = ['a'=>1];
+        $rules['a'] = 2;
+
+        dd($rules);
     }
 
     public function creditCardInfoCheck($orderId)

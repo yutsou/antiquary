@@ -166,7 +166,6 @@ class ExpertController extends Controller
             }
 
             #$this->lotService->updateLotName($lotId, $request);
-
             $lot = $this->lotService->updateApplication($lotId, $request);
 
             CustomClass::sendTemplateNotice($lot->owner_id, 1, 3, $lot->id, 1);
