@@ -322,7 +322,7 @@ class LineService
                 );
         } else {
             $content = '價格已經變動';
-            $nextBids = app(BidService::class)->getNextBids($lot->current_bid);
+            $nextBids = app(BidService::class)->getNextBids($lot->current_bid, $lot->starting_price);
             $actions = [];
             foreach ($nextBids as $nextBid) {
                 array_push($actions, new PostbackTemplateActionBuilder("出價NT$" . number_format($nextBid), 'lineBidConfirm,' . $lot->id . ',' . $bidderId . ',' . $nextBid));
@@ -395,16 +395,16 @@ class LineService
         }
     }
 
-    public function confirmSetAutoBid($lotId, $user, $bidderId)
+    public function confirmSetAutoBid($lot, $user, $bidderId, $nextBids)
     {
         $user->lineMode()->updateOrCreate([
             'user_id' => $bidderId,
             'mode' => 0,
             'step' => 0,
-            'extra_info' => $lotId . ',' . $bidderId
+            'extra_info' => $lot->id . ',' . $bidderId
         ]);
 
-        return new TextMessageBuilder('請輸入您的自動出價，我們將會在接下來的步驟與您確認出價。');
+        return new TextMessageBuilder('請輸入您的自動出價，最低NT$'.$nextBids[0].'，我們將會在接下來的步驟與您確認出價。');
     }
 
     public function initMode($user)
@@ -430,7 +430,7 @@ class LineService
     private function createLotTemplate($lot, $user, $text='')
     {
 
-        $nextBids = app('App\Services\BidService')->getNextBids($lot->current_bid);
+        $nextBids = app('App\Services\BidService')->getNextBids($lot->current_bid, $lot->starting_price);
         $carbonPresenter = new CarbonPresenter;
 
         if($lot->bidRecords->count() != 0) {

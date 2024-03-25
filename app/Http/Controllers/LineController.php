@@ -24,13 +24,14 @@ class LineController extends Controller
         UserService $userService,
         BidService $bidService,
         LineService $lineService,
-        AuctionService $auctionService
+        AuctionService $auctionService,
     ) {
         $this->lotService = $lotService;
         $this->userService = $userService;
         $this->bidService = $bidService;
         $this->lineService = $lineService;
         $this->auctionService = $auctionService;
+
     }
 
     public function webhook (Request $request)
@@ -183,10 +184,12 @@ class LineController extends Controller
                         break;
                     case 'confirmSetAutoBid':
                         $lotId = $data[1];
+                        $lot = $this->lotService->getLot($lotId);
+                        $nextBids = $this->bidService->getNextBids($lot->current_bid, $lot->starting_price);
                         $bidderId = $data[2];
                         $user = $this->userService->getUser($bidderId);
 
-                        $messageBuilder = $this->lineService->confirmSetAutoBid($lotId, $user, $bidderId);
+                        $messageBuilder = $this->lineService->confirmSetAutoBid($lot, $user, $bidderId, $nextBids);
                         break;
                     case 'initMode':
                         $lineUserId = $request['events'][0]['source']['userId'];

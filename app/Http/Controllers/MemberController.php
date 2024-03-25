@@ -547,7 +547,7 @@ class MemberController extends Controller
         ###判斷起標價
         if ($lot->current_bid == 0 &&  $request->bid < $lot->starting_price) {
             $rules['bid'] = 'required|gte:'.$lot->starting_price;
-            $messages['bid.gte'] =  '出價必須大於起標價';
+            $messages['bid.gte'] =  '出價必須大於起標價，';
         }
 
         $bidderLotAutoBid = $this->bidService->getBidderLotAutoBid($request->bidderId, $lot);

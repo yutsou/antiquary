@@ -48,11 +48,18 @@ class BidService
         return $lot->autoBids()->orderBy('bid', 'desc')->orderBy('updated_at')->first();
     }
 
-    public function getNextBids($bid)
+    public function getNextBids($bid, $startingPrice)
     {
-        $firstBid = $bid+$this->bidRule($bid);
-        $secondBid = $firstBid+$this->bidRule($firstBid);
-        $thirdBid = $secondBid+$this->bidRule($secondBid);
+        if ($bid == 0 && $startingPrice != 0) {
+            $firstBid = $startingPrice;
+            $secondBid = $startingPrice+$this->bidRule($startingPrice);
+            $thirdBid = $secondBid+$this->bidRule($secondBid);
+        } else {
+            $firstBid = $bid+$this->bidRule($bid);
+            $secondBid = $firstBid+$this->bidRule($firstBid);
+            $thirdBid = $secondBid+$this->bidRule($secondBid);
+        }
+
         return [$firstBid, $secondBid, $thirdBid];
     }
 
