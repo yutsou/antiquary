@@ -324,18 +324,14 @@ class UserService extends UserRepository
     {
         $count = 0;
         $user = $this->getUser($userId);
-        /*foreach($user->ownLots as $lot) {
-            if($lot->entrust == 0){
-                $order = $lot->order;
-                if($order != null) {
-                    $orderStatus = $lot->order->status;
-                    if(in_array($orderStatus, [12, 13, 20])) {
-                        $count += 1;
-                    }
+        $count += UserRepository::getLotNoticeCount([23, 24, 25], $userId);
+        foreach ($user->ownLots as $lot) {
+            if($lot->order != null) {
+                if($lot->order->messages->count() != 0) {
+                    $count += $lot->order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
                 }
             }
-        }*/
-        $count += UserRepository::getLotNoticeCount([23, 24, 25], $userId);
+        }
         return $count;
 
     }

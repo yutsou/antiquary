@@ -18,6 +18,9 @@
         <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('mart.m_categories.show', $mCategory->id) }}" class="custom-color-1 custom-link-mute">{{ $mCategory->name }}</a> > <a href="{{ route('mart.s_categories.show', [$mCategory->id, $sCategory->id]) }}" class="custom-color-1 custom-link-mute">{{ $sCategory->name }}</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
     </div>
     <div class="uk-margin">
+        <div>
+            <label style="font-size: 14px">商品號碼: {{ $lot->id }}</label>
+        </div>
         <div class="uk-grid-medium" uk-grid>
             <div class="uk-width-2-3@m">
                 <div class="uk-text-center"><h1 class="lot-head" style="color: #333;">{{ $head }}</h1></div>

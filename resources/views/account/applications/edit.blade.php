@@ -4,6 +4,9 @@
     <div class="uk-margin uk-text-small">
         <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.applications.index') }}" class="custom-color-1 custom-link-mute">審核中的申請</a>
     </div>
+    <div class="uk-margin-medium">
+        <h1 class="uk-heading-small">商品號碼: {{ $lot->id }}</h1>
+    </div>
     <div class="uk-flex uk-flex-center">
         <div class="uk-width-1-1">
             @if(isset($lot->suggestion))

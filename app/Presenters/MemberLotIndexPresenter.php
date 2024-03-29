@@ -27,7 +27,7 @@ class MemberLotIndexPresenter
                             <label>'.$this->getStatus($lot).'</label>
                         </div>
                         <hr>
-                        <h3 class="uk-card-title uk-text-truncate" style="margin: 0 0 0 0">No.'.$lot->id.' - '.$this->getLotName($lot).'  </h3>
+                        <h3 class="uk-card-title uk-text-truncate" style="margin: 0 0 0 0">'.$this->getLotName($lot).'  </h3>
                         <hr>
                         <div class="uk-margin uk-flex uk-flex-right">
                             <div class="uk-grid-small" uk-grid>
