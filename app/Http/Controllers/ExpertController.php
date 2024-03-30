@@ -183,14 +183,14 @@ class ExpertController extends Controller
                 $rules = [
                     "subCategoryId" => "required",
                     "estimatedPrice" => "required",
-                    "startingPrice" => 'required', new GreaterThanFiftyOrZero()
+                    "startingPrice" => ['required', new GreaterThanFiftyOrZero()]
                 ];
 
                 $messages = [
                     "subCategoryId.required" => "為商品選擇分類",
                     "estimatedPrice.required" => "為商品設定預估價格",
                     "startingPrice.required" => "為商品設定起標價格",
-                    "startingPrice.greater_than_fifty_or_zero" => "must be greater than 50 or equal to 0."
+                    "startingPrice.App\\Rules\\GreaterThanFiftyOrZero" => "起標價格需大於50或等於0"
                 ];
                 $validator = Validator::make($input, $rules, $messages);
 
