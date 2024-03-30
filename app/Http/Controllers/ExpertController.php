@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\GreaterThanFiftyOrZero;
 use App\Services\AuctionService;
 use Illuminate\Http\Request;
 use App\CustomFacades\CustomClass;
@@ -149,49 +150,94 @@ class ExpertController extends Controller
 
     public function handleLot(Request $request, $mainCategoryId, $lotId)
     {
-        if ($request->action == 'requestRevision') {
-            $input = $request->all();
+        switch ($request->action)
+        {
+            case 'requestRevision':
+                $input = $request->all();
 
-            $rules = [
-                "suggestion" => 'required',
-            ];
+                $rules = [
+                    "suggestion" => "required",
+                ];
 
-            $messages = [
-                'suggestion.required'=>'未填寫修改建議',
-            ];
-            $validator = Validator::make($input, $rules, $messages);
+                $messages = [
+                    'suggestion.required'=>'未填寫修改建議',
+                ];
+                $validator = Validator::make($input, $rules, $messages);
 
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()->all()]);
-            }
+                if ($validator->fails()) {
+                    return response()->json(array(
+                        'success' => false,
+                        'errors' => $validator->getMessageBag()->toArray()
+                    ), 400);
+                }
 
-            #$this->lotService->updateLotName($lotId, $request);
-            $lot = $this->lotService->updateApplication($lotId, $request);
 
-            CustomClass::sendTemplateNotice($lot->owner_id, 1, 3, $lot->id, 1);
-        } else if ($request->action == 'acceptApplication') {
-            $input = $request->all();
+                #$this->lotService->updateLotName($lotId, $request);
+                $lot = $this->lotService->updateApplication($lotId, $request);
 
-            $rules = [
-                "subCategoryId" => 'required'
-            ];
+                CustomClass::sendTemplateNotice($lot->owner_id, 1, 3, $lot->id, 1);
+                break;
+            case 'acceptApplication':
+                $input = $request->all();
 
-            $messages = [
-                "subCategoryId.required" => '為選擇商品分類'
-            ];
-            $validator = Validator::make($input, $rules, $messages);
+                $rules = [
+                    "subCategoryId" => "required",
+                    "estimatedPrice" => "required",
+                    "startingPrice" => 'required', new GreaterThanFiftyOrZero()
+                ];
 
-            if ($validator->fails()) {
-                return response()->json(['error' => $validator->errors()->all()]);
-            }
+                $messages = [
+                    "subCategoryId.required" => "為商品選擇分類",
+                    "estimatedPrice.required" => "為商品設定預估價格",
+                    "startingPrice.required" => "為商品設定起標價格",
+                    "startingPrice.greater_than_fifty_or_zero" => "must be greater than 50 or equal to 0."
+                ];
+                $validator = Validator::make($input, $rules, $messages);
 
-            #$this->lotService->updateLotName($lotId, $request);
-            $this->lotService->updateApplication($lotId, $request);
-            $noticeData = $this->lotService->grantLot($lotId);
+                if ($validator->fails()) {
+                    return response()->json(array(
+                        'success' => false,
+                        'errors' => $validator->getMessageBag()->toArray()
+                    ), 400);
+                }
 
-            CustomClass::sendTemplateNotice($noticeData[0]->owner_id, 1, $noticeData[1], $noticeData[0]->id, 1);
+                #$this->lotService->updateLotName($lotId, $request);
+                $this->lotService->updateApplication($lotId, $request);
+                $noticeData = $this->lotService->grantLot($lotId);
 
+                CustomClass::sendTemplateNotice($noticeData[0]->owner_id, 1, $noticeData[1], $noticeData[0]->id, 1);
+                break;
+            case 'updateBiddingInfo':
+                $input = $request->all();
+
+                $rules = [
+                    "subCategoryId" => "required",
+                    "estimatedPrice" => "required",
+                    "startingPrice" => ['required', new GreaterThanFiftyOrZero()]
+                ];
+
+                $messages = [
+                    "subCategoryId.required" => "為商品選擇分類",
+                    "estimatedPrice.required" => "為商品設定預估價格",
+                    "startingPrice.required" => "為商品設定起標價格",
+                    "startingPrice.App\\Rules\\GreaterThanFiftyOrZero" => "起標價格需大於50或等於0"
+                ];
+                $validator = Validator::make($input, $rules, $messages);
+
+                if ($validator->fails()) {
+                    return response()->json(array(
+                        'success' => false,
+                        'errors' => $validator->getMessageBag()->toArray()
+                    ), 400);
+                }
+
+                $this->lotService->updateBiddingInfo($lotId, $request);
+                break;
         }
+        return response()->json(array(
+            'success' => 'Sucess',
+            'errors' => false
+        ), 200);
     }
 
     public function showAuctions($mainCategoryId)

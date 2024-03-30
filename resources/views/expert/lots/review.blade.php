@@ -4,9 +4,6 @@
     <div class="uk-margin">
         <a href="{{ route('expert.lots.index', $mainCategory->id) }}" class="custom-link"> > 返回物品管理</a>
     </div>
-    <div class="uk-alert-warning" id="validator-alert" uk-alert hidden>
-        <ul id="validator-alert-ul"></ul>
-    </div>
     <div class="uk-margin">
         <div class="uk-card uk-card-default uk-card-body">
             <h3 class="uk-card-title uk-form-label">賣家資料</h3>
@@ -204,6 +201,9 @@
         </li>
     </ul>
     <hr>
+    <div class="uk-alert-warning" id="validator-alert" uk-alert hidden>
+        <ul id="validator-alert-ul"></ul>
+    </div>
     <input id="main-category-id" value="{{ $mainCategory->id }}" hidden>
     <input id="lot-id" value="{{ $lot->id }}" hidden>
     <form class="uk-form-stacked" method="POST"
@@ -225,11 +225,11 @@
             </div>
             <div class="uk-margin">
                 <label class="uk-form-label font-white">預估價格</label>
-                <input class="uk-input" type="number" id="estimated-price" name="estimated_price" value="{{ intval($lot->estimated_price) ?? null }}">
+                <input class="uk-input" type="number" id="estimated-price" name="estimatedPrice" value="{{ intval($lot->estimated_price) ?? null }}">
             </div>
             <div class="uk-margin">
                 <label class="uk-form-label font-white">起標價格</label>
-                <input class="uk-input" type="number" id="starting-price" name="starting_price" value="{{ intval($lot->starting_price) ?? null }}">
+                <input class="uk-input" type="number" id="starting-price" name="startingPrice" value="{{ intval($lot->starting_price) ?? null }}">
             </div>
             <div class="uk-margin">
                 <label class="uk-form-label font-white">給予修改建議</label>
@@ -252,11 +252,24 @@
                 <button type="submit" class="uk-button custom-button-1 handle" action="acceptApplication">審核通過</button>
             </p>
         </div>
-        @if($lot->status == 0)
-        <div class="uk-margin uk-align-right">
-            <a href="#request-revision" rel="modal:open" class="uk-button custom-button-2">要求修改</a>
-            <a href="#accept-application" rel="modal:open" class="uk-button custom-button-1">審核通過</a>
+
+        <div id="update-bidding-info" class="modal">
+            <h2>確定修改嗎？</h2>
+            <p class="uk-text-right">
+                <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
+                <button type="submit" class="uk-button custom-button-1 handle" action="updateBiddingInfo">確定修改</button>
+            </p>
         </div>
+
+        @if($lot->status == 0)
+            <div class="uk-margin uk-align-right">
+                <a href="#request-revision" rel="modal:open" class="uk-button custom-button-2">要求修改</a>
+                <a href="#accept-application" rel="modal:open" class="uk-button custom-button-1">審核通過</a>
+            </div>
+        @elseif($lot->status >= 10 && $lot->status <= 13)
+            <div class="uk-margin uk-align-right">
+                <a href="#update-bidding-info" rel="modal:open" class="uk-button custom-button-1">修改</a>
+            </div>
         @endif
 
     </form>
@@ -267,42 +280,35 @@
 @push('scripts')
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
-        $(document).on('click', '.handle', function(){
-            let mainCategoryId = $('#main-category-id').val();
-            let lotId = $('#lot-id').val();
-            let url = '{{ route("expert.lots.handle", [":mainCategoryId", ":lotId"]) }}';
-            url = url.replace(':mainCategoryId', mainCategoryId);
-            url = url.replace(':lotId', lotId);
+        $(function () {
+            $('.handle').click(function () {
+                let mainCategoryId = $('#main-category-id').val();
+                let lotId = $('#lot-id').val();
+                let url = '{{ route("expert.lots.handle", [":mainCategoryId", ":lotId"]) }}';
+                url = url.replace(':mainCategoryId', mainCategoryId);
+                url = url.replace(':lotId', lotId);
 
-            let redirectUrl = '{{ route("expert.lots.review", [":mainCategoryId", ":lotId"]) }}';
-            redirectUrl = redirectUrl.replace(':mainCategoryId', mainCategoryId);
-            redirectUrl = redirectUrl.replace(':lotId', lotId);
+                let redirectUrl = '{{ route("expert.lots.review", [":mainCategoryId", ":lotId"]) }}';
+                redirectUrl = redirectUrl.replace(':mainCategoryId', mainCategoryId);
+                redirectUrl = redirectUrl.replace(':lotId', lotId);
 
-            let action = $(this).attr('action');
-            let startingPrice = $('#starting-price').val();
-            let estimatedPrice = $('#estimated-price').val();
-            let subCategoryId = $('#sub-category-id').val();
-            let suggestion = $('#suggestion').val();
+                let action = $(this).attr('action');
+                let startingPrice = $('#starting-price').val();
+                let estimatedPrice = $('#estimated-price').val();
+                let subCategoryId = $('#sub-category-id').val();
+                let suggestion = $('#suggestion').val();
 
 
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                type: "post",
-                data: { action:action, startingPrice:startingPrice, estimatedPrice:estimatedPrice, subCategoryId:subCategoryId, suggestion:suggestion, mainCategoryId:mainCategoryId },
-                url: url,
-                success: function (data) {
-                    $.modal.close();
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    type: "post",
+                    data: { action:action, startingPrice:startingPrice, estimatedPrice:estimatedPrice, subCategoryId:subCategoryId, suggestion:suggestion, mainCategoryId:mainCategoryId },
+                    url: url,
+                    success: function (response) {
+                        $.modal.close();
 
-                    if (typeof (data.error) !== 'undefined') {
-                        let errors = Object.values(data.error)
-                        $('#validator-alert').prop('hidden', false);
-                        let validatorAlertUl = $('#validator-alert-ul');
-                        validatorAlertUl.empty();
-                        errors.forEach(i => validatorAlertUl.append($("<li></li>").text(i)));
-                        $('html,body').animate({scrollTop: 0}, 500);
-                    } else {
                         Swal.fire({
                             position: 'center',
                             icon: 'success',
@@ -313,8 +319,16 @@
                         setTimeout(function() {
                             window.location.assign(redirectUrl);
                         }, 1000);
+                    },
+                    error: function (response) {
+                        $.modal.close();
+                        let errors = merge_errors(response)
+                        let validatorAlert = $('#validator-alert');
+                        validatorAlert.empty();
+                        validatorAlert.prop('hidden', false);
+                        validatorAlert.append(errors);
                     }
-                }
+                });
             });
         });
     </script>

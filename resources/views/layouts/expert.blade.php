@@ -22,6 +22,7 @@
         <script src="{{ asset('js/jquery-3.6.0/jquery.min.js') }}"></script>
         <script src="{{ asset('extensions/uikit-3.15.19/js/uikit.min.js') }}"></script>
         <script src="{{ asset('extensions/uikit-3.15.19/js/uikit-icons.min.js') }}"></script>
+        <script src="{{ asset('js/custom.js') }}?v={{$version}}"></script>
         <script src="{{ asset('extensions/sweetalert2/js/sweetalert2.min.js') }}"></script>
         @stack('scripts')
     </head>

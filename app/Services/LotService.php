@@ -149,7 +149,7 @@ class LotService extends LotRepository
 
     public function ajaxCreateAuctionGetLots($mainCategory)
     {
-        $lots = $mainCategory->lots->whereBetween('status', [10, 19]);
+        $lots = $mainCategory->lots->whereBetween('status', [10, 13]);
 
         $datatable = DataTables::of($lots)
             ->addColumn('selection', function ($lot)
@@ -255,6 +255,20 @@ class LotService extends LotRepository
             'suggestion' => $request->suggestion
         ]);
         $lot->status = 1;
+        $lot->save();
+        return $lot;
+    }
+
+    public function updateBiddingInfo($lotId, $request)
+    {
+        $lot = $this->getLot($lotId);
+        if($request->subCategoryId !== null) {
+            $this->syncCategoryLot($lotId, [$request->mainCategoryId, $request->subCategoryId]);
+        }
+        $lot->update([
+            'estimated_price' => $request->estimatedPrice,
+            'starting_price' => $request->startingPrice,
+        ]);
         $lot->save();
         return $lot;
     }
