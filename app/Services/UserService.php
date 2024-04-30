@@ -325,7 +325,7 @@ class UserService extends UserRepository
         $count = 0;
         $user = $this->getUser($userId);
         $count += UserRepository::getLotNoticeCount([23, 24, 25], $userId);
-        foreach ($user->ownLots as $lot) {
+        foreach ($user->ownLots->where('entrust', 0) as $lot) {
             if($lot->order != null) {
                 if($lot->order->messages->count() != 0) {
                     $count += $lot->order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();

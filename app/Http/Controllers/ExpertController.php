@@ -26,7 +26,7 @@ class ExpertController extends Controller
         DomainService $domainService,
         DefaultSpecificationTitleService $defaultSpecificationTitleService,
         LotService $lotService,
-        AuctionService $auctionService
+        AuctionService $auctionService,
     ) {
         $this->userService = $userService;
         $this->categoryService = $categoryService;
@@ -347,14 +347,15 @@ class ExpertController extends Controller
 
         $lot = $this->lotService->getLot($lotId);
         if( $lot->status == 30) {
-            $type = 2;
+            $type = 2; //無人競標退回
+            CustomClass::sendTemplateNotice($lot->owner_id, 5, 0, $lot->id);
         } else { #35
-            $type = 3;
+            $type = 3; //放棄付款退回
+            CustomClass::sendTemplateNotice($lot->owner_id, 5, 1, $lot->id);
         }
         $this->lotService->returnLot($request, $lotId, $type);
 
 
-        CustomClass::sendTemplateNotice($lot->owner_id, 5, 0, $lot->id);
 
     }
 

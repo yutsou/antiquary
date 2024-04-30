@@ -163,11 +163,7 @@ class MartController extends Controller
 
     public function test()
     {
-        $rules = array();
-        $rules = ['a'=>1];
-        $rules['a'] = 2;
 
-        dd($rules);
     }
 
     public function creditCardInfoCheck($orderId)
@@ -190,8 +186,14 @@ class MartController extends Controller
             $result = $this->gomypayService->checkTransactionStatus($request, $order);
 
             if($result === 1) {#check pay is valid
-                $this->orderService->hasPaid($request, $order->id);
-                return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
+                if($order->status == 10) {
+                    $this->orderService->hasPaid($request, $order->id);
+                    return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
+                } else {
+                    $this->orderService->hasPaid($request, $order->id, 50);
+                    return $this->showWarning('爭議', '付款逾時，請通知管理員');
+                }
+
             } else {
                 return $this->showWarning('付款失敗', '付款檢查錯誤，請通知管理員');
             }

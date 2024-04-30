@@ -93,6 +93,9 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::post('/orders/{orderId}/notice-remit', [AuctioneerController::class, 'noticeRemit'])->name('auctioneer.orders.notice_remit');
 
     Route::post('/orders/{orderId}/notice-confirm-atm-pay', [AuctioneerController::class, 'noticeConfirmAtmPay'])->name('auctioneer.orders.notice_confirm_atm_pay');
+    Route::post('/orders/{orderId}/confirm-paid', [AuctioneerController::class, 'confirmPaid'])->name('auctioneer.orders.confirm_paid');
+    Route::post('/orders/{orderId}/set-withdrawal-bid', [AuctioneerController::class, 'setWithdrawalBid'])->name('auctioneer.orders.set_withdrawal_bid');
+
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');
     Route::get('/orders/{orderId}/member-chatroom', [AuctioneerController::class, 'indexMemberMessages'])->name('auctioneer.orders.member_chatroom_show');

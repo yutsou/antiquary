@@ -62,12 +62,31 @@ class HandlePaymentNotice implements ShouldQueue
                 }
                 CustomClass::sendTemplateNotice($order->lot->owner->id, 2, 3, $order->lot->id, 1);
 
-                if ($order->status === 0) {
-                    $status = 51;
-                } else {
-                    $status = 52;
+                switch (true) {
+                    // 等待確認訂單
+                    case ($order->status == 0):
+                        // 失效 - 未確認訂單
+                        $status = 51;
+                        // 棄標
+                        app(LotService::class)->updateLotStatus(25, $order->lot);
+                        break;
+                    // 等待付款
+                    case ($order->status == 10):
+                        if($order->payment_method == 0) { // credit card
+                            // 付款截止 - 等待確認刷卡狀態
+                            $status = 54;
+                        } else { // f2f
+                            // 付款截止 - 等待確認匯款
+                            $status = 53;
+                        }
+                        break;
+                    // 等待確認匯款
+                    case ($order->status == 11):
+                        // 付款截止 - 等待確認匯款
+                        $status = 53;
+                        break;
                 }
-                app(LotService::class)->updateLotStatus(25, $order->lot);
+
                 app(OrderService::class)->updateOrderStatus($status, $order);
             }
         }

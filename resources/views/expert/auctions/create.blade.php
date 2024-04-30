@@ -51,7 +51,7 @@
                         <thead>
                         <tr>
                             <th>選擇</th>
-                            <th>ID</th>
+                            <th>商品名稱</th>
                             <th>規格</th>
                             <th>狀態</th>
                         </tr>
@@ -102,7 +102,7 @@
                 "columns":
                     [
                         { "data": "selection", "orderable": false},
-                        { "data": "id", "orderable": false},
+                        { "data": "name", "orderable": false},
                         { "data": "specification", "orderable": false},
                         { "data": "status", "orderable": false},
                     ]

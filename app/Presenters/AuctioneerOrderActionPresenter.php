@@ -6,27 +6,32 @@ use Illuminate\Support\Facades\Auth;
 
 class AuctioneerOrderActionPresenter
 {
-    public function modal($buttonName, $content, $modalName, $orderId, $actionUrl, $redirectUrl)
+    public function modal($buttonName, $content, $modalName, $orderId, $actionUrl, $redirectUrl, $type=null)
     {
+        if ($type == null) {
+            $color = "custom-button-1";
+        } else {
+            $color = "custom-button-2";
+        }
         return
         '
         <div id="'.$modalName.'-'.$orderId.'" class="modal">
             <h2>訂單'.$orderId.'，'.$content.'</h2>
             <p class="uk-text-right">
                 <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
-                <button class="uk-button uk-button-primary '.$modalName.'" type="button" orderId="'.$orderId.'" actionUrl="'.$actionUrl.'" redirectUrl="'.$redirectUrl.'">確定</button>
+                <button class="uk-button custom-button-1 uk-button-primary '.$modalName.'" type="button" orderId="'.$orderId.'" actionUrl="'.$actionUrl.'" redirectUrl="'.$redirectUrl.'">確定</button>
             </p>
         </div>
-        <a href="#'.$modalName.'-'.$orderId.'" rel="modal:open" class="uk-button custom-button-1">'.$buttonName.'</a>
+        <a href="#'.$modalName.'-'.$orderId.'" rel="modal:open" class="uk-button '.$color.'">'.$buttonName.'</a>
         ';
     }
 
     public function present($order)
     {
-        switch ($order->status) {
-            case 11:
+        switch (true) {
+            case ($order->status == 11):
                 return $this->modal('通知已收到匯款', '通知已收到匯款嗎？', 'notice-confirm-atm-pay', $order->id, route('auctioneer.orders.notice_confirm_atm_pay', $order), route('auctioneer.orders.index'));
-            case 12:
+            case ($order->status == 12):
                 if($order->lot->entrust == 0){
                     return '<p class="uk-text-right"><a href="'.route('auctioneer.orders.member_chatroom_show', $order).'" class="uk-button custom-button-1">查看對話</a></p>';
 
@@ -38,9 +43,9 @@ class AuctioneerOrderActionPresenter
                         return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
                     }
                 }
-            case 40:
+            case ($order->status == 40):
                 return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
-            case 13:
+            case ($order->status == 13):
                 if($order->lot->entrust == 0){
                     return '';
                 } else {
@@ -57,8 +62,13 @@ class AuctioneerOrderActionPresenter
                             </div>';
                 }
 
-            case 20:
+            case ($order->status == 20):
                 return $this->modal('通知到貨', '通知到貨嗎？', 'notice-arrival', $order->id, route('auctioneer.orders.notice_arrival', $order), route('auctioneer.orders.index'));
+            case ($order->status == 53 || $order->status == 54 || $order->status == 50):
+                return
+                    $this->modal('設為棄標', '確認設為棄標嗎？', 'set-withdrawal-bid', $order->id, route('auctioneer.orders.set_withdrawal_bid', $order), route('auctioneer.orders.index'), 2).
+                    $this->modal('確認已付款', '確認已付款嗎？', 'confirm-paid', $order->id, route('auctioneer.orders.confirm_paid', $order), route('auctioneer.orders.index'))
+                ;
             default:
                 return '';
 

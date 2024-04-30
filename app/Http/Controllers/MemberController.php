@@ -379,21 +379,21 @@ class MemberController extends Controller
 
     public function indexSellingLots()
     {
-        $lots = $this->indexLots(1);
+        $lots = $this->indexLots(1)->sortByDesc('created_at');
         return CustomClass::viewWithTitle(view('account.selling_lots.index')->with('lots', $lots), '正在委賣的物品');
     }
 
     public function indexFinishedLots()
     {
         $user = $this->userService->getUser(Auth::user()->id);
-        $lots = $this->lotService->getFinishedLots($user);
+        $lots = $this->lotService->getFinishedLots($user)->sortByDesc('created_at');
         return CustomClass::viewWithTitle(view('account.finished_lots.index')->with('lots', $lots), '完成委賣的物品');
     }
 
     public function indexReturnedLots()
     {
         $user = $this->userService->getUser(Auth::user()->id);
-        $lots = $this->lotService->getReturnedLots($user);
+        $lots = $this->lotService->getReturnedLots($user)->sortByDesc('created_at');
         return CustomClass::viewWithTitle(view('account.returned_lots.index')->with('lots', $lots), '退回的物品');
     }
 

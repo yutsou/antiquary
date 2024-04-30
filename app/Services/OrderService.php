@@ -103,14 +103,16 @@ class OrderService extends OrderRepository
         return $order->logisticRecords->where('type', $type)->first();
     }
 
-    public function hasPaid($request, $orderId)
+    public function hasPaid($request, $orderId, $status=null)
     {
         $order = $this->getOrder($orderId);
 
-        if($order->delivery_method === 0) {
-            $status = 12;
-        } else {
-            $status = 13;
+        if($status == null) {
+            if($order->delivery_method === 0) {
+                $status = 12;
+            } else {
+                $status = 13;
+            }
         }
 
         $input = [
@@ -121,6 +123,20 @@ class OrderService extends OrderRepository
         ];
 
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
+    }
+
+    public function duePaid($orderId, $status=null)
+    {
+        $order = $this->getOrder($orderId);
+
+        if($order->status == 53) {
+            $transactionRecord = $order->orderRecords()->where('status', 11)->first()->transactionRecord->toArray();
+        } else {
+            $transactionRecord = $order->orderRecords()->where('status', 50)->first()->transactionRecord->toArray();
+        }
+
+
+        OrderRepository::updateOrderStatusWithTransaction($transactionRecord, $status, $orderId);
     }
 
     public function ajaxGetOrders()
@@ -183,8 +199,12 @@ class OrderService extends OrderRepository
     public function noticeRemit($request, $orderId, $type)
     {
         $order = $this->getOrder($orderId);
-        if($type == 0) {
-            $status = 11;
+        if($type == 0) { // 得標者通知已ATM付款
+            if($order->status == 10) {
+                $status = 11; // 等待確認匯款
+            } else {
+                $status = 50; // 爭議
+            }
             $input = [
                 'status' => $status,
                 'payment_method' => 1,

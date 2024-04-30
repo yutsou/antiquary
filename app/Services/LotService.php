@@ -156,9 +156,9 @@ class LotService extends LotRepository
             {
                 return '<label><input class="uk-checkbox" type="checkbox" name="lots[]" value="'.$lot->id.'"></label>';
             })
-            ->addColumn('id', function ($lot)
+            ->addColumn('name', function ($lot)
             {
-                return $lot->id;
+                return $lot->name;
             })
             ->addColumn('specification', function ($lot)
             {
@@ -415,7 +415,7 @@ class LotService extends LotRepository
         LotRepository::update($input, $lotId);
     }
 
-    public function returnedLotLogistic($request, $lotId)
+    public function returnedLotLogistic($request, $lotId) //1: 下架
     {
         $input = [
             'addressee_name' => $request->addressee_name,
@@ -455,7 +455,7 @@ class LotService extends LotRepository
         $lot->bidRecords()->delete();
     }
 
-    public function returnLot($request, $lotId, $type)#1 下架 2 流標退回
+    public function returnLot($request, $lotId, $type)#0: 寄給拍賣會 1: 物品退回 2: 無人競標退回 3: 未付款退回
     {
         $input = [
             'company_name' => $request->company_name,

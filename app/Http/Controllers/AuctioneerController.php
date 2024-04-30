@@ -188,6 +188,30 @@ class AuctioneerController extends Controller
         return back()->with('notification', '通知成功');
     }
 
+    public function confirmPaid($orderId)
+    {
+        $order = $this->orderService->getOrder($orderId);
+        switch (true)
+        {
+            // 面交
+            case ($order->delivery_method == 0):
+                $status = 12;
+                break;
+            case ($order->delivery_method == 1 || $order->delivery_method == 2):
+                $status = 13;
+        }
+        $this->orderService->duePaid($orderId, $status);
+        //$this->orderService->updateOrderStatus($status, $order);
+    }
+
+    public function setWithdrawalBid($orderId)
+    {
+        $order = $this->orderService->getOrder($orderId);
+        $this->orderService->updateOrderStatus(52, $order); // 失效 - 付款逾期
+        $lot = $order->lot;
+        $this->lotService->updateLotStatus(25, $lot); // 棄標
+    }
+
     public function indexMessages($orderId)
     {
         $order = $this->orderService->getOrder($orderId);

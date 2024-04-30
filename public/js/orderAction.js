@@ -84,3 +84,35 @@ $(document).on('click', '.notice-confirm-atm-pay', function(){
         }
     });
 });
+
+$(document).on('click', '.set-withdrawal-bid', function(){
+    let orderId = $(this).attr('orderId');
+    let actionUrl = $(this).attr('actionUrl');
+    let redirectUrl = $(this).attr('redirectUrl');
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: "post",
+        url: actionUrl,
+        success: function () {
+            window.location.assign(redirectUrl);
+        }
+    });
+});
+
+$(document).on('click', '.confirm-paid', function(){
+    let orderId = $(this).attr('orderId');
+    let actionUrl = $(this).attr('actionUrl');
+    let redirectUrl = $(this).attr('redirectUrl');
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: "post",
+        url: actionUrl,
+        success: function () {
+            window.location.assign(redirectUrl);
+        }
+    });
+});
