@@ -43,7 +43,7 @@ class HandlePaymentNotice implements ShouldQueue
             if ($type === 0) {
                 CustomClass::sendTemplateNotice($order->user_id, 6, 0, $order->id, 1, 1);
                 if(config('app.env') == 'production') {
-                    HandlePaymentNotice::dispatch($order, 1)->delay(Carbon::now()->days(3));
+                    HandlePaymentNotice::dispatch($order, 1)->delay(Carbon::now()->addDays(4));
                 } else {
                     HandlePaymentNotice::dispatch($order, 1)->delay(Carbon::now()->addSeconds(120));
                 }
@@ -51,9 +51,9 @@ class HandlePaymentNotice implements ShouldQueue
                 if ($order->user->status === 0) {
                     HandleUserStatus::dispatch(1, $order->user);#第一階短暫封鎖
                     if(config('app.env') == 'production') {
-                        HandleUserStatus::dispatch(2, $order->user)->delay(Carbon::now()->days(7));#第一階封鎖解鎖
+                        HandleUserStatus::dispatch(2, $order->user)->delay(Carbon::now()->addDays(7));#第一階封鎖解鎖
                     } else {
-                        HandleUserStatus::dispatch(2, $order->user)->delay(Carbon::now()->addSeconds(180));#第一階封鎖解鎖
+                        HandleUserStatus::dispatch(2, $order->user)->delay(Carbon::now()->addSeconds(210));#第一階封鎖解鎖
                     }
                     CustomClass::sendTemplateNotice($order->user_id, 6, 1, $order->id, 1, 1);
                 } elseif($order->user->status === 2) { #status 2

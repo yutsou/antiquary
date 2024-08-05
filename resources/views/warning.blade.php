@@ -8,7 +8,7 @@
         <h1 class="uk-heading-medium">{{ $head }}</h1>
     </div>
     <div class="uk-margin">
-        <p>{{ $message }}</p>
+        <h2>{{ $message }}</h2>
     </div>
 @endsection
 

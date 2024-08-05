@@ -46,8 +46,13 @@ class Kernel extends HttpKernel
 
         'validMember' => [
             \App\Http\Middleware\Authenticate::class,
-            \App\Http\Middleware\EnsureIsMember::class,
-            \App\Http\Middleware\EnsureMemberIsValid::class
+            \App\Http\Middleware\EnsureMemberIsValid::class,
+        ],
+
+        'ownership' => [
+            \App\Http\Middleware\OrderOwnership::class,
+            \App\Http\Middleware\LotOwnership::class,
+            \App\Http\Middleware\ChatOwnership::class
         ],
     ];
 

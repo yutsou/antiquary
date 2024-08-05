@@ -64,11 +64,12 @@
                                         <div class="uk-child-width-1-3" id="main-image-preview"></div>
                                     </div>
                                     <div class="js-upload" uk-form-custom>
-                                        <input type="file" id="main-image" name="mainImage">
+                                        <input type="file" id="main-image" name="mainImage" accept="image/jpeg, image/png">
                                         <button class="uk-button uk-button-default custom-color-group-1" type="button"
                                                 tabindex="-1">選擇圖片
                                         </button>
                                     </div>
+                                    <div class="uk-text-meta">支援的圖片格式：jpg、png</div>
                                 </div>
                             </div>
                             <div class="uk-margin">
@@ -79,11 +80,12 @@
                                              uk-grid></div>
                                     </div>
                                     <div class="js-upload" uk-form-custom>
-                                        <input type="file" multiple id="gallery-photo-add" name="images[]">
+                                        <input type="file" multiple id="gallery-photo-add" name="images[]" accept="image/jpeg, image/png">
                                         <button class="uk-button uk-button-default custom-color-group-1" type="button"
                                                 tabindex="-1">選擇圖片
                                         </button>
                                     </div>
+                                    <div class="uk-text-meta">支援的圖片格式：jpg、png</div>
                                 </div>
                             </div>
                         </div>

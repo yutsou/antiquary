@@ -42,7 +42,12 @@ class OrderService extends OrderRepository
 
         OrderRepository::createOrderRecord(0, $order->id);
 
-        HandlePaymentNotice::dispatch($order, 0)->delay(Carbon::now()->addSeconds(120));
+        if(config('app.env') == 'production') {
+            HandlePaymentNotice::dispatch($order, 0)->delay(Carbon::now()->addDays(3));
+        } else {
+            HandlePaymentNotice::dispatch($order, 0)->delay(Carbon::now()->addSeconds(90));
+        }
+
 
         return $order;
     }

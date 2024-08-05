@@ -39,7 +39,7 @@ class MemberOrderActionPresenter
                     return '
                     <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
                         <div>
-                            <a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交地點時間</a>
+                            <span class="uk-badge" style="background-color: #d62828;"></span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1">協調面交資訊</a>
                         </div>
                         <div>
                             <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>
@@ -50,7 +50,7 @@ class MemberOrderActionPresenter
                     return '
                     <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
                         <div>
-                            <span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交地點時間</a>
+                            <span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交資訊</a>
                         </div>
                         <div>
                             <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>

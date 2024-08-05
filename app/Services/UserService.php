@@ -322,19 +322,33 @@ class UserService extends UserRepository
 
     public function getOwnerSellingLotNoticeCount($userId)
     {
-        $count = 0;
         $user = $this->getUser($userId);
-        $count += UserRepository::getLotNoticeCount([23, 24, 25], $userId);
-        foreach ($user->ownLots->where('entrust', 0) as $lot) {
-            if($lot->order != null) {
-                if($lot->order->messages->count() != 0) {
-                    $count += $lot->order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
-                }
-            }
-        }
-        return $count;
+        $count = UserRepository::getLotNoticeCount([23, 24, 25], $userId);
 
+        $noEntrustLots = $user->ownLots->where('entrust', 0);
+
+        foreach ($noEntrustLots->where('status', 22) as $lot) {
+            $order = $lot->order;
+
+            $unreadMessageCount = 0;
+            if($order->messages->count() != 0) {
+                $unreadMessageCount = $lot->order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
+            }
+
+            if ($unreadMessageCount == 0) {
+                if($order->status == 12) {
+                    $count ++;
+                }
+            } else {
+                $count += $unreadMessageCount;
+            }
+
+        }
+
+        return $count;
     }
+
+
 
     public function getOrderLotNoticeCount($userId)
     {

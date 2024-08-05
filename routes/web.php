@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\MartController;
+use App\Http\Middleware\ChatOwnership;
 use App\Http\Middleware\EnsureMemberIsValid;
 use App\Http\Middleware\EnsureSellerIsValid;
+use App\Http\Middleware\LotOwnership;
+use App\Http\Middleware\OrderOwnership;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\MemberController;
@@ -66,9 +69,6 @@ Route::post('/pay/gomypay/callback', [MartController::class, 'payGomypayCallback
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [AuthController::class, 'switchRole'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    Route::get('/orders/{orderId}/chatroom', [MartController::class, 'indexMessages'])->name('mart.chatroom.show');
-    Route::post('/orders/{orderId}/messages', [MartController::class, 'sendMessage'])->name('mart.messages.send');
     Route::post('/messages/{messageId}/haveRead', [MartController::class, 'haveRead'])->name('mart.messages.haveRead');
 });
 
@@ -99,6 +99,7 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');
     Route::get('/orders/{orderId}/member-chatroom', [AuctioneerController::class, 'indexMemberMessages'])->name('auctioneer.orders.member_chatroom_show');
+
 
     Route::get('/promotions', [AuctioneerController::class, 'indexPromotions'])->name('auctioneer.promotions.index');
     Route::post ('/promotions', [AuctioneerController::class, 'updatePromotion'])->name('auctioneer.promotions.update');
@@ -161,63 +162,62 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class, Ensure
     #application
     Route::get('/applications/create', [MemberController::class, 'createLot'])->name('account.applications.create');
     Route::post('/applications', [MemberController::class, 'storeLot'])->name('account.applications.store');
-    Route::get('/applications/{lotId}', [MemberController::class, 'editLot'])->name('account.applications.edit');
-    Route::post('/applications/{lotId}', [MemberController::class, 'updateLot'])->name('account.applications.update');
     Route::get('/applications', [MemberController::class, 'indexApplications'])->name('account.applications.index');
-    Route::get('/applications/{lotId}/logistic-info', [MemberController::class, 'createApplicationLogisticInfo'])->name('account.application_logistic_info.create');
-    Route::post('/applications/{lotId}/application-logistic-info/store', [MemberController::class, 'storeApplicationLogisticInfo'])->name('account.application_logistic_info.store');
-
     #selling lots
     Route::get('/lots', [MemberController::class, 'indexSellingLots'])->name('account.selling_lots.index');
-    Route::get('/unsold-lots/{lotId}', [MemberController::class, 'editUnsoldLot'])->name('account.unsold_lots.edit');
-    Route::post('/unsold-lots/{lotId}', [MemberController::class, 'handleUnsoldLot'])->name('account.unsold_lots.handle');
     #finished lots
     Route::get('/finished-lots', [MemberController::class, 'indexFinishedLots'])->name('account.finished_lots.index');
-
     #returned lots
     Route::get('/returned-lots', [MemberController::class, 'indexReturnedLots'])->name('account.returned_lots.index');
-    Route::get('/returned-lots/{lotId}', [MemberController::class, 'editReturnedLot'])->name('account.returned_lots.edit');
-    Route::post('/returned-lots/{lotId}', [MemberController::class, 'updateReturnedLot'])->name('account.returned_lots.update');
-
-
-
 });
 Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->group(function () {
 #Route::prefix('account')->group(function () {
     Route::get('/', [MemberController::class, 'showDashboard'])->name('account');
-
-
     Route::get('/favorites', [MemberController::class, 'showFavorites'])->name('account.favorites.index');
-
     Route::get('/orders', [MemberController::class, 'indexOrders'])->name('account.orders.index');
+    Route::get('/biding-lots', [MemberController::class, 'indexBiddingLots'])->name('account.bidding_lots.index');
+    Route::get('/ajax/main-categories/{mainCategoryId}/sub-categories', [MemberController::class, 'ajaxSubCategories'])->name('account.ajax.sub_categories.get');
+    Route::post('/ajax/lots/{lotId}/favorite', [MemberController::class, 'ajaxHandleFavorite'])->name('account.ajax.favorite.handle');
+    Route::post('/axios/lots/manual_bid', [MemberController::class, 'manualBid']);
+    Route::post('/axios/lots/auto_bid', [MemberController::class, 'autoBid']);
+    Route::get('/bind', [AuthController::class, 'showBind'])->name('account.bind.show');
+    Route::get('/notices', [MemberController::class, 'indexNotices'])->name('account.notices.index');
+    Route::get('/unread-notices', [MemberController::class, 'indexUnreadNotices'])->name('account.unread_notices.index');
+});
+
+Route::prefix('account')->middleware(['auth', LotOwnership::class])->group(function () {
+    Route::get('/applications/{lotId}', [MemberController::class, 'editLot'])->name('account.applications.edit');
+    Route::post('/applications/{lotId}', [MemberController::class, 'updateLot'])->name('account.applications.update');
+    Route::get('/applications/{lotId}', [MemberController::class, 'editLot'])->name('account.applications.edit');
+    Route::post('/applications/{lotId}', [MemberController::class, 'updateLot'])->name('account.applications.update');
+    Route::get('/applications/{lotId}/logistic-info', [MemberController::class, 'createApplicationLogisticInfo'])->name('account.application_logistic_info.create');
+    Route::post('/applications/{lotId}/application-logistic-info/store', [MemberController::class, 'storeApplicationLogisticInfo'])->name('account.application_logistic_info.store');
+    Route::get('/unsold-lots/{lotId}', [MemberController::class, 'editUnsoldLot'])->name('account.unsold_lots.edit');
+    Route::post('/unsold-lots/{lotId}', [MemberController::class, 'handleUnsoldLot'])->name('account.unsold_lots.handle');
+    Route::get('/returned-lots/{lotId}', [MemberController::class, 'editReturnedLot'])->name('account.returned_lots.edit');
+    Route::post('/returned-lots/{lotId}', [MemberController::class, 'updateReturnedLot'])->name('account.returned_lots.update');
+
+});
+
+Route::prefix('account')->middleware(['auth', OrderOwnership::class])->group(function () {
     Route::get('/orders/{orderId}', [MemberController::class, 'showOrder'])->name('account.orders.show');
     Route::get('/orders/{orderId}/edit', [MemberController::class, 'editOrder'])->name('account.orders.edit');
     Route::post('/orders/{orderId}', [MemberController::class, 'updateOrder'])->name('account.orders.update');
-
     Route::post('/orders/{orderId}/confirm', [MemberController::class, 'confirmOrder'])->name('account.orders.confirm');
     Route::get('/orders/{orderId}/pay', [MemberController::class, 'pay'])->name('account.orders.pay');
     Route::get('/orders/{orderId}/atm-pay-info', [MemberController::class, 'showAtmPayInfo'])->name('account.atm_pay_info.show');
     Route::post('/orders/{orderId}/notice-atm-pay', [MemberController::class, 'noticeAtmPay'])->name('account.atm_pay.notice');
     Route::post('/orders/{orderId}/complete', [MemberController::class, 'completeOrder'])->name('account.orders.complete');
-
     Route::post('/orders/{orderId}/notice-shipping', [MemberController::class, 'noticeShipping'])->name('account.orders.notice_shipping');
     Route::get('/orders/{orderId}/shipping-info', [MemberController::class, 'showShippingInfo'])->name('account.orders.show_shipping_info');
     Route::post('/orders/{orderId}/notice-arrival', [MemberController::class, 'noticeArrival'])->name('account.orders.notice_arrival');
-
     Route::get('/orders/{orderId}/credit-card-info/check', [MartController::class, 'creditCardInfoCheck'])->name('account.credit_card_info.check');
-
-    Route::get('/biding-lots', [MemberController::class, 'indexBiddingLots'])->name('account.bidding_lots.index');
-
-    Route::get('/ajax/main-categories/{mainCategoryId}/sub-categories', [MemberController::class, 'ajaxSubCategories'])->name('account.ajax.sub_categories.get');
-    Route::post('/ajax/lots/{lotId}/favorite', [MemberController::class, 'ajaxHandleFavorite'])->name('account.ajax.favorite.handle');
-    Route::post('/axios/lots/manual_bid', [MemberController::class, 'manualBid']);
-    Route::post('/axios/lots/auto_bid', [MemberController::class, 'autoBid']);
-
-    Route::get('/bind', [AuthController::class, 'showBind'])->name('account.bind.show');
-
-    Route::get('/notices', [MemberController::class, 'indexNotices'])->name('account.notices.index');
-    Route::get('/unread-notices', [MemberController::class, 'indexUnreadNotices'])->name('account.unread_notices.index');
 });
+
+Route::prefix('account')->middleware(['auth', ChatOwnership::class])->group(function () {
+    Route::get('/orders/{orderId}/chatroom', [MartController::class, 'indexMessages'])->name('mart.chatroom.show');
+});
+Route::post('/orders/{orderId}/messages', [MartController::class, 'sendMessage'])->name('mart.messages.send');
 
 Route::prefix('account')->middleware('auth')->group(function () {
     Route::get('/profile', [MemberController::class, 'editProfile'])->name('account.profile.edit');
@@ -241,13 +241,4 @@ Route::get('/bidding-notes', [MartController::class, 'showBiddingNotes'])->name(
 Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->name('mart.privacy-policy.show');
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
-
-
-Route::get('/test-lot/delete/{lotId}', [MemberController::class, 'testLotDelete']);
-Route::get('/test-user/delete/{userId}', [MemberController::class, 'testUserDelete']);
-Route::get('/test/schedule', [MemberController::class, 'testSchedule']);
-Route::post('postTest', [MemberController::class, 'postTest']);
-Route::get('/test', [MartController::class, 'test']);
-Route::post('/testCallback', [MartController::class, 'testCallback'])->name('testCallback');
-Route::get('/testReturn', [MartController::class, 'testReturn'])->name('testReturn');
 

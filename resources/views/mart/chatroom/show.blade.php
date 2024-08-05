@@ -2,7 +2,7 @@
 @inject('orderStatusPresenter', 'App\Presenters\OrderStatusPresenter')
 @section('content')
     <div class="uk-margin uk-text-small">
-        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.orders.index') }}" class="custom-color-1 custom-link-mute">已得標的物品</a>
+        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.orders.index') }}" class="custom-color-1 custom-link-mute">已得標的物品</a> > <a href="{{ route('account.orders.show', $order) }}" class="custom-color-1 custom-link-mute">訂單#{{ $order->id }}</a> > <a href="{{ route('mart.chatroom.show', $order) }}" class="custom-color-1 custom-link-mute">聊天室</a>
     </div>
     <div class="uk-margin-medium">
         <h1 class="uk-heading-medium">{{ $head }}</h1>

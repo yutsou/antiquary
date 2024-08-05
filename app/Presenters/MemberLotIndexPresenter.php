@@ -32,9 +32,7 @@ class MemberLotIndexPresenter
                         <div class="uk-margin uk-flex uk-flex-right">
                             <div class="uk-grid-small" uk-grid>
                                 <div>
-                                    <div class="uk-margin uk-flex uk-flex-right">
-                                        '.$this->getAction($lot).'
-                                    </div>
+                                    '.$this->getAction($lot).'
                                 </div>
                             </div>
                         </div>
@@ -113,9 +111,9 @@ class MemberLotIndexPresenter
                         if($lot->entrust == 0) {
                             $count = $order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
                             if($count == 0) {
-                                return '<button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'">協調面交地點</button>';
+                                return '<span class="uk-badge" style="background-color: #d62828;"></span><button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'"><span uk-icon="commenting"></span> 協調面交資訊</button>';
                             } else {
-                                return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'">協調面交地點</button>';
+                                return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><button class="uk-button custom-button-1 communication" orderId="'.$lot->order->id.'"><span uk-icon="commenting"></span> 協調面交資訊</button>';
                             }
                         } else {
                             return '以 NT$'.number_format($lot->current_bid).' 賣出';

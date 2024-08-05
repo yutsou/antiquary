@@ -110,8 +110,10 @@ class MartController extends Controller
         $this->orderService->haveRead($messageId);
     }
 
-    public function showWarning($title, $message)
+    public function showWarning(Request $request)
     {
+        $title = $request->session()->get('title', 'Warning');
+        $message = $request->session()->get('message', 'An unexpected error occurred.');
         return CustomClass::viewWithTitle(view('warning')->with('message', $message), $title);
     }
 
@@ -132,7 +134,7 @@ class MartController extends Controller
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
-        $lots = $sCategory->lots->whereIn('status', [20,21]);
+        $lots = $sCategory->lots->whereIn('status', [20,21])->sortBy('auction_end_at');
         return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 
@@ -191,14 +193,20 @@ class MartController extends Controller
                     return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
                 } else {
                     $this->orderService->hasPaid($request, $order->id, 50);
-                    return $this->showWarning('爭議', '付款逾時，請通知管理員');
+                    return redirect()->route('mart.warning.show')->with('title', '爭議')->with('message', '付款逾時，請通知管理員');
+
+                    //return $this->showWarning('爭議', '付款逾時，請通知管理員');
                 }
 
             } else {
-                return $this->showWarning('付款失敗', '付款檢查錯誤，請通知管理員');
+                return redirect()->route('mart.warning.show')->with('title', '付款失敗')->with('message', '付款檢查錯誤，請通知管理員');
+
+                //return $this->showWarning('付款失敗', '付款檢查錯誤，請通知管理員');
             }
         } else {
-            return $this->showWarning('付款失敗', $request->ret_msg);
+            return redirect()->route('mart.warning.show')->with('title', '付款失敗')->with('message', $request->ret_msg);
+
+            //return $this->showWarning('付款失敗', $request->ret_msg);
         }
     }
 

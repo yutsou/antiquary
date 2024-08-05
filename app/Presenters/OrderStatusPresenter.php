@@ -52,8 +52,6 @@ class OrderStatusPresenter
                     $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
                     if ($order->payment_method === 0) {
                         $statusHtml = $statusHtml . '<br>萬事達付款編號：' . $orderRecord->transactionRecord->system_order_id . ' 金額NT$' . number_format($orderRecord->transactionRecord->amount);
-                    } else {
-                        $statusHtml = $statusHtml . '<br>帳號後五碼：' . $orderRecord->transactionRecord->remitter_account . ' 匯款金額NT$' . number_format($orderRecord->transactionRecord->amount);
                     }
                     break;
                 case ($orderRecord->status == 41):
