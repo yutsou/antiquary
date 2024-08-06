@@ -201,7 +201,31 @@ class AuctioneerController extends Controller
                 $status = 13;
                 break;
         }
-        $this->orderService->updateOrderStatus($status, $order);
+        $transactionRecord = $order->orderRecords->last()->transactionRecord;
+
+        switch (true)
+        {
+            case ($order->payment_method == 0):
+                $input = [
+                    'payment_method' => $transactionRecord->payment_method,
+                    'system_order_id' => $transactionRecord->system_order_id,
+                    'av_code' => $transactionRecord->av_code,
+                    'amount' => $transactionRecord->amount
+                ];
+                break;
+            case ($order->payment_method == 1):
+                $input = [
+                    'payment_method' => $transactionRecord->payment_method,
+                    'amount'=>$transactionRecord->amount,
+                    'remitter_id'=>$transactionRecord->remitter_id,
+                    'remitter_account'=>$transactionRecord->remitter_account,
+                    'payee_id'=>$transactionRecord->payee_id
+                ];
+                break;
+        }
+
+
+        $this->orderService->updateOrderStatusWithTransaction($input, $status, $orderId);
     }
 
     public function confirmRefillTransferInfo($orderId)
@@ -214,7 +238,7 @@ class AuctioneerController extends Controller
     public function setWithdrawalBid($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        $this->orderService->updateOrderStatus(52, $order); // 失效 - 付款逾期
+        $this->orderService->updateOrderStatus(51, $order); // 失效 - 付款逾期
         $lot = $order->lot;
         $this->lotService->updateLotStatus(25, $lot); // 棄標
     }

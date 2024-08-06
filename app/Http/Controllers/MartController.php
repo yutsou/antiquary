@@ -193,7 +193,7 @@ class MartController extends Controller
                     $this->orderService->hasPaid($request, $order->id);
                     return redirect()->route('account.orders.show', $order->id)->with('notification', '付款完成');
                 } else {
-                    $this->orderService->hasPaid($request, $order->id, 50);
+                    $this->orderService->hasPaid($request, $order->id, 53);
                     return redirect()->route('mart.warning.show')->with('title', '爭議')->with('message', '付款逾時，請通知管理員');
 
                     //return $this->showWarning('爭議', '付款逾時，請通知管理員');

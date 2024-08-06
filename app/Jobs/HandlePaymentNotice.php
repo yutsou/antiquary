@@ -39,7 +39,7 @@ class HandlePaymentNotice implements ShouldQueue
         $order = $this->order;
         $type = $this->type;#0: stage1 notice, 1: stage2 notice
 
-        if ($order->status === 0 or $order->status === 10 or $order->status === 11) {
+        if ($order->status === 0 or $order->status === 10) {
             if ($type === 0) {
                 CustomClass::sendTemplateNotice($order->user_id, 6, 0, $order->id, 1, 1);
                 if(config('app.env') == 'production') {
@@ -66,24 +66,13 @@ class HandlePaymentNotice implements ShouldQueue
                     // 等待確認訂單
                     case ($order->status == 0):
                         // 失效 - 未確認訂單
-                        $status = 51;
+                        $status = 50;
                         // 棄標
                         app(LotService::class)->updateLotStatus(25, $order->lot);
                         break;
                     // 等待付款
                     case ($order->status == 10):
-                        if($order->payment_method == 0) { // credit card
-                            // 付款截止 - 等待確認刷卡狀態
-                            $status = 54;
-                        } else { // f2f
-                            // 付款截止 - 等待確認匯款
-                            $status = 53;
-                        }
-                        break;
-                    // 等待確認匯款
-                    case ($order->status == 11):
-                        // 付款截止 - 等待確認匯款
-                        $status = 53;
+                        $status = 51;
                         break;
                 }
 

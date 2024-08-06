@@ -13,7 +13,7 @@ class OrderStatusPresenter
             1 => ['等待付款', '等待確認匯款', '付款完成，等待面交', '付款完成，等待出貨'],
             2 => ['已出貨', '等待買家確認物品'],
             4 => ['訂單已完成', '已匯款給賣家'],
-            5 => ['爭議', '失效 - 未確認訂單', '失效 - 付款逾期', '付款截止 - 等待確認匯款', '付款截止 - 等待確認刷卡狀態']
+            5 => ['失效 - 未確認訂單', '失效 - 付款逾期', '爭議 - 等待確認匯款', '爭議 - 等待確認刷卡狀態', '']
         };
         return $statusList[$status];
     }
@@ -44,11 +44,11 @@ class OrderStatusPresenter
         foreach($order->orderRecords as $orderRecord) {
             $statusHtml = '<tr><td class="uk-table-expand">';
             switch (true) {
-                case ($orderRecord->status == 11):
+                case ($orderRecord->status == 11 || $orderRecord->status == 52):
                     $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
                     $statusHtml = $statusHtml . '<br>帳號後五碼：' . $orderRecord->transactionRecord->remitter_account . ' 匯款金額NT$' . number_format($orderRecord->transactionRecord->amount);
                     break;
-                case ($orderRecord->status == 12 || $orderRecord->status == 50):
+                case ($orderRecord->status == 12 || $orderRecord->status == 53):
                     $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
                     if ($order->payment_method === 0) {
                         $statusHtml = $statusHtml . '<br>萬事達付款編號：' . $orderRecord->transactionRecord->system_order_id . ' 金額NT$' . number_format($orderRecord->transactionRecord->amount);

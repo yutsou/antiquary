@@ -195,7 +195,7 @@ class OrderService extends OrderRepository
             if($order->status == 10) {
                 $status = 11; // 等待確認匯款
             } else {
-                $status = 50; // 爭議
+                $status = 52; // 爭議 - 等待確認匯款
             }
             $input = [
                 'status' => $status,
