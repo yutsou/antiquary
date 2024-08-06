@@ -94,6 +94,7 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
 
     Route::post('/orders/{orderId}/notice-confirm-atm-pay', [AuctioneerController::class, 'noticeConfirmAtmPay'])->name('auctioneer.orders.notice_confirm_atm_pay');
     Route::post('/orders/{orderId}/confirm-paid', [AuctioneerController::class, 'confirmPaid'])->name('auctioneer.orders.confirm_paid');
+    Route::post('/orders/{orderId}/confirm-refill-transfer-info', [AuctioneerController::class, 'confirmRefillTransferInfo'])->name('auctioneer.orders.confirm_refill_transfer_info');
     Route::post('/orders/{orderId}/set-withdrawal-bid', [AuctioneerController::class, 'setWithdrawalBid'])->name('auctioneer.orders.set_withdrawal_bid');
 
 
@@ -242,3 +243,4 @@ Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->nam
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
 
+Route::get('/test/order/{lotId}', [MartController::class, 'test'])->name('test.order.create');

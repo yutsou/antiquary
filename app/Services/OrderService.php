@@ -23,6 +23,7 @@ class OrderService extends OrderRepository
     {
         $now = Carbon::now();
 
+
         $commission = $this->getCommission($lot);
         $premium = $this->getPremium($lot);
 
@@ -128,20 +129,6 @@ class OrderService extends OrderRepository
         ];
 
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
-    }
-
-    public function duePaid($orderId, $status=null)
-    {
-        $order = $this->getOrder($orderId);
-
-        if($order->status == 53) {
-            $transactionRecord = $order->orderRecords()->where('status', 11)->first()->transactionRecord->toArray();
-        } else {
-            $transactionRecord = $order->orderRecords()->where('status', 50)->first()->transactionRecord->toArray();
-        }
-
-
-        OrderRepository::updateOrderStatusWithTransaction($transactionRecord, $status, $orderId);
     }
 
     public function ajaxGetOrders()

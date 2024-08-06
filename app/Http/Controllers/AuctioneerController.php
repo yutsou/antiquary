@@ -199,9 +199,16 @@ class AuctioneerController extends Controller
                 break;
             case ($order->delivery_method == 1 || $order->delivery_method == 2):
                 $status = 13;
+                break;
         }
-        $this->orderService->duePaid($orderId, $status);
-        //$this->orderService->updateOrderStatus($status, $order);
+        $this->orderService->updateOrderStatus($status, $order);
+    }
+
+    public function confirmRefillTransferInfo($orderId)
+    {
+        $order = $this->orderService->getOrder($orderId);
+        $status = 10;
+        $this->orderService->updateOrderStatus($status, $order);
     }
 
     public function setWithdrawalBid($orderId)

@@ -163,9 +163,10 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('bidding_notes'), '競標須知');
     }
 
-    public function test()
+    public function test($lotId)
     {
-
+        $lot=$this->lotService->getLot($lotId);
+        $this->orderService->createOrder($lot);
     }
 
     public function creditCardInfoCheck($orderId)

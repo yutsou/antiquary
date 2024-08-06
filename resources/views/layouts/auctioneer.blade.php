@@ -4,7 +4,7 @@
 <html>
     <head>
         <title>{{ $title }}</title>
-        <meta {{ $version = '03' }}>
+        <meta {{ $version = '04' }}>
         <!-- Meta -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">

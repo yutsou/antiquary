@@ -64,15 +64,22 @@ class AuctioneerOrderActionPresenter
 
             case ($order->status == 20):
                 return $this->modal('通知到貨', '通知到貨嗎？', 'notice-arrival', $order->id, route('auctioneer.orders.notice_arrival', $order), route('auctioneer.orders.index'));
-            case ($order->status == 53 || $order->status == 54 || $order->status == 50):
+            case ($order->status == 50):
                 return
                     $this->modal('設為棄標', '確認設為棄標嗎？', 'set-withdrawal-bid', $order->id, route('auctioneer.orders.set_withdrawal_bid', $order), route('auctioneer.orders.index'), 2).
                     $this->modal('確認已付款', '確認已付款嗎？', 'confirm-paid', $order->id, route('auctioneer.orders.confirm_paid', $order), route('auctioneer.orders.index'))
-                ;
+                    ;
+            case ($order->status == 53):
+                return
+                    $this->modal('設為棄標', '確認設為棄標嗎？', 'set-withdrawal-bid', $order->id, route('auctioneer.orders.set_withdrawal_bid', $order), route('auctioneer.orders.index'), 2).
+                    $this->modal('讓賣家填寫匯款資訊', '確認讓賣家填寫匯款資訊嗎？', 'confirm-refill-transfer-info', $order->id, route('auctioneer.orders.confirm_refill_transfer_info', $order), route('auctioneer.orders.index'))
+                    ;
+            case ($order->status == 54):
+                return
+                    $this->modal('設為棄標', '確認設為棄標嗎？', 'set-withdrawal-bid', $order->id, route('auctioneer.orders.set_withdrawal_bid', $order), route('auctioneer.orders.index'), 2)
+                    ;
             default:
                 return '';
-
-
         }
 
         /*if($order->lot->entrust === 0) {

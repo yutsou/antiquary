@@ -85,6 +85,21 @@ $(document).on('click', '.notice-confirm-atm-pay', function(){
     });
 });
 
+$(document).on('click', '.confirm-refill-transfer-info', function(){
+    let orderId = $(this).attr('orderId');
+    let actionUrl = $(this).attr('actionUrl');
+    let redirectUrl = $(this).attr('redirectUrl');
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: "post",
+        url: actionUrl,
+        success: function () {
+            window.location.assign(redirectUrl);
+        }
+    });
+});
 $(document).on('click', '.set-withdrawal-bid', function(){
     let orderId = $(this).attr('orderId');
     let actionUrl = $(this).attr('actionUrl');
