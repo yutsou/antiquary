@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\CustomFacades\CustomClass;
@@ -50,12 +51,18 @@ class AuthController extends Controller
         $validator = Validator::make($input, $rules, $messages);
 
         if ($validator->fails()) {
-            return redirect('/register')->withErrors($validator)->withInput();
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 422); // 400 being the HTTP code for an invalid request.
         }
 
         $this->userService->register($request);
 
-        return redirect('/account');
+        return Response::json(array(
+            'success' => route('account'),
+            'errors' => false
+        ), 200);
     }
 
     static function showLogin($redirectUrl=null)
@@ -73,7 +80,17 @@ class AuthController extends Controller
 
         $redirect = $this->userService->login($request, $credentials);
 
-        return $redirect;
+        if ($redirect) {
+            return response()->json([
+                'success' => $redirect,
+                'errors' => false
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'errors' => ['email' => ['電子郵件或密碼輸入錯誤']]
+            ], 422);
+        }
     }
 
     public function logout(Request $request)
@@ -85,7 +102,7 @@ class AuthController extends Controller
     public function switchRole()
     {
         $redirect = $this->userService->switchRole();
-        return $redirect;
+        return redirect($redirect);
     }
 
     public function generateLineVerifyCode()

@@ -6,7 +6,10 @@
             <div class="uk-margin-medium">
                 <h1 class="uk-heading-medium">{{ $head }}</h1>
             </div>
-            <form class="uk-form-stacked" method="POST" action="{{ route('login') }}">
+            <div class="uk-alert-warning" id="validator-alert" uk-alert hidden>
+                <ul id="validator-alert-ul"></ul>
+            </div>
+            <form class="uk-form-stacked" id="login-form">
                 @csrf
                 <input type="hidden" name="redirectUrl" value="{{ $redirectUrl ?? '' }}">
                 <input type="hidden" name="linkToken" value="{{ request()->get('linkToken') ?? '' }}">
@@ -14,7 +17,7 @@
                 <div class="uk-margin">
                     <label class="uk-form-label" for="email">電子郵件</label>
                     <div class="uk-form-controls">
-                        <input type="email" class="uk-input" id="email" name="email" value="{{ old('email') }}" required>
+                        <input type="email" class="uk-input" id="email" name="email" required>
                     </div>
                 </div>
 
@@ -22,7 +25,7 @@
                     <label class="uk-form-label" for="password">密碼</label>
                     <div class="uk-form-controls">
                         <input type="password" class="uk-input" id="password" name="password" required
-                               autocomplete="new-password">
+                               autocomplete="password">
                     </div>
                 </div>
 
@@ -30,16 +33,11 @@
                     <a class="uk-link-text " href="{{ route('auth.password_forgot.show') }}">忘記密碼？</a>
                 </div>
                 <div class="uk-margin">
-                    <button type="submit" class="uk-button custom-button-1 uk-width-1-1">登入</button>
+                    <button class="g-recaptcha uk-button custom-button-1 uk-width-1-1"
+                            data-sitekey="6Lce1CAqAAAAAGoDOkmLMxcKOBQEkYb_EQbwQqwg"
+                            data-callback='onSubmit'
+                            data-action='submit'>登入</button>
                 </div>
-                @if ($errors->has('warning'))
-                    <div uk-alert>
-                        <a class="uk-alert-close" uk-close></a>
-                        @foreach ($errors->get('warning') as $error)
-                            <p class="custom-color-2">{{ $error }}</p>
-                        @endforeach
-                    </div>
-                @endif
             </form>
             <div class="separator">或是</div>
             <div class="uk-margin">
@@ -60,3 +58,64 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+        function onSubmit(token) {
+            $('#login-form').submit();
+        }
+
+        $(function () {
+            $('#login-form').submit(function (e) {
+                e.preventDefault();
+                let inputData = new FormData(this);
+
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    type: "post",
+                    url: '{{ route('login') }}',
+                    data: inputData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        Swal.fire({
+                            position: 'center',
+                            icon: 'success',
+                            title: '登入成功',
+                            showConfirmButton: false,
+                        })
+
+                        function successAction(response) {
+                            window.location.replace(response.success);
+                        }
+
+                        setTimeout(function () {
+                            successAction(response);
+                        }, 1000);
+                    },
+                    error: function (response) {
+                        Swal.close();
+                        let errors = mergeErrors(response);
+                        let validatorAlert = $('#validator-alert');
+                        validatorAlert.prop('hidden', false);
+                        let validatorAlertUl = $('#validator-alert-ul');
+                        validatorAlertUl.empty();
+                        validatorAlertUl.append(errors);
+                        $('html,body').animate({scrollTop: 0}, 500);
+                    }
+                });
+            });
+
+            function mergeErrors(response) {
+                let errors = response.responseJSON.errors;
+                let errorList = '';
+                $.each(errors, function (key, value) {
+                    errorList += '<li>' + value[0] + '</li>';
+                });
+                return errorList;
+            }
+        });
+    </script>
+@endpush

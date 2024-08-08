@@ -24,10 +24,9 @@ function number_format (number, decimals, dec_point, thousands_sep) {
 
 function merge_errors (response) {
     let errors = response.responseJSON.errors;
-    let errorString = '<ul class="uk-list">';
+    let errorString = '';
     $.each( errors, function( key, value) {
         errorString += '<li>' + value + '</li>';
     });
-    errorString += '</ul>';
     return errorString
 }

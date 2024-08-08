@@ -34,10 +34,12 @@ Route::get('/m-categories/{mCategoryId}', [MartController::class, 'showMCategory
 Route::get('/m-categories/{mCategoryId}/s-categories/{sCategoryId}', [MartController::class, 'showSCategory'])->name('mart.s_categories.show');
 
 #Auth
-Route::get('/register', [AuthController::class, 'showRegister']);
-Route::get('/login/{redirectUrl?}', [AuthController::class, 'showLogin'])->name('login.show');
-Route::post('/login/{redirectUrl?}', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister']);
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login.show');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+});
 
 #Auth Line
 Route::get('/auth/line/login', [AuthController::class, 'redirectLineLogin'])->name('auth.line.login');

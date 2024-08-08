@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
+use PhpOption\None;
 use Yajra\DataTables\DataTables;
 class UserService extends UserRepository
 {
@@ -36,7 +37,7 @@ class UserService extends UserRepository
                 $request->session()->regenerate();
                 if(isset($request->redirectUrl)) {
                     $redirectUrl = str_replace('_', '/', $request->redirectUrl);
-                    return redirect($redirectUrl);
+                    return $redirectUrl;
                 } else {
                     return $this->switchRole();
                 }
@@ -46,30 +47,30 @@ class UserService extends UserRepository
                 $request->session()->regenerate();
                 if(isset($request->redirectUrl)) {
                     $redirectUrl = str_replace('_', '/', $request->redirectUrl);
-                    return redirect($redirectUrl);
+                    return $redirectUrl;
                 } else {
                     return $this->switchRole();
                 }
             }
         }
 
-        return back()->withErrors([
-            'warning' => '電子郵件或密碼錯誤',
-        ])->withInput();
+        return false;
     }
 
     public function logout($request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if(Auth::check()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
     }
 
     public function switchRole()
     {
         $role = Auth::user()->role;
-        $redirects = ['/auctioneer/dashboard', '/expert/dashboard', '/account', '/account'];
-        return redirect($redirects[$role]);
+        $redirects = [route('auctioneer.dashboard'), route('expert.dashboard'), route('account'), route('account')];
+        return $redirects[$role];
     }
 
     public function createUser($request, $role)
