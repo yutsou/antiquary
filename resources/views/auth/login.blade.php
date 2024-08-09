@@ -9,6 +9,13 @@
             <div class="uk-alert-warning" id="validator-alert" uk-alert hidden>
                 <ul id="validator-alert-ul"></ul>
             </div>
+            @if ($errors->has('warning'))
+                <div class="uk-alert-warning" id="validator-alert" uk-alert>
+                    <ul id="validator-alert-ul">
+                        <li>{{ $errors->get('warning')[0] }}</li>
+                    </ul>
+                </div>
+            @endif
             <form class="uk-form-stacked" id="login-form">
                 @csrf
                 <input type="hidden" name="redirectUrl" value="{{ $redirectUrl ?? '' }}">

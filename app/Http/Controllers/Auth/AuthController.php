@@ -220,7 +220,7 @@ class AuthController extends Controller
                 return redirect()->route('account');
             } else {
                 return redirect()->route('login')->withErrors([
-                    'warning' => 'Google 無綁定的帳號',
+                    'warning' => '沒有與這個Google帳號綁定的帳號',
                 ]);
             }
         }
@@ -243,6 +243,10 @@ class AuthController extends Controller
         $oauthUser = $this->lineService->getUserProfile($response['access_token']);
 
         $user = $this->userService->getUserByOauth('line', $oauthUser['userId']);
+
+        if($user == null) {
+            return redirect()->route('login')->withErrors(['warning' => '沒有與這個LINE帳號綁定的帳號']);
+        }
 
         Auth::login($user);
 
