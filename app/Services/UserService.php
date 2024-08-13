@@ -35,26 +35,12 @@ class UserService extends UserRepository
         if (isset($request->remember)) {
             if (Auth::attempt($credentials, $request->remember)) {
                 $request->session()->regenerate();
-                if(isset($request->redirectUrl)) {
-                    $redirectUrl = str_replace('_', '/', $request->redirectUrl);
-                    return $redirectUrl;
-                } else {
-                    return $this->switchRole();
-                }
             }
         } else {
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
-                if(isset($request->redirectUrl)) {
-                    $redirectUrl = str_replace('_', '/', $request->redirectUrl);
-                    return $redirectUrl;
-                } else {
-                    return $this->switchRole();
-                }
             }
         }
-
-        return false;
     }
 
     public function logout($request)
@@ -66,11 +52,20 @@ class UserService extends UserRepository
         }
     }
 
+    public function afterLoginRedirect($redirectUrl)
+    {
+        if ($redirectUrl == null) {
+            return $this->switchRole();
+        } else {
+            return $redirectUrl;
+        }
+    }
+
     public function switchRole()
     {
         $role = Auth::user()->role;
         $redirects = [route('auctioneer.dashboard'), route('expert.dashboard'), route('account'), route('account')];
-        return $redirects[$role];
+        return redirect()->intended($redirects[$role])->getTargetUrl();
     }
 
     public function createUser($request, $role)

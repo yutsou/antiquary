@@ -15,7 +15,12 @@
         </script>
     @endif
     <div class="uk-margin uk-text-small">
-        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('mart.m_categories.show', $mCategory->id) }}" class="custom-color-1 custom-link-mute">{{ $mCategory->name }}</a> > <a href="{{ route('mart.s_categories.show', [$mCategory->id, $sCategory->id]) }}" class="custom-color-1 custom-link-mute">{{ $sCategory->name }}</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
+        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a
+            href="{{ route('mart.m_categories.show', $mCategory->id) }}"
+            class="custom-color-1 custom-link-mute">{{ $mCategory->name }}</a> > <a
+            href="{{ route('mart.s_categories.show', [$mCategory->id, $sCategory->id]) }}"
+            class="custom-color-1 custom-link-mute">{{ $sCategory->name }}</a> > <a href="{{ URL::current() }}"
+                                                                                    class="custom-color-1 custom-link-mute">{{ $head }}</a>
     </div>
     <div class="uk-margin">
         <div>
@@ -42,11 +47,13 @@
                     <div class="uk-margin">
                         <div class="uk-flex uk-flex-center">
                             <div style="overflow-x: scroll; height: 120px;">
-                                <ul class="uk-thumbnav uk-slider-items uk-grid-small" uk-grid style="touch-action: auto !important;">
+                                <ul class="uk-thumbnav uk-slider-items uk-grid-small" uk-grid
+                                    style="touch-action: auto !important;">
                                     @foreach($lot->images as $key=>$image)
                                         <li uk-slideshow-item="{{ $key }}">
                                             <a href="#">
-                                                <img src="{{ $image->url }}" alt="" style="width: auto; height: 100px; object-fit: cover;">
+                                                <img src="{{ $image->url }}" alt=""
+                                                     style="width: auto; height: 100px; object-fit: cover;">
                                             </a>
                                         </li>
                                     @endforeach
@@ -57,14 +64,13 @@
                 </div>
                 <div class="uk-margin-medium">
                     <div class="uk-text-right">
-                        @auth
+                        @if(Auth::check())
                             <a class="custom-link" id="favorite">
                                 @if(Auth::user()->getFavoriteAttribute($lot->id) == false)
                                     <span id="favoriteStatus" class="google-icon">
                                         <span class="material-symbols-outlined uk-text-middle">favorite</span>
                                         <span id="favoriteStatusText" class="uk-text-middle">加到追蹤清單</span>
                                     </span>
-
                                 @else
                                     <span id="favoriteStatus" class="google-icon-fill">
                                         <span class="material-symbols-outlined uk-text-middle">favorite</span>
@@ -72,8 +78,7 @@
                                     </span>
                                 @endif
                             </a>
-                        @endauth
-                        @guest
+                        @else
                             <a href="#favorite-login-notice" class="custom-link" uk-toggle>
                                  <span id="favoriteStatus" class="google-icon">
                                     <span class="material-symbols-outlined uk-text-middle">favorite</span>
@@ -86,16 +91,18 @@
                                     <h2 class="uk-modal-title">物品加入追蹤清單前需要先登入</h2>
                                     <div class="uk-flex uk-flex-right">
                                         <a class="uk-button custom-button-1"
-                                           href="{{ route('login.show', ['redirectUrl'=>'lots_'.$lot->id]) }}">登入</a>
+                                           href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a>
                                     </div>
                                 </div>
                             </div>
-                        @endguest
+                        @endif
+
                     </div>
                 </div>
                 <div class="uk-visible@m">
                     <div class="uk-margin">
-                        <div class="custom-color-group-1"><h3 style="color: #fff; padding: 0.5em 0 0.5em 1em;">商品規格</h3>
+                        <div class="custom-color-group-1">
+                            <h3 style="color: #fff; padding: 0.5em 0 0.5em 1em;">商品規格</h3>
                         </div>
                         <table class="uk-table">
                             <tbody>
@@ -113,7 +120,8 @@
                         </table>
                     </div>
                     <div class="uk-margin">
-                        <div class="custom-color-group-1"><h3 style="color: #fff; padding: 0.5em 0 0.5em 1em;">商品詳情</h3>
+                        <div class="custom-color-group-1"><h3 style="color: #fff; padding: 0.5em 0 0.5em 1em;">
+                                商品詳情</h3>
                         </div>
                         <div style="box-sizing: border-box; border-right: 1em #fff solid; border-left: 1em #fff solid">
                             <p>
@@ -125,7 +133,8 @@
             </div>
 
             <div class="uk-width-expand@m">
-                <div class="uk-text-center custom-color-group-1"><h3 style="color: #fff; padding: 0.5em 0 0.5em 0;">競標資訊</h3></div>
+                <div class="uk-text-center custom-color-group-1"><h3 style="color: #fff; padding: 0.5em 0 0.5em 0;">
+                        競標資訊</h3></div>
                 <div class="uk-flex uk-flex-center">
                     <div style="box-sizing: border-box; border-right: 1em #fff solid; border-left: 1em #fff solid">
                         <div class="uk-margin">
@@ -137,51 +146,52 @@
                                     @if($carbon->between($lot->auction_start_at, $lot->auction_end_at))
                                         <input id="auction-status" value="1" hidden>
                                         <div class="uk-grid-small uk-child-width-auto" id="lot-countdown" uk-grid
-                                             end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}" auction-end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}">
-                                    @else
-                                        <input id="auction-status" value="2" hidden>
-                                        <div class="uk-grid-small uk-child-width-auto" uk-grid hidden>
-                                    @endif
+                                             end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}"
+                                             auction-end-at="{{ $lot->auction_end_at->toIso8601ZuluString('millisecond') }}">
+                                            @else
+                                                <input id="auction-status" value="2" hidden>
+                                                <div class="uk-grid-small uk-child-width-auto" uk-grid hidden>
+                                                    @endif
 
-                                    <div>將於</div>
-                                    <div>
-                                        <div class="uk-countdown-number countdown-days"
-                                             style="font-size: 1em"></div>
-                                        <div
-                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
-                                            style="font-size: 1em">天
-                                        </div>
-                                    </div>
-                                    <div class="uk-countdown-separator" style="font-size: 1em">:</div>
-                                    <div>
-                                        <div class="uk-countdown-number countdown-hours"
-                                             style="font-size: 1em"></div>
-                                        <div
-                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
-                                            style="font-size: 1em">時
-                                        </div>
-                                    </div>
-                                    <div class="uk-countdown-separator" style="font-size: 1em">:</div>
-                                    <div>
-                                        <div class="uk-countdown-number countdown-minutes"
-                                             style="font-size: 1em"></div>
-                                        <div
-                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
-                                            style="font-size: 1em">分
-                                        </div>
-                                    </div>
-                                    <div class="uk-countdown-separator" style="font-size: 1em">:</div>
-                                    <div>
-                                        <div class="uk-countdown-number countdown-seconds"
-                                             style="font-size: 1em"></div>
-                                        <div
-                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
-                                            style="font-size: 1em">秒
-                                        </div>
-                                    </div>
-                                    <div>後結束競標</div>
-                                    </div>
-                                @endif
+                                                    <div>將於</div>
+                                                    <div>
+                                                        <div class="uk-countdown-number countdown-days"
+                                                             style="font-size: 1em"></div>
+                                                        <div
+                                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
+                                                            style="font-size: 1em">天
+                                                        </div>
+                                                    </div>
+                                                    <div class="uk-countdown-separator" style="font-size: 1em">:</div>
+                                                    <div>
+                                                        <div class="uk-countdown-number countdown-hours"
+                                                             style="font-size: 1em"></div>
+                                                        <div
+                                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
+                                                            style="font-size: 1em">時
+                                                        </div>
+                                                    </div>
+                                                    <div class="uk-countdown-separator" style="font-size: 1em">:</div>
+                                                    <div>
+                                                        <div class="uk-countdown-number countdown-minutes"
+                                                             style="font-size: 1em"></div>
+                                                        <div
+                                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
+                                                            style="font-size: 1em">分
+                                                        </div>
+                                                    </div>
+                                                    <div class="uk-countdown-separator" style="font-size: 1em">:</div>
+                                                    <div>
+                                                        <div class="uk-countdown-number countdown-seconds"
+                                                             style="font-size: 1em"></div>
+                                                        <div
+                                                            class="uk-countdown-label uk-margin-small uk-text-center uk-visible@s"
+                                                            style="font-size: 1em">秒
+                                                        </div>
+                                                    </div>
+                                                    <div>後結束競標</div>
+                                                </div>
+                                            @endif
                                         </div>
                                         <hr>
                                         <div class="uk-margin">
@@ -216,11 +226,13 @@
                                             <label style="font-size: 14px">拍賣手續費: {{ $premium }}</label>
                                             <br>
                                             @if($lot->estimated_price != 0)
-                                                <label style="font-size: 14px">預估價格 - NT$<span id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
+                                                <label style="font-size: 14px">預估價格 - NT$<span
+                                                        id="estimatedPrice">{{ number_format($lot->estimated_price) }}</span></label>
                                                 <br>
                                             @endif
                                             @if($lot->starting_price != 0)
-                                                <label style="font-size: 14px">起標價格 - NT$<span>{{ number_format($lot->starting_price) }}</span></label>
+                                                <label style="font-size: 14px">起標價格 -
+                                                    NT$<span>{{ number_format($lot->starting_price) }}</span></label>
                                             @endif
                                             <input id="starting-price" value="{{ $lot->starting_price }}" hidden>
                                         </div>
@@ -228,7 +240,8 @@
                                         <hr>
 
                                         <div class="uk-margin uk-flex uk-flex-center">
-                                            <label>目前價格: NT$<span id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
+                                            <label>目前價格: NT$<span
+                                                    id="currentBid">{{ number_format($lot->current_bid) }}</span></label>
                                         </div>
                                         <hr>
                                         <div class="uk-margin">
@@ -237,11 +250,7 @@
                                                     @auth
                                                         <input id="bidInput" hidden>
                                                         <div id="next-bids-field" class="uk-width-1-1"></div>
-
                                                     @endauth
-                                                    @guest
-
-                                                    @endguest
                                                 </div>
                                             </div>
                                         </div>
@@ -273,20 +282,23 @@
                                                                 <h2 class="uk-modal-title">自動出價前需要先登入</h2>
                                                                 <div class="uk-flex uk-flex-right">
                                                                     <a class="uk-button custom-button-1"
-                                                                       href="{{ route('login.show', ['redirectUrl'=>'lots_'.$lot->id]) }}">登入</a>
+                                                                       href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a>
                                                                 </div>
 
                                                             </div>
                                                         </div>
-                                                    @endguest
-                                                </div>
+                                                    @endguest                                                </div>
                                             </div>
-                                            @auth
-                                                <div id="my-auto-bid-section" {{ Auth::user()->getLotAutoBid($lot->id) === null? "hidden" : "" }}>
+
+                                            @if(Auth::check())
+                                                <div
+                                                    id="my-auto-bid-section" {{ Auth::user()->getLotAutoBid($lot->id) === null ? "hidden" : "" }}>
                                                     <label style="font-size: 0.9em">您的自動出價 - NT$
-                                                        <span id="my-auto-bid">{{ number_format(optional(Auth::user()->getLotAutoBid($lot->id))->bid) ?? '' }}</span></label>
+                                                        <span
+                                                            id="my-auto-bid">{{ number_format(optional(Auth::user()->getLotAutoBid($lot->id))->bid) ?? '' }}</span></label>
                                                 </div>
-                                            @endauth
+                                            @endif
+
 
                                         </div>
                                         <div class="uk-overflow-auto" style="max-height: 30vh;">
@@ -294,16 +306,12 @@
                                                 <tbody id="bidHistories" style="font-size: 0.8em">
                                                 @foreach($lot->bidRecords as $bidRecord)
                                                     <tr>
-                                                        @auth
-                                                            @if($bidRecord->bidder_id === Auth::user()->id)
-                                                                <td>你</td>
-                                                            @else
-                                                                <td class="uk-text-nowrap">競標者 {{ $bidRecord->bidder_alias }}</td>
-                                                            @endif
-                                                        @endauth
-                                                        @guest
-                                                            <td class="uk-text-nowrap">競標者 {{ $bidRecord->bidder_alias }}</td>
-                                                        @endguest
+                                                        @if(Auth::check() && $bidRecord->bidder_id === Auth::user()->id)
+                                                            <td>你</td>
+                                                        @else
+                                                            <td class="uk-text-nowrap">
+                                                                競標者 {{ $bidRecord->bidder_alias }}</td>
+                                                        @endif
 
 
                                                         <td style="font-size: 0.8em">{{ $bidRecord->created_at }}</td>
@@ -343,7 +351,8 @@
                             </table>
                         </li>
                         <li>
-                            <div style="box-sizing: border-box; border-right: 1em #fff solid; border-left: 1em #fff solid">
+                            <div
+                                style="box-sizing: border-box; border-right: 1em #fff solid; border-left: 1em #fff solid">
                                 <p>
                                     {!! nl2br($lot->description) !!}
                                 </p>
@@ -363,14 +372,16 @@
 
                     <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
 
-                        <ul class="uk-slider-items uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid" >
+                        <ul class="uk-slider-items uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid">
                             @foreach($auction->lots as $singleLot)
                                 @if($singleLot->id != $lot->id)
                                     <li>
-                                        <div class="uk-card uk-card-default uk-card-hover lot-card-click" lotId="{{ $singleLot->id }}">
+                                        <div class="uk-card uk-card-default uk-card-hover lot-card-click"
+                                             lotId="{{ $singleLot->id }}">
                                             <div class="uk-card-media-top">
-                                                <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                                     style="background-image: url({{ $singleLot->images->first()->url }});">
+                                                <div
+                                                    class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
+                                                    style="background-image: url({{ $singleLot->images->first()->url }});">
                                                 </div>
                                             </div>
                                             <div class="uk-card-body">
@@ -378,7 +389,8 @@
                                                     @include('mart.components.favorite-inline', $singleLot)
                                                 </div>
                                                 <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
-                                                <label class="custom-font-medium" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
+                                                <label class="custom-font-medium"
+                                                       style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
                                                 <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
                                             </div>
                                         </div>
@@ -400,12 +412,14 @@
                 </div>
                 <div class="uk-slider-container-offset" uk-slider="finite: true">
                     <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
-                        <ul class="uk-slider-items  uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid" >
+                        <ul class="uk-slider-items  uk-child-width-1-4@l uk-child-width-1-3@m  uk-child-width-1-2@s uk-grid-small uk-grid-match uk-grid">
                             @foreach($auctions->whereIn('status', [0,1]) as $auction)
                                 <li>
-                                    <div class="uk-card uk-card-default uk-card-hover auction-card-click" auctionId="{{ $auction->id }}">
+                                    <div class="uk-card uk-card-default uk-card-hover auction-card-click"
+                                         auctionId="{{ $auction->id }}">
                                         <div class="uk-card-media-top">
-                                            <img src="{{ $auction->lots->first()->images->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                            <img src="{{ $auction->lots->first()->images->first()->url }}" alt=""
+                                                 style="width: 100vw; height: 300px; object-fit: cover;">
                                         </div>
                                         <div class="uk-card-body">
                                             <h3 class="uk-card-title">{{ $auction->name }}</h3>
@@ -423,7 +437,8 @@
     <input id="bidderId" value="{{ optional(Auth::user())->id }}" hidden>
 @endsection
 @push('style')
-    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}"
+          crossorigin="anonymous">
     <style>
         .uk-active > a {
             border-bottom: 2px solid #003a6c !important;
@@ -470,8 +485,8 @@
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
         class UnitDate {
-            constructor (date) {
-                let { userAgent } = window.navigator;
+            constructor(date) {
+                let {userAgent} = window.navigator;
                 if (userAgent.includes('Safari')) {
                     if (typeof date === 'string') {
                         date = date.replace(/-/g, '/');
@@ -512,12 +527,12 @@
             if (bid === 0 && startingPriceInt !== 0) {
                 bid = startingPriceInt;
                 firstBid = bid;
-                secondBid = bid+bidRule(bid);
-                thirdBid = secondBid+bidRule(secondBid);
+                secondBid = bid + bidRule(bid);
+                thirdBid = secondBid + bidRule(secondBid);
             } else {
-                firstBid = bid+bidRule(bid);
-                secondBid = firstBid+bidRule(firstBid);
-                thirdBid = secondBid+bidRule(secondBid);
+                firstBid = bid + bidRule(bid);
+                secondBid = firstBid + bidRule(firstBid);
+                thirdBid = secondBid + bidRule(secondBid);
             }
 
 
@@ -526,23 +541,23 @@
 
         let generateModalwithButton = function (bid) {
             return '' +
-            '<a data-modal="#confirm-manual-bid-modal-'+bid+'" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="'+bid+'">出價NT$'+number_format(bid)+'</a>' +
-            '<div id="confirm-manual-bid-modal-'+bid+'" class="modal">' +
-                '<h3>確認出價 NT$'+number_format(bid)+'</h3>' +
-                '<p class="uk-text-left">出價金額不包含運費及拍賣服務費用。</p>'+
+                '<a data-modal="#confirm-manual-bid-modal-' + bid + '" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="' + bid + '">出價NT$' + number_format(bid) + '</a>' +
+                '<div id="confirm-manual-bid-modal-' + bid + '" class="modal">' +
+                '<h3>確認出價 NT$' + number_format(bid) + '</h3>' +
+                '<p class="uk-text-left">出價金額不包含運費及拍賣服務費用。</p>' +
                 '<div class="uk-grid-small uk-flex uk-flex-right" uk-grid>' +
-                    '<div><a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a></div>' +
-                    '<div><a class="uk-button custom-button-1 bids">確認</a></div>' +
+                '<div><a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a></div>' +
+                '<div><a class="uk-button custom-button-1 bids">確認</a></div>' +
                 '</div>' +
-            '</div>';
+                '</div>';
         }
 
-        let setNextBids = function(bid) {
+        let setNextBids = function (bid) {
             let nextBids = getNextBids(bid);
             let nextBidsField = $('#next-bids-field');
             nextBidsField.empty();
 
-            nextBids.forEach(function(bid){
+            nextBids.forEach(function (bid) {
                 nextBidsField.append(
                     generateModalwithButton(bid)
                 );
@@ -551,16 +566,16 @@
             $('#bidInput').val();
         }
 
-        let setInputPlaceholder = function(bid) {
+        let setInputPlaceholder = function (bid) {
             let autoBidInput = $("#autoBidInput");
             let startingPriceString = $("#starting-price").val();
             let startingPriceInt = parseInt(startingPriceString);
             let text = "";
 
             if (bid === 0 && startingPriceInt !== 0) {
-                text = "自動出價：最低 NT$"+number_format(startingPriceInt);
+                text = "自動出價：最低 NT$" + number_format(startingPriceInt);
             } else {
-                text = "自動出價：最低 NT$"+(bid+bidRule(bid)).toString();
+                text = "自動出價：最低 NT$" + (bid + bidRule(bid)).toString();
             }
 
             autoBidInput.attr("placeholder", text);
@@ -593,7 +608,7 @@
                     icon: 'warning',
                     title: '出價成功，但未達底價',
                     html:
-                        '<p style="color: #666">'+success.data.text+'</p>',
+                        '<p style="color: #666">' + success.data.text + '</p>',
                     showConfirmButton: false,
                     timer: 5000
                 })
@@ -653,12 +668,12 @@
                 'bidderId': bidderId,
                 'bid': bidInput
             })
-            .then(function (response) {
-                successResponse(response);
-            })
-            .catch(function (response) {
-               failedResponse(response);
-            });
+                .then(function (response) {
+                    successResponse(response);
+                })
+                .catch(function (response) {
+                    failedResponse(response);
+                });
         };
 
         let autoBid = function (lotId, autoBidInput) {
@@ -669,24 +684,24 @@
                 'bidderId': bidderId,
                 'bid': autoBidInput
             })
-            .then(function (response) {
-                $('#my-auto-bid').text(number_format(parseInt(response.data.myAutoBid)));
-                $('#my-auto-bid-section').prop('hidden', false);
-                successResponse(response);
-            })
-            .catch(function (response) {
-                failedResponse(response);
-            });
+                .then(function (response) {
+                    $('#my-auto-bid').text(number_format(parseInt(response.data.myAutoBid)));
+                    $('#my-auto-bid-section').prop('hidden', false);
+                    successResponse(response);
+                })
+                .catch(function (response) {
+                    failedResponse(response);
+                });
         };
     </script>
     <script>
-        let setLotCountdown = function(countdown){
+        let setLotCountdown = function (countdown) {
             const second = 1000,
                 minute = second * 60,
                 hour = minute * 60,
                 day = hour * 24;
 
-            function freshCountdown(countdown, dueTime){
+            function freshCountdown(countdown, dueTime) {
                 let now = new Date().getTime();
                 let distance = dueTime - now;
 
@@ -709,7 +724,7 @@
                 }
             }
 
-            let timer = setInterval(function() {
+            let timer = setInterval(function () {
                 let dueTimeIso = countdown.attr('end-at');
                 let dueTime = new Date(dueTimeIso).getTime();
                 freshCountdown(countdown, dueTime)
@@ -740,12 +755,11 @@
                 $('#nextBid').text(number_format(parseInt(e.bid) + bidRule(parseInt(e.bid))));
 
 
-
                 let lotCountdown = $('#lot-countdown');
                 console.log(lotCountdown.attr('auction-end-at'));
                 console.log(e.auction_end_at);
 
-                if (e.auction_end_at !==  lotCountdown.attr('auction-end-at')) {
+                if (e.auction_end_at !== lotCountdown.attr('auction-end-at')) {
                     lotCountdown.attr('end-at', e.auction_end_at);
                     Swal.fire({
                         icon: 'info',
@@ -765,21 +779,21 @@
                 addFavorite({{ $lot->id }});
             });
 
-            $(document).on('click', '.confirm-manual-bid-buttons', function() {
+            $(document).on('click', '.confirm-manual-bid-buttons', function () {
                 let bid = $(this).attr('bid');
-                $('#confirm-manual-bid-modal-'+bid).modal();
+                $('#confirm-manual-bid-modal-' + bid).modal();
                 $('#bidInput').val(bid);
                 return false;
             });
 
-            $("#confirmAutoBidButton").click(function(event) {
+            $("#confirmAutoBidButton").click(function (event) {
                 $(this).modal();
                 let bidInput = $('#autoBidInput').val();
-                $('#confirmAutoBidTitle').text('確認設定自動出價 NT$'+number_format(bidInput));
+                $('#confirmAutoBidTitle').text('確認設定自動出價 NT$' + number_format(bidInput));
                 return false;
             });
 
-            $(document).on('click', '.bids', function() {
+            $(document).on('click', '.bids', function () {
                 let bidInput = $('#bidInput')
                 bid({{ $lot->id }}, bidInput.val());
                 bidInput.val('');
@@ -801,7 +815,7 @@
     </script>
     <script>
         $(function () {
-            $(".lot-card-click").click(function(){
+            $(".lot-card-click").click(function () {
                 let lotId = $(this).attr('lotId');
                 let url = '{{ route("mart.lots.show", ":id") }}';
                 url = url.replace(':id', lotId);
@@ -811,20 +825,20 @@
     </script>
     <script>
         $(function () {
-            $('.auction-card-click').on('click', function() {
+            $('.auction-card-click').on('click', function () {
                 let aucitonId = $(this).attr('auctionId');
-                window.location.assign('/auctions/'+aucitonId);
+                window.location.assign('/auctions/' + aucitonId);
             });
         });
     </script>
     <script>
-        let setLotCardCountdown = function(countdown){
+        let setLotCardCountdown = function (countdown) {
             const second = 1000,
                 minute = second * 60,
                 hour = minute * 60,
                 day = hour * 24;
 
-            function freshCountdown(countdown, dueTime){
+            function freshCountdown(countdown, dueTime) {
                 let now = new Date().getTime();
 
                 let distance = dueTime - now;
@@ -839,15 +853,15 @@
                     clearInterval(timer);
                     countdown.text('競標結束')
                 } else {
-                    if(distance > 86400000) {
-                        countdown.text('於 '+days+ '天內結束競標')
+                    if (distance > 86400000) {
+                        countdown.text('於 ' + days + '天內結束競標')
                     } else {
-                        countdown.text('於 '+hours+ '時'+minutes+'分'+seconds+'秒 後結束')
+                        countdown.text('於 ' + hours + '時' + minutes + '分' + seconds + '秒 後結束')
                     }
                 }
             }
 
-            let timer = setInterval(function() {
+            let timer = setInterval(function () {
                 let dueTimeIso = countdown.attr('end-at');
                 let dueTime = new Date(dueTimeIso).getTime();
                 freshCountdown(countdown, dueTime)
@@ -857,7 +871,7 @@
         $(function () {
             let lotCardCountdowns = $('.lot-card-countdowns');
             lotCardCountdowns.each(function () {
-                let lotCardCountdown = $('#'+this.id);
+                let lotCardCountdown = $('#' + this.id);
                 setLotCardCountdown(lotCardCountdown);
             });
         });

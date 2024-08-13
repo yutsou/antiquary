@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\LineService;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -65,8 +66,9 @@ class AuthController extends Controller
         ), 200);
     }
 
-    static function showLogin($redirectUrl=null)
+    static function showLogin(Request $request)
     {
+        $redirectUrl = $request->redirectUrl;
         $customView = CustomClass::viewWithTitle(view('auth.login')->with('redirectUrl', $redirectUrl), '會員登入');
         return $customView;
     }
@@ -78,9 +80,10 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $redirect = $this->userService->login($request, $credentials);
+        $this->userService->login($request, $credentials);
 
-        if ($redirect) {
+        if (Auth::check()) {
+            $redirect = $this->userService->afterLoginRedirect($request->redirectUrl);
             return response()->json([
                 'success' => $redirect,
                 'errors' => false
@@ -196,16 +199,78 @@ class AuthController extends Controller
         return $customView;
     }
 
-    public function redirectGoogleHandle()
+    public function redirectGoogleHandle(Request $request)
     {
-        return Socialite::driver('google')->redirect();
+        $redirectUrl = $request->redirectUrl;
+        $googleLoginUrl = $this->getGoogleLoginUrl($redirectUrl);
+        return redirect($googleLoginUrl);
     }
 
-    public function googleCallback()#bind or register
+    public function getGoogleLoginUrl($redirectUrl)
     {
+        $state = http_build_query([
+            'csrfToken' => csrf_token(),
+            'redirectUrl' => $redirectUrl,
+        ]);
+        $params = [
+            'client_id' => config('services.google.client_id'),
+            'redirect_uri' => route('auth.google.callback'),
+            'response_type' => 'code',
+            'scope' => 'openid profile email',
+            'state' => $state,
+            'access_type' => 'offline',
+            'prompt' => 'select_account',
+        ];
+
+        $googleUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query($params);
+
+        return $googleUrl;
+    }
+
+    public function googleCallback(Request $request)#bind or register
+    {
+        $state = $request->query('state');
+
+        parse_str($state, $stateParams);
+
+        $csrfToken = $stateParams['csrfToken'] ?? null;
+        $redirectUrl = $stateParams['redirectUrl'] ?? null;
+
+
+        if($csrfToken !== csrf_token())
+        {
+            return redirect()->route('mart.warning.show');
+        }
+
+        $client = new Client();
+
+        $response = $client->post('https://oauth2.googleapis.com/token', [
+            'form_params' => [
+                'client_id' => config('services.google.client_id'),
+                'client_secret' => config('services.google.client_secret'),
+                'redirect_uri' => route('auth.google.callback'),
+                'grant_type' => 'authorization_code',
+                'code' => $request->input('code'),
+            ],
+        ]);
+
+        $tokenData = json_decode($response->getBody(), true);
+
+        $accessToken = $tokenData['access_token'];
+
+        // 使用 Access Token 获取用户信息
+        $userResponse = $client->get('https://www.googleapis.com/oauth2/v3/userinfo', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $accessToken,
+            ],
+        ]);
+
+        $userData = json_decode($userResponse->getBody(), true);
+
+        $googleId = $userData['sub'];
+
         if (Auth::check()) {
-            $oauthUser = Socialite::driver('google')->user();
-            $result = $this->userService->bindAccount(Auth::user()->id, 'google', $oauthUser->id);
+            $result = $this->userService->bindAccount(Auth::user()->id, 'google', $googleId);
             if($result) {
                 return redirect()->route('account.bind.show')->with('success', '成功綁定 Google');
             } else {
@@ -213,11 +278,14 @@ class AuthController extends Controller
             }
 
         } else {
-            $oauthUser = Socialite::driver('google')->user();
-            $user = $this->userService->getUserByOauth('google', $oauthUser->id);
+            $user = $this->userService->getUserByOauth('google', $googleId);
             if ($user !== null) {
                 Auth::login($user);
-                return redirect()->route('account');
+                if ($redirectUrl == null) {
+                    return redirect()->route('account');
+                } else {
+                    return redirect($redirectUrl);
+                }
             } else {
                 return redirect()->route('login')->withErrors([
                     'warning' => '沒有與這個Google帳號綁定的帳號',
@@ -226,15 +294,24 @@ class AuthController extends Controller
         }
     }
 
-    public function redirectLineLogin()
+    public function redirectLineLogin(Request $request)
     {
-        $lineLoginUrl = $this->lineService->getLoginUrl();
+        $redirectUrl = $request->redirectUrl;
+        $lineLoginUrl = $this->lineService->getLoginUrl($redirectUrl);
         return redirect($lineLoginUrl);
     }
 
     public function lineCallback(Request $request)
     {
-        if($request->state !== csrf_token())
+        $state = $request->query('state');
+
+        parse_str($state, $stateParams);
+
+        $csrfToken = $stateParams['csrfToken'] ?? null;
+        $redirectUrl = $stateParams['redirectUrl'] ?? null;
+
+
+        if($csrfToken !== csrf_token())
         {
             return redirect()->route('mart.warning.show');
         }
@@ -250,7 +327,9 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('account');
+        $redirect = $this->userService->afterLoginRedirect($redirectUrl);
+
+        return redirect($redirect);
     }
 
     public function showPasswordForgot()

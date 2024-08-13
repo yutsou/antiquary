@@ -58,7 +58,7 @@ Route::get('/auth/line/confirm-bind', [AuthController::class, 'showLineBindConfi
 
 #google bind
 Route::get('/auth/google/handle', [AuthController::class, 'redirectGoogleHandle'])->name('auth.google.handle');
-Route::get('/auth/google/callback', [AuthController::class, 'googleCallback']);
+Route::get('/auth/google/callback', [AuthController::class, 'googleCallback'])->name('auth.google.callback');
 
 #ecpay
 Route::post('/pay/ecpay/receive', [MartController::class, 'payEcpayReceive'])->name('shop.pay.ecpay.receive');
@@ -245,4 +245,3 @@ Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->nam
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
 
-Route::get('/test/order/{lotId}', [MartController::class, 'test'])->name('test.order.create');

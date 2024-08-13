@@ -51,15 +51,21 @@ class LineService
         $this->lineAdminId = config('services.line.line_bot_admin_id');
     }
 
-    public function getLoginUrl()
+    public function getLoginUrl($redirectUrl)
     {
+
+        $state = http_build_query([
+            'csrfToken' => csrf_token(),
+            'redirectUrl' => $redirectUrl,
+        ]);
         // 組成 Line Login Url
-        $url = config('services.line.authorize_base_url');
-        $url .= '?response_type=code';
-        $url .= '&client_id=' . config('services.line.login_channel_id');
-        $url .= '&redirect_uri=' . config('app.url') . '/auth/line/callback';
-        $url .= '&state=' . csrf_token();
-        $url .= '&scope=profile%20openid%20email';
+        $url = config('services.line.authorize_base_url') . '?' . http_build_query([
+                'response_type' => 'code',
+                'client_id' => config('services.line.login_channel_id'),
+                'redirect_uri' => config('app.url') . '/auth/line/callback',
+                'state' => $state,
+                'scope' => 'profile openid email',
+            ]);
 
         return $url;
     }
