@@ -247,10 +247,8 @@
                                         <div class="uk-margin">
                                             <div class="uk-grid-small" uk-grid>
                                                 <div>
-                                                    @auth
-                                                        <input id="bidInput" hidden>
-                                                        <div id="next-bids-field" class="uk-width-1-1"></div>
-                                                    @endauth
+                                                    <input id="bidInput" hidden>
+                                                    <div id="next-bids-field" class="uk-width-1-1"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -540,7 +538,8 @@
         }
 
         let generateModalwithButton = function (bid) {
-            return '' +
+            @if(Auth::check())
+                return '' +
                 '<a data-modal="#confirm-manual-bid-modal-' + bid + '" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="' + bid + '">出價NT$' + number_format(bid) + '</a>' +
                 '<div id="confirm-manual-bid-modal-' + bid + '" class="modal">' +
                 '<h3>確認出價 NT$' + number_format(bid) + '</h3>' +
@@ -550,6 +549,17 @@
                 '<div><a class="uk-button custom-button-1 bids">確認</a></div>' +
                 '</div>' +
                 '</div>';
+            @else
+                return '' +
+                '<a data-modal="#confirm-manual-bid-modal-' + bid + '" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="' + bid + '">出價NT$' + number_format(bid) + '</a>' +
+                '<div id="confirm-manual-bid-modal-' + bid + '" class="modal">' +
+                '<h3>出價前需要先登入</h3>' +
+                '<div class="uk-grid-small uk-flex uk-flex-right" uk-grid>' +
+                '<div><a class="uk-button custom-button-1" href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a></div>' +
+                '</div>' +
+                '</div>';
+            @endif
+
         }
 
         let setNextBids = function (bid) {
