@@ -19,7 +19,7 @@ class MemberLotIndexPresenter
         return '
             <a href="'.route('account.applications.edit', $lot).'" class="uk-card uk-card-default uk-card-hover uk-grid-collapse uk-margin custom-link-mute" lotId="'.$lot->id.'" style="-webkit-tap-highlight-color: transparent;" uk-grid>
                 <div class="uk-card-media-left uk-cover-container uk-width-1-3 uk-width-1-5@m ">
-                    <img src="'. $lot->images->first()->url .'" alt="" uk-cover>
+                    <img src="'. $lot->blImages->first()->url .'" alt="" uk-cover>
                 </div>
                 <div class="uk-width-expand">
                     <div class="uk-card-body" style="padding: 20px 20px">

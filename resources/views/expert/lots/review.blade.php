@@ -71,25 +71,15 @@
                 <div class="uk-margin">
                     <div class="uk-card uk-card-default uk-card-body">
                         <h3 class="uk-card-title uk-form-label">上傳物品封面圖片</h3>
-                        <div class="uk-margin">
-                            <div class="uk-child-width-1-2"  id="main-image-preview">
-                                <img src="{{ $lot->main_image->url }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <div class="uk-card uk-card-default uk-card-body">
-                        <h3 class="uk-card-title uk-form-label">上傳物品其他圖片</h3>
-                        <div class="uk-margin">
-                            <div class="uk-grid-small uk-child-width-1-2 uk-child-width-1-4@s gallery" uk-grid>
-                                @foreach ($lot->other_images as $image)
-                                    <div>
-                                        <img src="{{ $image->url }}">
+                        <ul id="sortable-list" class="uk-grid-small uk-child-width-1-4@s uk-flex-center uk-flex-middle uk-grid" uk-grid>
+                            @foreach($lot->blImages as $image)
+                                <li>
+                                    <div class="uk-card uk-card-default uk-card-body uk-card-small uk-text-center">
+                                        <img src="{{ $image->url }}" style="max-width: 100%">
                                     </div>
-                                @endforeach
-                            </div>
-                        </div>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             </div>

@@ -73,7 +73,7 @@
                             <li>
                                 <div class="uk-card uk-card-default uk-card-hover custom-card-click" auctionId="{{ $auction->id }}">
                                     <div class="uk-card-media-top">
-                                        <img src="{{ $auction->lots->first()->images->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                        <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $auction->name }}</h3>
@@ -99,7 +99,7 @@
                             <div >
                                 <div class="uk-card uk-card-default uk-card-hover custom-card-click" auctionId="{{ $auction->id }}">
                                     <div class="uk-card-media-top">
-                                        <img src="{{ $auction->lots->first()->images->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                        <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $auction->name }}</h3>

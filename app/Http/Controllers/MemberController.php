@@ -198,7 +198,6 @@ class MemberController extends Controller
 
         if($imageValid === 0)
         {
-            $rules['mainImage'] = 'required';
             $rules['images'] = 'required';
         }
 
@@ -219,8 +218,7 @@ class MemberController extends Controller
             'mainCategoryId.required'=>'未選擇物品分類',
             'specificationValues.*.required' => '規格未填寫完整',
             'description.required' => '未填寫描述',
-            'mainImage.required' => '未上傳主要圖片',
-            'images.required' => '未上傳其他圖片',
+            'images.required' => '未上傳圖片',
             'reserve_price.required' => '未填寫底價',
             'reserve_price.gte' => '底價需大於等於3000',
             'homeDeliveryCost.required'=> '未填寫台灣區物流費用',
@@ -251,23 +249,15 @@ class MemberController extends Controller
 
         $this->deliveryMethodService->createDeliveryMethods($request, $lotId);
 
-        $file = $request->mainImage;
-        $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
-        $alt = null;
-        $imageable_id = $lotId;
-        $imageable_type = 'App\Models\Lot';
+        $syncImageIds = array();
 
-        $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
-
-        $syncImageIds = array($imageId=>['main'=>1]);
-
-        foreach ($request->images as $file) {
+        foreach ($request->images as $index=>$file) {
             $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
             $alt = null;
             $imageable_id = $lotId;
             $imageable_type = 'App\Models\Lot';
             $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
-            array_push($syncImageIds, $imageId);
+            $syncImageIds[$imageId] = ['main'=>$index];
         }
 
         $this->lotService->syncLotImages($lotId, $syncImageIds);
@@ -300,7 +290,29 @@ class MemberController extends Controller
         }
 
         $lot = $this->lotService->getLot($lotId);
-        #dd($lot->other_images->pluck('id')->toArray());
+
+        if (isset($request->images)) {
+            $olderImageIds = $lot->blImages->pluck('id')->toArray();
+            $lot->blImages()->detach($olderImageIds);
+            foreach($olderImageIds as $imageId)
+            {
+                $this->imageService->deleteImage($imageId);
+            }
+            $newImageIds = array();
+            foreach ($request->images as $index=>$file) {
+                $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
+                $alt = null;
+                $imageable_id = $lotId;
+                $imageable_type = 'App\Models\Lot';
+                $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+                $newImageIds[$imageId] = ['main'=>$index];
+
+            }
+            $this->lotService->attachLotImages($lotId, $newImageIds);
+        } else {
+            $this->imageService->changeImagesOrder($request->imageOrderArray, $lot);
+        }
+
         if ($request->mainCategoryId == $lot->main_category->id) {
             #判斷是否變更了主分類，沒變更的話則單純修改規格
             $this->specificationService->updateSpecifications($request, $lotId);
@@ -313,39 +325,7 @@ class MemberController extends Controller
         $this->lotService->updateLot($request, $lotId);
         $this->deliveryMethodService->syncDeliveryMethods($request, $lot);#同步分類
 
-        if (isset($request->mainImage)) {
-            $mianImageId = $lot->main_image->id;
-            $lot->blImages()->detach($mianImageId);
-            $this->imageService->deleteImage($mianImageId);
-            $file = $request->mainImage;
-            $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
-            $alt = null;
-            $imageable_id = $lotId;
-            $imageable_type = 'App\Models\Lot';
 
-            $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
-
-            $this->lotService->attachLotImages($lotId, [$imageId=>['main'=>true]]);
-        }
-
-        if (isset($request->images)) {
-            $olderImageIds = $lot->other_images->pluck('id')->toArray();
-            $lot->blImages()->detach($olderImageIds);
-            foreach($olderImageIds as $imageId)
-            {
-                $this->imageService->deleteImage($imageId);
-            }
-            $newImageIds = array();
-            foreach ($request->images as $file) {
-                $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
-                $alt = null;
-                $imageable_id = $lotId;
-                $imageable_type = 'App\Models\Lot';
-                $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
-                array_push($newImageIds, $imageId);
-            }
-            $this->lotService->attachLotImages($lotId, $newImageIds);
-        }
 
         return Response::json(array(
             'success' => route('account.applications.index'),
@@ -372,7 +352,7 @@ class MemberController extends Controller
 
     public function indexApplications()
     {
-        $lots = $this->indexLots(0);
+        $lots = $this->indexLots(0)->sortByDesc('created_at');
         return CustomClass::viewWithTitle(view('account.applications.index')->with('lots', $lots), '審核中的申請');
     }
 
@@ -784,15 +764,4 @@ class MemberController extends Controller
          return CustomClass::viewWithTitle(view('account.bidding_lots.index')->with('lots', $lots), '您的競標');
     }
 
-    public function testLotDelete($lotId)
-    {
-        $lot = $this->lotService->getLot($lotId);
-        $lot->delete();
-    }
-
-    public function testUserDelete($userId)
-    {
-        $user = $this->userService->getUser($userId);
-        $user->delete();
-    }
 }

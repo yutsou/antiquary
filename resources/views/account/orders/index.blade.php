@@ -13,7 +13,7 @@
             @foreach($orders as $order)
                 <div class="uk-card uk-card-default uk-card-hover uk-grid-collapse uk-margin custom-card-click" orderId="{{ $order->id }}" uk-grid>
                     <div class="uk-card-media-left uk-cover-container uk-width-1-3 uk-width-1-5@m">
-                        <img src="{{ $order->lot->images->first()->url }}" alt="" uk-cover>
+                        <img src="{{ $order->lot->blImages->first()->url }}" alt="" uk-cover>
                     </div>
                     <div class="uk-width-expand">
 

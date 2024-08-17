@@ -77,4 +77,18 @@ class ImageService extends ImageRepository
         $this->removeStorageImage($oldImagePath);
         ImageRepository::find($imageId)->delete();
     }
+
+    public function changeImagesOrder($newImagesOrder, $lot)
+    {
+        foreach ($lot->blImages as $image) {
+            // 找到图片的新顺序
+            $index = array_search($image->id, $newImagesOrder);
+
+            // 检查 pivot 表中的 'main' 是否与新的顺序不一致
+            if ($image->pivot->main != $index) {
+                // 使用 updateExistingPivot 方法更新 pivot 表中的 'main' 字段
+                $lot->blImages()->updateExistingPivot($image->id, ['main' => $index]);
+            }
+        }
+    }
 }

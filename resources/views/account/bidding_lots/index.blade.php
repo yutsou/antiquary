@@ -14,7 +14,7 @@
                 @foreach($lots as $singleLot)
                     <div class="uk-card uk-card-default uk-grid-collapse uk-margin" uk-grid>
                         <div class="uk-card-media-left uk-cover-container uk-width-1-5">
-                            <img src="{{ $singleLot->images->first()->url }}" alt="" uk-cover>
+                            <img src="{{ $singleLot->blImages->first()->url }}" alt="" uk-cover>
                         </div>
                         <div class="uk-width-expand">
                             <div class="uk-card-body" style="padding: 20px 20px">

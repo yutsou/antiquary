@@ -58,7 +58,7 @@ class Lot extends Model
 
     public function blImages()
     {
-        return $this->belongsToMany(Image::class, 'lot_image', 'lot_id', 'image_id');
+        return $this->belongsToMany(Image::class, 'lot_image', 'lot_id', 'image_id') ->withPivot('main')->orderBy('lot_image.main');
     }
 
     public function deliveryMethods()

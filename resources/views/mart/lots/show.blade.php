@@ -31,7 +31,7 @@
                 <div class="uk-text-center"><h1 class="lot-head" style="color: #333;">{{ $head }}</h1></div>
                 <div class="uk-position-relative" uk-slideshow="">
                     <ul class="uk-slideshow-items">
-                        @foreach($lot->images as $index=>$image)
+                        @foreach($lot->blImages as $index=>$image)
                             <li>
                                 <div id="ex{{$index}}" class="modal lot-modal">
                                     <div class="uk-flex uk-flex-center">
@@ -49,7 +49,7 @@
                             <div style="overflow-x: scroll; height: 120px;">
                                 <ul class="uk-thumbnav uk-slider-items uk-grid-small" uk-grid
                                     style="touch-action: auto !important;">
-                                    @foreach($lot->images as $key=>$image)
+                                    @foreach($lot->blImages as $key=>$image)
                                         <li uk-slideshow-item="{{ $key }}">
                                             <a href="#">
                                                 <img src="{{ $image->url }}" alt=""
@@ -379,7 +379,7 @@
                                             <div class="uk-card-media-top">
                                                 <div
                                                     class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                                    style="background-image: url({{ $singleLot->images->first()->url }});">
+                                                    style="background-image: url({{ $singleLot->blImages->first()->url }});">
                                                 </div>
                                             </div>
                                             <div class="uk-card-body">
@@ -416,7 +416,7 @@
                                     <div class="uk-card uk-card-default uk-card-hover auction-card-click"
                                          auctionId="{{ $auction->id }}">
                                         <div class="uk-card-media-top">
-                                            <img src="{{ $auction->lots->first()->images->first()->url }}" alt=""
+                                            <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt=""
                                                  style="width: 100vw; height: 300px; object-fit: cover;">
                                         </div>
                                         <div class="uk-card-body">

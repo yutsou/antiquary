@@ -333,7 +333,7 @@ class LineService
             foreach ($nextBids as $nextBid) {
                 array_push($actions, new PostbackTemplateActionBuilder("出價NT$" . number_format($nextBid), 'lineBidConfirm,' . $lot->id . ',' . $bidderId . ',' . $nextBid));
             }
-            $buttonTemplateBuilder = new ButtonTemplateBuilder($lot->name, $content . '，目前NT$' . number_format($lot->current_bid) . '，需要繼續競標嗎？', config('app.url') . $lot->images->first()->url, $actions);
+            $buttonTemplateBuilder = new ButtonTemplateBuilder($lot->name, $content . '，目前NT$' . number_format($lot->current_bid) . '，需要繼續競標嗎？', config('app.url') . $lot->blImages->first()->url, $actions);
             return new TemplateMessageBuilder($content, $buttonTemplateBuilder);
         }
     }

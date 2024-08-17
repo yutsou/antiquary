@@ -245,3 +245,5 @@ Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->nam
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
 
+Route::get('test', [MartController::class, 'showTest']);
+Route::post('test', [MartController::class, 'postTest'])->name('test.post');

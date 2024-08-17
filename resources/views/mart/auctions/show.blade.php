@@ -16,7 +16,7 @@
                         <div class="uk-card uk-card-default uk-card-hover custom-card-click" lotId="{{ $singleLot->id }}">
                             <div class="uk-card-media-top">
                                 <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                     style="background-image: url({{ $singleLot->images->first()->url }});">
+                                     style="background-image: url({{ $singleLot->blImages->first()->url }});">
                                 </div>
                             </div>
                             <div class="uk-card-body">

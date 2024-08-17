@@ -79,45 +79,28 @@
                         </li>
                         <li>
                             <div class="uk-margin">
-                                <div class="uk-margin">
-                                    <div class="uk-card uk-card-default uk-card-body">
-                                        <h3 class="uk-card-title uk-form-label">上傳物品封面圖片</h3>
-                                        <div class="uk-margin">
-                                            <div class="uk-child-width-1-3" id="main-image-preview">
-                                                <img src="{{ $lot->main_image->url }}">
-                                            </div>
+
+                                <div class="uk-card uk-card-default uk-card-body">
+                                    <h3 class="uk-card-title uk-form-label">上傳物品圖片</h3>
+                                    <p class="uk-text-meta">可經由拖曳改變圖片順序，第一張圖片為封面圖片。</p>
+                                    <div class="uk-placeholder uk-text-center">
+                                        <span uk-icon="icon: cloud-upload"></span>
+                                        <span class="uk-text-middle">拖曳圖片到此處，或</span>
+                                        <div uk-form-custom>
+                                            <input type="file" multiple id="gallery" accept="image/jpeg, image/png">
+                                            <span class="uk-link">選擇圖片</span>
                                         </div>
-                                        @if($lot->status == 1)
-                                            <div class="js-upload" uk-form-custom>
-                                                <input type="file" id="main-image" name="mainImage">
-                                                <button class="uk-button uk-button-default custom-color-group-1" type="button"
-                                                        tabindex="-1">選擇圖片
-                                                </button>
-                                            </div>
-                                        @endif
+                                        <span class="uk-text-middle">(支援的圖片格式：jpg、png)</span>
                                     </div>
-                                </div>
-                                <div class="uk-margin">
-                                    <div class="uk-card uk-card-default uk-card-body">
-                                        <h3 class="uk-card-title uk-form-label">上傳物品其他圖片</h3>
-                                        <div class="uk-margin">
-                                            <div class="uk-grid-small uk-child-width-1-2 uk-child-width-1-4@s gallery" uk-grid>
-                                                @foreach ($lot->other_images as $image)
-                                                    <div>
-                                                        <img src="{{ $image->url }}">
-                                                    </div>
-                                                @endforeach
+                                    <ul id="sortable-list" class="uk-grid-small uk-child-width-1-4@s uk-flex-center uk-flex-middle uk-grid" uk-grid uk-sortable="handle: .uk-card">
+                                    @foreach($lot->blImages as $image)
+                                        <li id="{{ $image->id }}">
+                                            <div class="uk-card uk-card-default uk-card-body uk-card-small uk-text-center">
+                                                <img src="{{ $image->url }}" style="max-width: 100%">
                                             </div>
-                                        </div>
-                                        @if($lot->status == 1)
-                                            <div class="js-upload" uk-form-custom>
-                                                <input type="file" multiple id="gallery-photo-add" name="images[]">
-                                                <button class="uk-button uk-button-default custom-color-group-1" type="button"
-                                                        tabindex="-1">選擇圖片
-                                                </button>
-                                            </div>
-                                        @endif
-                                    </div>
+                                        </li>
+                                    @endforeach
+                                    </ul>
                                 </div>
                             </div>
                         </li>
@@ -185,24 +168,6 @@
             });
         };
 
-        // Multiple images preview in browser
-        let imagesPreview = function (input, placeToInsertImagePreview) {
-            if (input.files) {
-                let filesAmount = input.files.length;
-                for (i = 0; i < filesAmount; i++) {
-                    var reader = new FileReader();
-                    reader.onload = function (event) {
-                        img = new Image();
-                        img.src = event.target.result;
-                        $(placeToInsertImagePreview).append($('<div>').append(img));
-                        //$('<li>').append(img).appendTo(placeToInsertImagePreview);
-                        //$('<img>').attr('src', event.target.result).appendTo(placeToInsertImagePreview);
-                    }
-                    reader.readAsDataURL(input.files[i]);
-                }
-            }
-        };
-
         let addNewShippingMethod = function () {
             $("#shipping-methods").append(
                 $('<div>').addClass('uk-margin uk-form-horizontal').append(
@@ -216,31 +181,16 @@
                 )
             )
         };
-
-        let addNewMainImage = function (input, placeToInsertImagePreview) {
-            let reader = new FileReader();
-
-            reader.onload = function (event) {
-                img = new Image();
-                img.src = event.target.result;
-                $(placeToInsertImagePreview).append(img);
-            }
-
-            reader.readAsDataURL(input.files[0]);
-        };
     </script>
 
     <script>
         $(function () {
 
+            let selectedFiles = [];
+
             $("#main-category").change(function () {
                 let mainCategoryId = $(this).val();
                 getDefaultSpecification(mainCategoryId);
-            });
-
-            $('#gallery-photo-add').on('change', function () {
-                $('.gallery').empty();
-                imagesPreview(this, '.gallery');
             });
 
             $('#add-new-shipping-method').click(function () {
@@ -276,8 +226,50 @@
                 }
             });
 
-            $('#submit-edit').click(function () {
+            $('#gallery').on('change', function(event) {
+                $('#sortable-list').empty();
+
+                selectedFiles = Array.from(event.target.files); // Convert FileList to Array
+
+                $.each(selectedFiles, function(index, file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const li = $('<li>').append(
+                            $('<div>').addClass('uk-card uk-card-default uk-card-body uk-card-small uk-text-center').append(
+                                $('<img>').attr('src', e.target.result).css('max-width', '100%')
+                            )
+                        ).attr('data-index', index); // Store the file index in the list item
+                        $('#sortable-list').append(li);
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            let moved = 0;
+            UIkit.util.on('#sortable-list', 'moved', function() {
+                moved = 1;
+            });
+
+            $('#submit-edit').click(function (event) {
+                Swal.showLoading()
+                event.preventDefault(); // Prevent the form from submitting the traditional way
+
                 let inputData = new FormData($('#lot-form')[0]);
+
+                // Get the order of the list items
+
+                if(selectedFiles.length !== 0) {
+                    $('#sortable-list li').each(function() {
+                        let index = $(this).attr('data-index');
+                        inputData.append('images[]', selectedFiles[index]); // Append files in the correct order
+                    });
+                } else {
+                    $('#sortable-list li').each(function() {
+                        inputData.append('imageOrderArray[]', $(this).attr('id'));
+                    });
+                }
 
                 $.ajax({
                     headers: {
