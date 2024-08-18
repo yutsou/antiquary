@@ -69,7 +69,7 @@
                                     </div>
                                     <span class="uk-text-middle">(支援的圖片格式：jpg、png)</span>
                                 </div>
-                                <ul id="sortable-list" class="uk-grid-small uk-child-width-1-4@s uk-flex-center uk-flex-middle uk-grid" uk-grid uk-sortable="handle: .uk-card">
+                                <ul id="sortable-list" class="uk-grid-small uk-child-width-1-4 uk-flex-center uk-flex-middle uk-grid" uk-grid uk-sortable="handle: .uk-card">
                                 </ul>
                             </div>
                         </div>

@@ -92,7 +92,7 @@
                                         </div>
                                         <span class="uk-text-middle">(支援的圖片格式：jpg、png)</span>
                                     </div>
-                                    <ul id="sortable-list" class="uk-grid-small uk-child-width-1-4@s uk-flex-center uk-flex-middle uk-grid" uk-grid uk-sortable="handle: .uk-card">
+                                    <ul id="sortable-list" class="uk-grid-small uk-child-width-1-4 uk-flex-center uk-flex-middle uk-grid" uk-grid uk-sortable="handle: .uk-card">
                                     @foreach($lot->blImages as $image)
                                         <li id="{{ $image->id }}">
                                             <div class="uk-card uk-card-default uk-card-body uk-card-small uk-text-center">
