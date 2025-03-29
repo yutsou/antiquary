@@ -17,7 +17,7 @@ use App\Services\DomainService;
 
 class AuctioneerController extends Controller
 {
-    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService;
+    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService, $lotService, $promotionService;
 
     public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService, BannerService $bannerService)
     {

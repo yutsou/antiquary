@@ -8,6 +8,84 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
 
+/**
+ * App\Models\Lot
+ *
+ * @property int $id
+ * @property string|null $name
+ * @property string|null $description
+ * @property string|null $estimated_price
+ * @property string|null $starting_price
+ * @property string|null $reserve_price
+ * @property string $current_bid
+ * @property int $owner_id
+ * @property int|null $winner_id
+ * @property int|null $auction_id
+ * @property \Illuminate\Support\Carbon|null $auction_start_at
+ * @property \Illuminate\Support\Carbon|null $auction_end_at
+ * @property int $rating
+ * @property int $status
+ * @property int $entrust
+ * @property string|null $suggestion
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Auction|null $auction
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AutoBid> $autoBids
+ * @property-read int|null $auto_bids_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BidRecord> $bidRecords
+ * @property-read int|null $bid_records_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Image> $blImages
+ * @property-read int|null $bl_images_count
+ * @property-read \Kalnoy\Nestedset\Collection<int, \App\Models\Category> $categories
+ * @property-read int|null $categories_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DeliveryMethod> $deliveryMethods
+ * @property-read int|null $delivery_methods_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LogisticRecord> $deliveryRecords
+ * @property-read int|null $delivery_records_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Favorite> $favorites
+ * @property-read int|null $favorites_count
+ * @property-read mixed $auction_start_at_format
+ * @property-read mixed $cross_border_delivery
+ * @property-read mixed $face_to_face
+ * @property-read mixed $home_delivery
+ * @property-read mixed $main_category
+ * @property-read mixed $main_image
+ * @property-read mixed $next_bid
+ * @property-read mixed $other_images
+ * @property-read mixed $top_bidder_id
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Image> $images
+ * @property-read int|null $images_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LogisticRecord> $logisticRecords
+ * @property-read int|null $logistic_records_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Order> $orders
+ * @property-read int|null $orders_count
+ * @property-read \App\Models\User $owner
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Specification> $specifications
+ * @property-read int|null $specifications_count
+ * @property-read \App\Models\User|null $winner
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereAuctionEndAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereAuctionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereAuctionStartAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereCurrentBid($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereEntrust($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereEstimatedPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereOwnerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereRating($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereReservePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereStartingPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereSuggestion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Lot whereWinnerId($value)
+ * @mixin \Eloquent
+ */
 class Lot extends Model
 {
     use HasFactory;

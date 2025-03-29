@@ -10,6 +10,93 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * App\Models\User
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string|null $phone
+ * @property \Illuminate\Support\Carbon|null $phone_verified_at
+ * @property string $password
+ * @property string|null $remember_token
+ * @property string|null $line_id
+ * @property string|null $line_nonce
+ * @property int $role
+ * @property int $status
+ * @property float|null $commission_rate
+ * @property float|null $premium_rate
+ * @property \Illuminate\Support\Carbon|null $birthday
+ * @property string|null $county
+ * @property string|null $district
+ * @property string|null $zip_code
+ * @property string|null $address
+ * @property string|null $bank_name
+ * @property string|null $bank_branch_name
+ * @property string|null $bank_account_number
+ * @property string|null $bank_account_name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Auction> $auctions
+ * @property-read int|null $auctions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BidRecord> $bidRecords
+ * @property-read int|null $bid_records_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Domain> $domains
+ * @property-read int|null $domains_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lot> $favoriteLots
+ * @property-read int|null $favorite_lots_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Favorite> $favorites
+ * @property-read int|null $favorites_count
+ * @property-read mixed $birthday_format
+ * @property-read mixed $favorite
+ * @property-read mixed $google_bind_status
+ * @property-read mixed $line_bind_status
+ * @property-read mixed $verification_status
+ * @property-read \App\Models\LineMode|null $lineMode
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Notice> $notices
+ * @property-read int|null $notices_count
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Oauth> $oauths
+ * @property-read int|null $oauths_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Order> $orders
+ * @property-read int|null $orders_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Lot> $ownLots
+ * @property-read int|null $own_lots_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Notice> $unreadNotices
+ * @property-read int|null $unread_notices_count
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|User query()
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereBankAccountName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereBankAccountNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereBankBranchName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereBankName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereBirthday($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereCommissionRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereCounty($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereDistrict($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereEmailVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereLineId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereLineNonce($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePhoneVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User wherePremiumRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereRole($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereZipCode($value)
+ * @mixin \Eloquent
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
