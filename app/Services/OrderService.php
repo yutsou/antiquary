@@ -41,14 +41,16 @@ class OrderService extends OrderRepository
 
         $order = OrderRepository::create($input);
 
+        // 創建 order item 記錄
+        $order->orderItems()->create([
+            'lot_id' => $lot->id,
+            'quantity' => 1,
+            'price' => $lot->current_bid,
+            'subtotal' => $lot->current_bid,
+            'status' => 'normal',
+        ]);
+
         OrderRepository::createOrderRecord(0, $order->id);
-
-        if(config('app.env') == 'production') {
-            HandlePaymentNotice::dispatch($order, 0)->delay(Carbon::now()->addDays(3));
-        } else {
-            HandlePaymentNotice::dispatch($order, 0)->delay(Carbon::now()->addSeconds(90));
-        }
-
 
         return $order;
     }
@@ -57,6 +59,15 @@ class OrderService extends OrderRepository
     public function getOrder($orderId)
     {
         return OrderRepository::find($orderId);
+    }
+
+    public function getOrderByLotAndUser($lotId, $userId)
+    {
+        return Order::where('user_id', $userId)
+            ->whereHas('orderItems', function($query) use ($lotId) {
+                $query->where('lot_id', $lotId);
+            })
+            ->first();
     }
 
     public function confirmOrder($request, $orderId)
@@ -123,8 +134,8 @@ class OrderService extends OrderRepository
 
         $input = [
             'payment_method' => $order->payment_method,
-            'system_order_id' => $request->OrderID,
-            'av_code' => $request->AvCode,
+            'merchant_trade_no' => $request->MerchantTradeNo,
+            'trade_no' => $request->TradeNo,
             'amount' => $order->total
         ];
 
@@ -133,7 +144,7 @@ class OrderService extends OrderRepository
 
     public function ajaxGetOrders()
     {
-        $orders = OrderRepository::all()->sortByDesc('created_at');
+        $orders = OrderRepository::all()->sortByDesc('created_at')->load('orderItems.lot');
         $orderStatusPresenter = new OrderStatusPresenter;
         $orderActionPresenter = new AuctioneerOrderActionPresenter;
         $datatable = DataTables::of($orders)
@@ -141,7 +152,17 @@ class OrderService extends OrderRepository
                 return $order->id;
             })
             ->addColumn('name', function ($order) {
-                return '<a href="'.route('auctioneer.orders.show', $order).'">'.$order->lot->name.'</a>';
+                // 檢查是否有 order items
+                if ($order->orderItems && $order->orderItems->count() > 0) {
+                    $itemsHtml = '';
+                    foreach ($order->orderItems as $item) {
+                        $itemsHtml .= '<div>' . $item->lot->name . ' x' . $item->quantity . '</div>';
+                    }
+                    return '<a href="'.route('auctioneer.orders.show', $order).'">' . $itemsHtml . '</a>';
+                } else {
+                    // 如果沒有 order items，顯示預設訊息
+                    return '<a href="'.route('auctioneer.orders.show', $order).'">無商品資訊</a>';
+                }
             })
             ->addColumn('order_status', function ($order) use ($orderStatusPresenter) {
                 if($order->process_status === 6 && $order->owner_take_status === 1) {
@@ -184,7 +205,14 @@ class OrderService extends OrderRepository
     public function completeOrder($orderId)
     {
         $order = OrderRepository::updateOrderStatus(40, $orderId);
-        $order->lot->update(['status'=>40]);
+        // 只針對競標商品才更新 lot status
+        if ($order->orderItems->count() > 0) {
+            $lot = $order->orderItems->first()->lot;
+            if ($lot->type == 0) { // 競標商品
+                $lot->update(['status'=>40]);
+            }
+            // 直賣商品（type==1）不動 lot status
+        }
         CustomClass::sendTemplateNotice(1, 3, 3, $order->id);
     }
 
@@ -208,7 +236,12 @@ class OrderService extends OrderRepository
 
         } else { #type 1
             $status = 41;
-            $owner = $order->lot->owner;
+            // 獲取第一個商品的賣家資訊
+            $firstItem = $order->orderItems->first();
+            if (!$firstItem) {
+                throw new \Exception('訂單中沒有商品');
+            }
+            $owner = $firstItem->lot->owner;
             $input = [
                 'status' => $status,
                 'payment_method' => 1,
@@ -218,8 +251,8 @@ class OrderService extends OrderRepository
                 'payee_id'=>$owner->id,
                 'payee_account'=>$owner->bank_name.$owner->bank_branch_name.$owner->bank_account_name.$owner->bank_account_number
             ];
-            $order->lot()->update(['status'=>41]);
-            CustomClass::sendTemplateNotice($order->lot->owner_id, 3, 4, $orderId);
+            $firstItem->lot->update(['status'=>41]);
+            CustomClass::sendTemplateNotice($firstItem->lot->owner_id, 3, 4, $orderId);
         }
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
 
@@ -246,8 +279,13 @@ class OrderService extends OrderRepository
         $order = $this->getOrder($orderId);
 
         if(Auth::user()->id === $order->user_id) {#is winner
-            if($order->lot->entrust === 0) {
-                $input['target_user_id'] = $order->lot->owner_id;
+            // 獲取第一個商品的資訊
+            $firstItem = $order->orderItems->first();
+            if (!$firstItem) {
+                throw new \Exception('訂單中沒有商品');
+            }
+            if($firstItem->lot->entrust === 0) {
+                $input['target_user_id'] = $firstItem->lot->owner_id;
             } else {
                 $input['target_user_id'] = 1;
             }
@@ -306,5 +344,264 @@ class OrderService extends OrderRepository
     public function updateOrderStatus($status, $order)
     {
         return parent::updateOrderStatus($status, $order->id);
+    }
+
+    public function createProductOrder($lot)
+    {
+        $now = Carbon::now();
+
+        // 檢查並扣減庫存
+        $lotService = app(LotService::class);
+        $inventoryItems = [
+            [
+                'lot_id' => $lot->id,
+                'quantity' => 1
+            ]
+        ];
+
+        $inventoryResult = $lotService->checkAndDeductInventory($inventoryItems);
+
+        if (!$inventoryResult['success']) {
+            // 如果有庫存不足的商品，拋出異常
+            $insufficientItems = $inventoryResult['insufficient_items'] ?? [];
+            $errorMessage = '以下商品庫存不足：';
+            foreach ($insufficientItems as $item) {
+                $errorMessage .= "\n{$item['lot_name']} - 需要 {$item['requested_quantity']} 件，庫存 {$item['available_inventory']} 件";
+            }
+            throw new \Exception($errorMessage);
+        }
+
+        $input = [
+            'lot_id' => $lot->id,
+            'user_id' => Auth::user()->id,
+            'status' => 0,
+            'payment_due_at' => $now->addDays(7),
+            'subtotal' => $lot->reserve_price,
+            'owner_real_take' => $lot->reserve_price,
+            'commission' => 0,
+            'premium' => 0,
+            'earning' => $lot->reserve_price,
+        ];
+
+        $order = OrderRepository::create($input);
+
+        // 創建 order item 記錄
+        $order->orderItems()->create([
+            'lot_id' => $lot->id,
+            'quantity' => 1,
+            'price' => $lot->reserve_price,
+            'subtotal' => $lot->reserve_price,
+            'status' => 'normal',
+        ]);
+
+        OrderRepository::createOrderRecord(0, $order->id);
+
+        return $order;
+    }
+
+    public function createCartOrder($userId, $selectedLotIds, $requestData)
+    {
+        $now = Carbon::now();
+        $user = Auth::user();
+
+        // 取得所有商品
+        $cartService = app(CartService::class);
+        $selectedLots = $cartService->getSelectedCartItems($userId, $selectedLotIds);
+
+        if ($selectedLots->isEmpty()) {
+            throw new \Exception('選中的商品不存在於購物車中');
+        }
+
+        // 準備庫存檢查項目
+        $inventoryItems = [];
+        foreach ($selectedLots as $lot) {
+            $inventoryItems[] = [
+                'lot_id' => $lot->id,
+                'quantity' => $lot->cart_quantity
+            ];
+        }
+
+        // 檢查並扣減庫存
+        $lotService = app(LotService::class);
+        $inventoryResult = $lotService->checkAndDeductInventory($inventoryItems);
+
+        if (!$inventoryResult['success']) {
+            // 如果有庫存不足的商品，拋出異常
+            $insufficientItems = $inventoryResult['insufficient_items'] ?? [];
+            $errorMessage = '以下商品庫存不足：';
+            foreach ($insufficientItems as $item) {
+                $errorMessage .= "\n{$item['lot_name']} - 需要 {$item['requested_quantity']} 件，庫存 {$item['available_inventory']} 件";
+            }
+            throw new \Exception($errorMessage);
+        }
+
+        // 計算總小計（重新計算以確保使用正確的價格）
+        $subtotal = 0;
+        foreach ($selectedLots as $lot) {
+            $price = $lot->type === 0 ? $lot->current_bid : $lot->reserve_price;
+            $subtotal += $price * $lot->cart_quantity;
+        }
+        // 運費直接用 requestData['delivery_cost']
+        $deliveryCost = intval($requestData['delivery_cost']);
+        $total = $subtotal + $deliveryCost;
+
+        // 建立一筆訂單
+        $input = [
+            'user_id' => $userId,
+            'status' => 10,
+            'payment_method' => intval($requestData['payment_method']),
+            'delivery_method' => intval($requestData['delivery_method']),
+            'payment_due_at' => $now->addDays(7),
+            'subtotal' => $subtotal,
+            'delivery_cost' => $deliveryCost,
+            'total' => $total,
+            'commission' => 0,
+            'premium' => 0,
+            'earning' => $total,
+            'remark' => $requestData['remark'] ?? null,
+            // 你可以選擇 lot_id 設定為 null 或第一個商品
+            'lot_id' => $selectedLots->first()->id,
+        ];
+
+        $order = OrderRepository::create($input);
+        OrderRepository::createOrderRecord(0, $order->id);
+
+        // 建立 order_items
+        foreach ($selectedLots as $lot) {
+            // 競標商品使用 current_bid 作為價格，一般商品使用 reserve_price
+            $price = $lot->type === 0 ? $lot->current_bid : $lot->reserve_price;
+            $subtotal = $price * $lot->cart_quantity;
+
+            $order->orderItems()->create([
+                'lot_id' => $lot->id,
+                'quantity' => $lot->cart_quantity,
+                'price' => $price,
+                'subtotal' => $subtotal,
+                'status' => 'normal',
+            ]);
+        }
+
+        // 建立物流資訊
+        $this->storeCartOrderLogisticInfo($requestData, $order->id);
+
+
+        return $order;
+    }
+
+    private function storeCartOrderLogisticInfo($requestData, $orderId)
+    {
+        $input = [
+            'type' => 0,
+            'addressee_name' => $requestData['recipient_name'],
+            'addressee_phone' => $requestData['recipient_phone'],
+        ];
+
+        // 檢查運送方式
+        $deliveryMethod = intval($requestData['delivery_method']);
+
+        if ($deliveryMethod == 1) {
+            $input['delivery_zip_code'] = $requestData['zip_code'] ?? null;
+            $input['delivery_address'] = ($requestData['county'] ?? '') . ($requestData['district'] ?? '') . ($requestData['address'] ?? '');
+        } elseif ($deliveryMethod == 2) {
+            $input['cross_board_delivery_country'] = $requestData['country'] ?? null;
+            $input['cross_board_delivery_country_code'] = $requestData['country_selector_code'] ?? null;
+            $input['cross_board_delivery_address'] = $requestData['cross_board_address'] ?? null;
+        }
+
+        return OrderRepository::createLogisticRecord($input, $orderId);
+    }
+
+    public function createMergeShippingOrder($userId, $mergeRequest, $requestData)
+    {
+        $now = Carbon::now();
+
+        // 準備庫存檢查項目
+        $inventoryItems = [];
+        foreach ($mergeRequest->items as $item) {
+            $inventoryItems[] = [
+                'lot_id' => $item->lot_id,
+                'quantity' => $item->quantity
+            ];
+        }
+
+        // 檢查並扣減庫存
+        $lotService = app(LotService::class);
+        $inventoryResult = $lotService->checkAndDeductInventory($inventoryItems);
+
+        if (!$inventoryResult['success']) {
+            // 如果有庫存不足的商品，拋出異常
+            $insufficientItems = $inventoryResult['insufficient_items'] ?? [];
+            $errorMessage = '以下商品庫存不足：';
+            foreach ($insufficientItems as $item) {
+                $errorMessage .= "\n{$item['lot_name']} - 需要 {$item['requested_quantity']} 件，庫存 {$item['available_inventory']} 件";
+            }
+            throw new \Exception($errorMessage);
+        }
+
+        // 計算總計
+        $subtotal = $mergeRequest->items->sum(function($item) {
+            return $item->lot->reserve_price * $item->quantity;
+        });
+        $total = $subtotal + $mergeRequest->new_shipping_fee;
+
+        // 創建訂單
+        $input = [
+            'lot_id' => $mergeRequest->items->first()->lot_id, // 使用第一個商品作為主要商品
+            'user_id' => $userId,
+            'status' => 10,
+            'payment_method' => intval($requestData['payment_method']),
+            'delivery_method' => intval($requestData['delivery_method']),
+            'payment_due_at' => $now->addDays(7),
+            'subtotal' => $subtotal,
+            'delivery_cost' => $mergeRequest->new_shipping_fee,
+            'total' => $total,
+            'commission' => 0,
+            'premium' => 0,
+            'earning' => $total,
+            'remark' => '合併運費訂單 - 請求ID: ' . $mergeRequest->id,
+        ];
+
+        $order = OrderRepository::create($input);
+        OrderRepository::createOrderRecord(0, $order->id);
+
+        // 為每個 merge shipping item 創建 order item 記錄
+        foreach ($mergeRequest->items as $item) {
+            $order->orderItems()->create([
+                'lot_id' => $item->lot_id,
+                'quantity' => $item->quantity,
+                'price' => $item->lot->reserve_price,
+                'subtotal' => $item->lot->reserve_price * $item->quantity,
+                'status' => 'normal',
+            ]);
+        }
+
+        // 創建運送資訊
+        $this->storeMergeShippingOrderLogisticInfo($requestData, $order->id);
+
+
+
+        return $order;
+    }
+
+    private function storeMergeShippingOrderLogisticInfo($requestData, $orderId)
+    {
+        $input = [
+            'type' => 0, // 主物流資訊 - logistic_records type 定義：0=application(正常流程賣場寄給拍賣會), 1=returned(退還競標物品), 2=unsold(競標失敗退還), 3=未付款退回
+            'addressee_name' => $requestData['recipient_name'],
+            'addressee_phone' => $requestData['recipient_phone'],
+        ];
+
+        $deliveryMethod = intval($requestData['delivery_method']);
+
+        if ($deliveryMethod == 1) {
+            $input['delivery_zip_code'] = $requestData['zip_code'] ?? null;
+            $input['delivery_address'] = ($requestData['county'] ?? '') . ($requestData['district'] ?? '') . ($requestData['address'] ?? '');
+        } elseif ($deliveryMethod == 2) {
+            $input['cross_board_delivery_country'] = $requestData['country'] ?? null;
+            $input['cross_board_delivery_country_code'] = $requestData['country_selector_code'] ?? null;
+            $input['cross_board_delivery_address'] = $requestData['cross_board_address'] ?? null;
+        }
+
+        return OrderRepository::createLogisticRecord($input, $orderId);
     }
 }

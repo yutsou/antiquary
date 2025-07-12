@@ -65,11 +65,6 @@ class Order extends Model
 
     protected $dates = ['payment_due_at'];
 
-    public function lot()
-    {
-        return $this->belongsTo(Lot::class);
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -93,5 +88,10 @@ class Order extends Model
     public function logisticRecords()
     {
         return $this->morphMany(LogisticRecord::class, 'logistic_recordable');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

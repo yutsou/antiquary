@@ -37,7 +37,7 @@
                     <div class="uk-card uk-card-default uk-card-body">
                         <h3 class="uk-card-title">您得標的物品提供以下的運送方式</h3>
                         <ul class="uk-list">
-                            @foreach($order->lot->deliveryMethods as $method)
+                            @foreach($order->orderItems->first() ? $order->orderItems->first()->lot->deliveryMethods : [] as $method)
                                 <li>
                                     <label><input class="uk-radio paymentMethod" type="radio" name="deliveryMethod"
                                                   value="{{ $method->code }}"
@@ -65,7 +65,7 @@
 
                         </div>
                         <div class="sub-field uk-margin" id="face-to-face-field" hidden>
-                            @if($order->lot->entrust === 0)
+                            @if($order->orderItems->first() && $order->orderItems->first()->lot->entrust === 0)
                                 <label>這件物品的取貨地點需要與賣家協調</label>
                             @else
                                 <p>取貨資訊：</p>

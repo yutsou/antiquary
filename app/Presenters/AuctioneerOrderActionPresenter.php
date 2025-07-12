@@ -32,7 +32,11 @@ class AuctioneerOrderActionPresenter
             case ($order->status == 11):
                 return $this->modal('通知已收到匯款', '通知已收到匯款嗎？', 'notice-confirm-atm-pay', $order->id, route('auctioneer.orders.notice_confirm_atm_pay', $order), route('auctioneer.orders.index'));
             case ($order->status == 12):
-                if($order->lot->entrust == 0){
+                $firstItem = $order->orderItems->first();
+                if (!$firstItem) {
+                    return '';
+                }
+                if($firstItem->lot->entrust == 0){
                     return '<p class="uk-text-right"><a href="'.route('auctioneer.orders.member_chatroom_show', $order).'" class="uk-button custom-button-1">查看對話</a></p>';
 
                 } else {
@@ -46,7 +50,11 @@ class AuctioneerOrderActionPresenter
             case ($order->status == 40):
                 return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
             case ($order->status == 13):
-                if($order->lot->entrust == 0){
+                $firstItem = $order->orderItems->first();
+                if (!$firstItem) {
+                    return '';
+                }
+                if($firstItem->lot->entrust == 0){
                     return '';
                 } else {
                     return '<div class="uk-grid-small" uk-grid>

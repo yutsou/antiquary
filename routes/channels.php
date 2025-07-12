@@ -23,7 +23,11 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 Broadcast::channel('orders.{orderId}', function ($user, $orderId) {
     $order = Order::find($orderId);
-    $lot = $order->lot;
+    $firstItem = $order->orderItems->first();
+    if (!$firstItem) {
+        return false;
+    }
+    $lot = $firstItem->lot;
     if($lot->entrust === 0){
         if($user->id === $order->user_id || $user->id === $lot->owner_id) {
             return true;

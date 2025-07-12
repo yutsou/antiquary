@@ -75,14 +75,10 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="uk-navbar-center" style="width: 60%">
-                            <form method="get" action="{{ route('mart.lots.search') }}" uk-grid class="uk-navbar-item uk-width-expand uk-grid-small">
-                                <div class="uk-width-expand">
-                                    <input class="uk-input" type="text" name="q">
-                                </div>
-                                <div class="uk-width-auto">
-                                    <button class="uk-button custom-button-1">搜尋</button>
-                                </div>
+                        <div class="uk-navbar-center" style="width: 60%;">
+                            <form method="get" action="{{ route('mart.lots.search') }}" class="uk-navbar-item uk-width-expand" style="display: flex; gap: 0.5em;">
+                                <input class="uk-input" type="text" name="q" placeholder="搜尋物品" style="flex: 1 1 0; min-width: 0;" />
+                                <button class="uk-button custom-button-1" type="submit" style="white-space: nowrap;">搜尋</button>
                             </form>
                         </div>
                         <div class="uk-navbar-right">
@@ -94,6 +90,16 @@
                             @endguest
                             @auth
                                 <ul class="uk-navbar-nav">
+                                    <li>
+                                        <a href="{{ route('account.cart.show') }}">
+                                            <div id="cart-status" class="google-icon">
+                                                <span class="material-symbols-outlined" uk-tooltip="title: 購物車; pos: top-left">shopping_cart</span>
+                                                @if(Auth::user()->cart_count > 0)
+                                                    <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="cart-count">{{ Auth::user()->cart_count }}</span>
+                                                @endif
+                                            </div>
+                                        </a>
+                                    </li>
                                     <li><a href="{{ route('account.unread_notices.index') }}">
                                             @if(Auth::user()->unreadNotices()->count() !== 0)
                                                 <div id="notification-status" class="google-icon-fill">
@@ -141,20 +147,43 @@
                         </ul>
                     </div>
                     <div class="uk-navbar-right">
+                        @guest
+                            <ul class="uk-navbar-nav">
+                                <li><a href="/login">登入</a></li>
+                                <li><a href="/register">註冊</a></li>
+                            </ul>
+                        @endguest
                         @auth
                             <ul class="uk-navbar-nav">
                                 <li>
+                                    <a href="{{ route('account.cart.show') }}">
+                                        <div id="cart-status" class="google-icon">
+                                            <span class="material-symbols-outlined" uk-tooltip="title: 購物車; pos: top-left">shopping_cart</span>
+                                            @if(Auth::user()->cart_count > 0)
+                                                <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="cart-count">{{ Auth::user()->cart_count }}</span>
+                                            @endif
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="{{ route('account.unread_notices.index') }}">
-                                    <span id="notification-status" class="google-icon">
-                                        <span class="material-symbols-outlined" uk-tooltip="title: 沒有未讀的通知; pos: top-left">notifications</span>
-                                    </span>
+                                        @if(Auth::user()->unreadNotices()->count() !== 0)
+                                            <div id="notification-status" class="google-icon-fill">
+                                                <span class="material-symbols-outlined uk-text-middle">notifications</span>
+                                                <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="unread-notices-count">{{ Auth::user()->unreadNotices()->count() }}</span>
+                                            </div>
+                                        @else
+                                            <div id="notification-status" class="google-icon">
+                                                <span class="material-symbols-outlined" uk-tooltip="title: 沒有未讀的通知; pos: top-left">notifications</span>
+                                            </div>
+                                        @endif
                                     </a>
                                 </li>
                                 <li>
                                     <a href="{{ route('account.favorites.index') }}">
-                                    <span class="google-icon">
-                                        <span class="material-symbols-outlined uk-text-middle">favorite</span>
-                                    </span>
+                                        <span class="google-icon">
+                                            <span class="material-symbols-outlined uk-text-middle">favorite</span>
+                                        </span>
                                     </a>
                                 </li>
                             </ul>
@@ -166,7 +195,6 @@
                     <ul class="uk-nav-default" uk-nav>
                         <li class="uk-padding">
                             <form method="get" action="{{ route('mart.lots.search') }}">
-                                @csrf
                                 <div class="uk-grid-small" uk-grid>
                                     <div class="uk-width-expand">
                                         <input class="uk-input" type="text" name="q" placeholder="搜尋物品">
@@ -175,7 +203,6 @@
                                         <button class="uk-button custom-button-1">搜尋</button>
                                     </div>
                                 </div>
-
                             </form>
                         </li>
                     </ul>
@@ -205,23 +232,22 @@
                         </li>
 
                         @auth
-                            <li><a href="{{ route('dashboard') }}">會員中心</a></li>
-                        @endauth
-                        @guest
-                            <li><a href="{{ route('login.show') }}">會員登入</a></li>
-                        @endguest
-                    </ul>
-                    <hr>
-                    @auth
-                        <ul class="uk-nav-default uk-nav-center" uk-nav style="padding-top: 2em;">
-                            <li class="uk-active">
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="custom-link">登出</a>
-                                </form>
+                            <li>
+                                <a href="#">{{ Auth::user()->name }}</a>
+                                <ul class="uk-nav-sub">
+                                    <li><a href="{{ route('dashboard') }}">會員中心</a></li>
+                                    <li><hr></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="custom-link">登出</a>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
-                        </ul>
-                    @endauth
+                        @endauth
+
+                    </ul>
 
                 </div>
             </div>

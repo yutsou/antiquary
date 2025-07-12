@@ -195,6 +195,28 @@ class User extends Authenticatable
         return DB::table('auto_bids')->where('lot_id', $lotId)->where('user_id', $this->id)->first();
     }
 
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function mergeShippingRequests()
+    {
+        return $this->hasMany(MergeShippingRequest::class);
+    }
+
+        public function getCartCountAttribute()
+    {
+        $cartCount = $this->cartItems()->sum('quantity');
+
+        // 加上已處理的合併運費請求數量（每個請求算一個）
+        $mergeShippingCount = $this->mergeShippingRequests()
+            ->where('status', 1) // 已處理
+            ->count();
+
+        return $cartCount + $mergeShippingCount;
+    }
+
     /**
      * The attributes that are mass assignable.
      *

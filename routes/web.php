@@ -32,10 +32,11 @@ Route::get('/warning', [MartController::class, 'showWarning'])->name('mart.warni
 Route::get('/search', [MartController::class, 'searchLots'])->name('mart.lots.search');
 Route::get('/m-categories/{mCategoryId}', [MartController::class, 'showMCategory'])->name('mart.m_categories.show');
 Route::get('/m-categories/{mCategoryId}/s-categories/{sCategoryId}', [MartController::class, 'showSCategory'])->name('mart.s_categories.show');
+Route::get('/products/{lotId}', [MartController::class, 'showProduct'])->name('mart.products.show');
 
 #Auth
 Route::middleware('guest')->group(function () {
-    Route::get('/register', [AuthController::class, 'showRegister']);
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register.show');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login.show');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -114,6 +115,19 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
 
     Route::get('/members', [AuctioneerController::class, 'indexMembers'])->name('auctioneer.members.index');
     Route::get('/members/{userId}', [AuctioneerController::class, 'showMember'])->name('auctioneer.members.show');
+
+    Route::get('/products', [AuctioneerController::class, 'showProducts'])->name('auctioneer.products.index');
+    Route::get('/products/create', [AuctioneerController::class, 'createProduct'])->name('auctioneer.products.create');
+    Route::post('/products', [AuctioneerController::class, 'storeLot'])->name('auctioneer.products.store');
+    Route::get('/products/{lotId}', [AuctioneerController::class, 'editProduct'])->name('auctioneer.products.edit');
+    Route::post('/products/{lotId}', [AuctioneerController::class, 'updateProduct'])->name('auctioneer.products.update');
+    Route::post('/products/{lotId}/publish', [AuctioneerController::class, 'publishProduct'])->name('auctioneer.products.publish');
+    Route::post('/products/{lotId}/unpublish', [AuctioneerController::class, 'unpublishProduct'])->name('auctioneer.products.uppublish');
+
+    // 合併運費請求管理
+    Route::get('/merge-shipping-requests', [AuctioneerController::class, 'indexMergeShippingRequests'])->name('auctioneer.merge_shipping_requests.index');
+    Route::get('/merge-shipping-requests/{requestId}', [AuctioneerController::class, 'showMergeShippingRequest'])->name('auctioneer.merge_shipping_requests.show');
+    Route::post('/merge-shipping-requests/{requestId}', [AuctioneerController::class, 'updateMergeShippingRequest'])->name('auctioneer.merge_shipping_requests.update');
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');
@@ -123,6 +137,10 @@ Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(functi
     Route::post('/ajax/members/{id}/role-downgrade', [AuctioneerController::class, 'ajaxRoleDowngradeMember'])->name('ajax.members.role-downgrade');
     Route::post('/ajax/members/{id}/block', [AuctioneerController::class, 'ajaxBlockMember'])->name('ajax.members.block');
     Route::post('/ajax/members/{id}/unblock', [AuctioneerController::class, 'ajaxUnblockMember'])->name('ajax.members.unblock');
+    Route::get('/ajax/main-categories/{mainCategoryId}/default-specification-titles', [AuctioneerController::class, 'ajaxDefaultSpecificationTitles']);
+    Route::get('/ajax/main-categories/{mainCategoryId}/sub-categories', [AuctioneerController::class, 'ajaxSubCategories']);
+    Route::get('/ajax/products', [AuctioneerController::class, 'ajaxGetProducts']);
+
 
 });
 ############################################################# Expert #############################################################
@@ -186,11 +204,25 @@ Route::prefix('account')->middleware(['auth', EnsureMemberIsValid::class])->grou
     Route::get('/bind', [AuthController::class, 'showBind'])->name('account.bind.show');
     Route::get('/notices', [MemberController::class, 'indexNotices'])->name('account.notices.index');
     Route::get('/unread-notices', [MemberController::class, 'indexUnreadNotices'])->name('account.unread_notices.index');
+    Route::get('/cart', [MemberController::class, 'showCart'])->name('account.cart.show');
+    Route::post('/cart', [MemberController::class, 'storeCart'])->name('account.cart.store');
+    Route::post('/cart/update', [MemberController::class, 'updateCart'])->name('account.cart.update');
+    Route::post('/cart/remove', [MemberController::class, 'removeCart'])->name('account.cart.remove');
+    Route::post('/cart/payment-method-choice', [MemberController::class, 'cartPaymentMethodChoice'])->name('account.cart.payment_method_choice');
+    Route::post('/cart/delivery-method-choice', [MemberController::class, 'cartDeliveryMethodChoice'])->name('account.cart.delivery_method_choice');
+    Route::post('/cart/check', [MemberController::class, 'cartCheck'])->name('account.cart.check');
+    Route::post('/cart/confirm', [MemberController::class, 'cartConfirm'])->name('account.cart.confirm');
+
+    Route::post('/cart/merge-shipping-request', [MemberController::class, 'createMergeShippingRequest'])->name('account.cart.merge_shipping_request');
+    Route::get('/cart/merge-shipping-delivery-method/{requestId}', [MemberController::class, 'mergeShippingDeliveryMethodEdit'])->name('account.cart.merge_shipping.delivery_method.edit');
+    Route::post('/cart/merge-shipping-delivery/{requestId}', [MemberController::class, 'mergeShippingDeliveryUpdate'])->name('account.cart.merge_shipping_delivery.update');
+    Route::post('/cart/merge-shipping-check/{requestId}', [MemberController::class, 'mergeShippingCheck'])->name('account.cart.merge_shipping.check');
+    Route::post('/cart/merge-shipping-confirm/{requestId}', [MemberController::class, 'mergeShippingConfirm'])->name('account.cart.merge_shipping.confirm');
+    Route::post('/cart/merge-shipping-request/{requestId}/remove', [MemberController::class, 'removeMergeShippingRequest'])->name('account.cart.merge_shipping_request.remove');
+    Route::post('/products/{lotId}/confirm', [MemberController::class, 'confirmProduct'])->name('account.products.confirm');
 });
 
 Route::prefix('account')->middleware(['auth', LotOwnership::class])->group(function () {
-    Route::get('/applications/{lotId}', [MemberController::class, 'editLot'])->name('account.applications.edit');
-    Route::post('/applications/{lotId}', [MemberController::class, 'updateLot'])->name('account.applications.update');
     Route::get('/applications/{lotId}', [MemberController::class, 'editLot'])->name('account.applications.edit');
     Route::post('/applications/{lotId}', [MemberController::class, 'updateLot'])->name('account.applications.update');
     Route::get('/applications/{lotId}/logistic-info', [MemberController::class, 'createApplicationLogisticInfo'])->name('account.application_logistic_info.create');
@@ -199,7 +231,6 @@ Route::prefix('account')->middleware(['auth', LotOwnership::class])->group(funct
     Route::post('/unsold-lots/{lotId}', [MemberController::class, 'handleUnsoldLot'])->name('account.unsold_lots.handle');
     Route::get('/returned-lots/{lotId}', [MemberController::class, 'editReturnedLot'])->name('account.returned_lots.edit');
     Route::post('/returned-lots/{lotId}', [MemberController::class, 'updateReturnedLot'])->name('account.returned_lots.update');
-
 });
 
 Route::prefix('account')->middleware(['auth', OrderOwnership::class])->group(function () {

@@ -20,22 +20,36 @@ class EcpayService
 
         $input = [
             'MerchantID' => config('services.ecpay.merchant_id'),
-            'MerchantTradeNo' => 'Sold' . time(),
+            'MerchantTradeNo' => 'ANT' . date('YmdHis') . str_pad($order->id, 3, '0', STR_PAD_LEFT),
             'MerchantTradeDate' => date('Y/m/d H:i:s'),
-            'PaymentType' => 'aio',
             'TotalAmount' => intval($order->total),
-            'TradeDesc' => UrlService::ecpayUrlEncode('交易描述範例'),
-            'ItemName' => $order->lot->name.' NT$'.number_format($order->subtotal).'#'.'運費'.' NT$'.number_format($order->delivery_cost),
+            'TradeDesc' => '商品購買',
+            'ItemName' => $this->generateItemName($order),
             'ReturnURL' => route('shop.pay.ecpay.receive'),
-            'ClientBackURL' => route('account.orders.show', $order),
-            'OrderResultURL'=> route('shop.pay.ecpay.order_receive'),
+            'ClientBackURL' => route('shop.pay.ecpay.order_receive'),
+            'OrderResultURL' => route('shop.pay.ecpay.order_receive'),
+            'CustomField1' => $order->id,
+            'PaymentType' => 'aio',
             'ChoosePayment' => 'Credit',
             'EncryptType' => 1,
-            'CustomField1' => $order->id
         ];
         $action = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5';
 
         echo $autoSubmitFormService->generate($input, $action);
+    }
+
+    private function generateItemName($order)
+    {
+        $itemNames = [];
+        foreach ($order->orderItems as $orderItem) {
+            // 使用 orderItem 的單價和數量資訊
+            $itemNames[] = $orderItem->lot->name . ' x' . $orderItem->quantity . ' NT$' . number_format($orderItem->price) . '=' . number_format($orderItem->subtotal);
+        }
+
+        $itemNameString = implode('#', $itemNames);
+        $itemNameString .= '#運費 NT$' . number_format($order->delivery_cost);
+
+        return $itemNameString;
     }
 
     public function checkMacValue($request, $hashMethod)

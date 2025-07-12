@@ -1,13 +1,11 @@
 <div id="un-login-favorite-notice" class="modal">
-    <p class="custom-font-medium">物品加入追蹤清單前需要先登入。</p>
+    <p class="uk-text-left uk-text-large">物品加入追蹤清單前需要先登入。</p>
     <div class="uk-flex uk-flex-right">
         <a class="uk-button custom-button-1"
            href="{{ route('login.show', ['redirectUrl'=>str_replace('/','_',request()->path()) ]) }}">登入</a>
     </div>
 </div>
-@push('style')
-    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
-@endpush
+
 @push('scripts')
     <script>
         $(function () {

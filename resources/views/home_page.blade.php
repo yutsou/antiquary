@@ -63,6 +63,54 @@
 @endsection
 
 @section('content')
+    <h3 class="uk-card-title">Antiquary 精選</h3>
+    <div class="uk-visible@m">
+        <div class="uk-slider-container-offset" uk-slider="finite: true">
+            <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
+                <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
+                    @foreach($products as $product)
+                        <li>
+                            <div class="uk-card uk-card-default uk-card-hover product-card-click" productId="{{ $product->id }}">
+                                <div class="uk-card-media-top">
+                                    <img src="{{ $product->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                </div>
+                                <div class="uk-card-body uk-text-center">
+                                    <h3 class="uk-card-title">{{ $product->name }}</h3>
+                                    <p>NT${{ number_format($product->reserve_price) }}</p>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+                <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous
+                    uk-slider-item="previous"></a>
+                <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next
+                    uk-slider-item="next"></a>
+            </div>
+            <ul class="uk-slider-nav uk-dotnav uk-flex-center uk-margin"></ul>
+        </div>
+    </div>
+    <div class="uk-hidden@m">
+        <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1" uk-slider="center: true">
+            <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 30">
+                @foreach($products as $product)
+                    <li class="uk-width-5-6">
+                        <div >
+                            <div class="uk-card uk-card-default uk-card-hover product-card-click" productId="{{ $product->id }}">
+                                <div class="uk-card-media-top">
+                                    <img src="{{ $products->first()->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                </div>
+                                <div class="uk-card-body">
+                                    <h3 class="uk-card-title">{{ $product->name }}</h3>
+                                    <p>NT${{ number_format($product->reserve_price) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
     @if($auctions->where('status', 1)->count() != 0)
         <h3 class="uk-card-title">進行中的拍賣會</h3>
         <div class="uk-visible@m">
@@ -71,7 +119,7 @@
                     <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
                         @foreach($auctions->where('status', 1) as $auction)
                             <li>
-                                <div class="uk-card uk-card-default uk-card-hover custom-card-click" auctionId="{{ $auction->id }}">
+                                <div class="uk-card uk-card-default uk-card-hover auction-card-click" auctionId="{{ $auction->id }}">
                                     <div class="uk-card-media-top">
                                         <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
                                     </div>
@@ -97,7 +145,7 @@
                     @foreach($auctions as $auction)
                         <li class="uk-width-5-6">
                             <div >
-                                <div class="uk-card uk-card-default uk-card-hover custom-card-click" auctionId="{{ $auction->id }}">
+                                <div class="uk-card uk-card-default uk-card-hover auction-card-click" auctionId="{{ $auction->id }}">
                                     <div class="uk-card-media-top">
                                         <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
                                     </div>
@@ -117,9 +165,13 @@
 @push('scripts')
     <script>
         $(function () {
-            $('.custom-card-click').on('click', function() {
+            $('.auction-card-click').on('click', function() {
                 let aucitonId = $(this).attr('auctionId');
                 window.location.assign('/auctions/'+aucitonId);
+            });
+            $('.product-card-click').on('click', function() {
+                let productId = $(this).attr('productId');
+                window.location.assign('/products/'+productId);
             });
         });
     </script>

@@ -35,8 +35,13 @@
     </div>
     @include('mart.components.favorite-outline')
 @endsection
+@push('style')
+    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}"
+          crossorigin="anonymous">
+@endpush
 @push('scripts')
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
         $(function () {
             $(".custom-card-click").click(function(){

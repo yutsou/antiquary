@@ -20,6 +20,11 @@ class CarbonPresenter
 
     public function lotPresent($singleLotId, $endTime)
     {
+        // 處理商店直賣商品（沒有結束時間）
+        if ($endTime === null) {
+            return 'Antiquary 精選';
+        }
+
         if(Carbon::now()->lessThan($endTime)){
             if(Carbon::now()->diffInHours($endTime)<24) {
                 return '

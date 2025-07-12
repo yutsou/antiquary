@@ -15,6 +15,7 @@ use App\Models\Favorite;
 use App\Events\NewBid;
 use App\Models\BidRecord;
 use App\Models\Lot;
+use App\Presenters\AuctioneerProductPresenter;
 use App\Presenters\ExpertLotIndexPresenter;
 use App\Presenters\OrderStatusPresenter;
 use App\Repositories\LotRepository;
@@ -26,14 +27,30 @@ use App\Presenters\LotStatusPresenter;
 
 class LotService extends LotRepository
 {
-    public function createLot($request)
+    public function createLot($request, $status=null)
     {
         $input['name'] = $request->name;
         $input['owner_id'] = Auth::user()->id;
         $input['description'] = $request->description;
+        $input['reserve_price'] = $request->reserve_price;
 
-        if(isset($request->checkReversePrice)) {
-            $input['reserve_price'] = $request->reserve_price;
+        // 設置 inventory：如果是 application 或沒有設置，則為 1
+        if ($status === null || $status === 0) {
+            // application 的情況
+            $input['inventory'] = 1;
+        } else {
+            // 其他情況（如直賣商品）
+            $input['inventory'] = $request->inventory ?? 1;
+        }
+
+        if ($status !== null) {
+            $input['status'] = $status;
+            if ($status == 60) {
+                $input['type'] = 1; // 1: 直賣商品
+                $input['current_bid'] = $request->reserve_price;
+            }
+        } else {
+            $input['status'] = 0; // 0: 待審核
         }
 
         if(Auth::user()->role === 2) {
@@ -45,6 +62,8 @@ class LotService extends LotRepository
         } else {
             $input['entrust'] = 1;
         }
+
+
 
         $lot = LotRepository::create($input);
 
@@ -74,7 +93,7 @@ class LotService extends LotRepository
 
     public function ajaxReviewGetLots($mainCategory)
     {
-        $lots = $mainCategory->lots->sortByDesc('created_at');
+        $lots = $mainCategory->lots->sortByDesc('created_at')->where('status', '<', 60);
 
         $expertLotIndexPresenter =  app(ExpertLotIndexPresenter::class);
 
@@ -381,7 +400,7 @@ class LotService extends LotRepository
         $results = collect();
         $words = explode(" ", $query);
         foreach($words as $word) {
-            $results->push(Lot::search($word)->where('status', 21)->get());
+            $results->push(Lot::search($word)->whereIn('status', [21, 61])->get());
         }
         return $results->flatten()->unique('id');
         #
@@ -476,10 +495,213 @@ class LotService extends LotRepository
         return parent::update(['status'=>$status], $lot->id);
     }
 
+    public function ajaxGetProducts()
+    {
+        $lots = LotRepository::all()->sortByDesc('created_at')->where('status', '>=', 60);
+        $auctioneerProductPresenter = app(AuctioneerProductPresenter::class);
+
+        $datatable = DataTables::of($lots)
+            ->addColumn('id', function ($lot)
+            {
+                return $lot->id;
+            })
+            ->addColumn('name', function ($lot)
+            {
+                return '<a href="'.route('auctioneer.products.edit', $lot->id).'">'.$lot->name.'</a>';
+            })
+            /*->addColumn('specification', function ($lot)
+            {
+                $specification = $lot->specifications->pluck('value')->toArray();
+                return implode(", ", $specification);
+            })*/
+            ->addColumn('status', function ($lot)
+            {
+                $lotStatusPresenter = new LotStatusPresenter;
+                $orderStatusPresenter = new OrderStatusPresenter;
+                return $lotStatusPresenter->present($lot->status);
+            })
+            ->addColumn('action', function ($lot) use($auctioneerProductPresenter)
+            {
+                return $auctioneerProductPresenter->present($lot);
+            })
+            ->rawColumns(['name', 'status', 'action'])
+            ->toJson();
+
+        return  $datatable;
+    }
+
+    public function updateProduct($request, $lotId)
+    {
+        $lot = $this->getLot($lotId);
+        $lot->update([
+            'name'=>$request->name,
+            'description'=>$request->description,
+            'reserve_price'=>$request->reserve_price,
+            'inventory'=>$request->inventory,
+        ]);
+    }
+
+    public function getPublishedLots()
+    {
+        return LotRepository::all()->where('status', 61)->sortByDesc('created_at');
+    }
+
+    public function findOrFail($id)
+    {
+        return Lot::findOrFail($id);
+        // 你也可以 return Lot::where('id', $id)->where('status', 1)->firstOrFail();
+        // 以後直接加條件或觸發 event 都可以
+    }
+
     public function test()
     {
-        $lot = $this->getLot(2);
-        OrderCreate::dispatch($lot);
+        // 測試方法已棄用，拍賣結束時現在是放入購物車而不是直接創建訂單
+        // $lot = $this->getLot(2);
+        // OrderCreate::dispatch($lot);
+    }
+
+    /**
+     * 檢查商品庫存是否足夠
+     * @param int $lotId 商品ID
+     * @param int $quantity 需要的數量
+     * @return bool 庫存是否足夠
+     */
+    public function checkInventory($lotId, $quantity)
+    {
+        $lot = $this->getLot($lotId);
+
+        // 檢查是否為直賣商品（status >= 60）
+        if ($lot->status < 60) {
+            // 非直賣商品（競標商品）不檢查庫存
+            return true;
+        }
+
+        return $lot->inventory >= $quantity;
+    }
+
+    /**
+     * 檢查多個商品的庫存是否足夠
+     * @param array $items 商品項目陣列，每個項目包含 lot_id 和 quantity
+     * @return array 檢查結果，包含是否足夠和不足的商品資訊
+     */
+    public function checkMultipleInventory($items)
+    {
+        $result = [
+            'sufficient' => true,
+            'insufficient_items' => []
+        ];
+
+        foreach ($items as $item) {
+            $lotId = $item['lot_id'];
+            $quantity = $item['quantity'];
+
+            if (!$this->checkInventory($lotId, $quantity)) {
+                $lot = $this->getLot($lotId);
+                $result['sufficient'] = false;
+                $result['insufficient_items'][] = [
+                    'lot_id' => $lotId,
+                    'lot_name' => $lot->name,
+                    'requested_quantity' => $quantity,
+                    'available_inventory' => $lot->inventory
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 扣減商品庫存
+     * @param int $lotId 商品ID
+     * @param int $quantity 扣減的數量
+     * @return bool 是否成功扣減
+     */
+    public function deductInventory($lotId, $quantity)
+    {
+        $lot = $this->getLot($lotId);
+
+        // 檢查是否為直賣商品（status >= 60）
+        if ($lot->status < 60) {
+            // 非直賣商品（競標商品）不扣減庫存
+            return true;
+        }
+
+        // 檢查庫存是否足夠
+        if ($lot->inventory < $quantity) {
+            return false;
+        }
+
+        // 扣減庫存
+        $newInventory = $lot->inventory - $quantity;
+        $lot->update(['inventory' => $newInventory]);
+
+        return true;
+    }
+
+    /**
+     * 扣減多個商品的庫存
+     * @param array $items 商品項目陣列，每個項目包含 lot_id 和 quantity
+     * @return array 扣減結果，包含是否成功和失敗的商品資訊
+     */
+    public function deductMultipleInventory($items)
+    {
+        $result = [
+            'success' => true,
+            'failed_items' => []
+        ];
+
+        foreach ($items as $item) {
+            $lotId = $item['lot_id'];
+            $quantity = $item['quantity'];
+
+            if (!$this->deductInventory($lotId, $quantity)) {
+                $lot = $this->getLot($lotId);
+                $result['success'] = false;
+                $result['failed_items'][] = [
+                    'lot_id' => $lotId,
+                    'lot_name' => $lot->name,
+                    'requested_quantity' => $quantity,
+                    'available_inventory' => $lot->inventory
+                ];
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 檢查並扣減庫存（原子操作）
+     * @param array $items 商品項目陣列，每個項目包含 lot_id 和 quantity
+     * @return array 操作結果
+     */
+    public function checkAndDeductInventory($items)
+    {
+        // 先檢查所有商品的庫存
+        $checkResult = $this->checkMultipleInventory($items);
+
+        if (!$checkResult['sufficient']) {
+            return [
+                'success' => false,
+                'message' => '部分商品庫存不足',
+                'insufficient_items' => $checkResult['insufficient_items']
+            ];
+        }
+
+        // 庫存足夠，進行扣減
+        $deductResult = $this->deductMultipleInventory($items);
+
+        if (!$deductResult['success']) {
+            return [
+                'success' => false,
+                'message' => '庫存扣減失敗',
+                'failed_items' => $deductResult['failed_items']
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => '庫存檢查和扣減成功'
+        ];
     }
 
 }

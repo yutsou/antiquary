@@ -80,14 +80,16 @@
                         <thead>
                         <tr>
                             <th>物品</th>
-                            <th>得標價格</th>
+                            <th>價格</th>
                         </tr>
                         </thead>
                         <tbody>
+                        @foreach($orderItems as $orderItem)
                         <tr>
-                            <td>{{ $lot->name }}</td>
-                            <td>NT${{ number_format($lot->current_bid) }}</td>
+                            <td>{{ $orderItem->lot->name }}</td>
+                            <td>NT${{ number_format($orderItem->subtotal) }}</td>
                         </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -105,7 +107,7 @@
                         <tbody>
                         <tr>
                             <td>小計：</td>
-                            <td>NT${{ number_format($lot->current_bid) }}</td>
+                            <td>NT${{ number_format($order->subtotal) }}</td>
                         </tr>
                         <tr>
                             <td>手續費：</td>

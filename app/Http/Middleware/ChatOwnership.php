@@ -20,10 +20,18 @@ class ChatOwnership
     {
         $orderId = $request->route('orderId'); // Assuming the route parameter is named 'order'
         $order = Order::find($orderId);
-        $winnerId = $order->user_id;
-        $ownerId = $order->lot->owner_id;
+        if (!$order) {
+            return false;
+        }
 
-        if ($winnerId !== Auth::id() && $ownerId !== Auth::id() && 1 !== Auth::id()) {
+        $firstItem = $order->orderItems->first();
+        if (!$firstItem) {
+            return false;
+        }
+
+        $ownerId = $firstItem->lot->owner_id;
+
+        if ($ownerId !== Auth::id() && 1 !== Auth::id()) {
             // Order does not exist or the user does not own the order
             //return response()->json(['message' => 'Unauthorized'], 403);
             return redirect()->route('mart.warning.show')->with('title', '警告')->with('message', '錯誤的訪問');

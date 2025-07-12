@@ -111,7 +111,7 @@
                     @foreach($user->orders as $order)
                         <tr>
                             <td>{{ $order->id }}</td>
-                            <td>{{ $order->lot->name }}</td>
+                            <td>{{ $order->orderItems->first() ? $order->orderItems->first()->lot->name : '無商品資訊' }}</td>
                             <td>NT${{ number_format($order->total) }}</td>
                             <td>{{ $orderStatusPresenter->present($order) }}</td>
                         </tr>

@@ -128,7 +128,8 @@ class ExpertController extends Controller
     public function ajaxReviewGetLots($mainCategoryId)
     {
         $mainCategory = $this->categoryService->getCategory($mainCategoryId);
-        return $this->lotService->ajaxReviewGetLots($mainCategory);
+        $datatable = $this->lotService->ajaxReviewGetLots($mainCategory);
+        return $datatable;
     }
 
     public function reviewLot($mainCategoryId, $lotId)

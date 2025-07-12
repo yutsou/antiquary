@@ -52,12 +52,15 @@ class NoticePresenter
                         1 => ['流標', '物品 No.'.$model->id.' ，無人競標流標，請至平台選擇處理方式。'],
                         2 => ['流標', '物品 No.'.$model->id.' ，未達底價流標，請至平台選擇處理方式。'],
                         3 => ['棄標', '物品 No.'.$model->id.' ，遭到棄標，請至平台選擇處理方式。'],
+                        4 => ['已得標', '物品 No.'.$model->id.' ，以 NT$'.number_format($model->current_bid).'得標，點選此"<a href="'.route('account.cart.show').'">連結</a>"到付款頁面進行付款。'],
+                        5 => ['競標成功', '物品 No.'.$model->id.' ，以 NT$'.number_format($model->current_bid).'賣出。'],
                     };
                 case 3:
                     $model = Order::find($notice->target_id);
+                    $firstItem = $model->orderItems->first();
+                    $itemCount = $model->orderItems->count();
+                    $itemText = $itemCount > 1 ? "等{$itemCount}件物品" : "物品 No.{$firstItem->lot->id}";
                     return match ($notice->code) {
-                        0 => ['已得標', '物品 No.'.$model->lot->id.' ，以 NT$'.number_format($model->subtotal).'得標，點選此"<a href="'.route('account.orders.show', $model).'">連結</a>"到付款頁面進行付款。'],
-                        1 => ['競標成功', '物品 No.'.$model->lot->id.' ，以 NT$'.number_format($model->subtotal).'賣出。'],
                         2 => ['已收到匯款', '訂單 No.'.$model->id.' ，已收到匯款'],
                         3 => ['訂單已完成', '訂單 No.'.$model->id.' ，已完成'],
                         4 => ['已完成委賣', '訂單 No.'.$model->id.' ，已匯款'],
@@ -84,11 +87,11 @@ class NoticePresenter
                     $logisticInfo = $lot->logisticRecords->where('type',$type)->first();
                     return [$text, '物品編號 No.'.$lot->id.' ，已寄出。'.$logisticInfo->company_name.': '.$logisticInfo->tracking_code];
                 case 6:
-                    $model = Order::find($notice->target_id);
+                    $model = $notice->lot;
                     return match ($notice->code) {
-                        0 => ['付款提醒通知', '提醒您，訂單 No.' . $model->id . ' 還未付款，請您在今天起的四天內完成付款，若逾時付款導致棄標，將被暫時停權一週，若為第二次棄標，您的帳號將會被永久停權。'],
-                        1 => ['付款逾時', '訂單 No.' . $model->id . ' 逾期付款，此次棄標將導致您停權一週，若棄標第二次，我們將永久停權您的帳號。'],
-                        2 => ['付款逾時', '訂單 No.' . $model->id . ' 逾期付款，此次棄標將導致您的帳號永久停權。'],
+                        0 => ['付款提醒通知', '提醒您，物品 No.'.$model->id. ' 還未付款，請您在今天起的四天內完成付款，若逾時付款導致棄標，將被暫時停權一週，若為第二次棄標，您的帳號將會被永久停權。'],
+                        1 => ['付款逾時', '物品 No.'.$model->id. ' 逾期付款，此次棄標將導致您停權一週，若棄標第二次，我們將永久停權您的帳號。'],
+                        2 => ['付款逾時', '物品 No.'.$model->id. ' 逾期付款，此次棄標將導致您的帳號永久停權。'],
                     };
             }
         } catch (Exception $e) {

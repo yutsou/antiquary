@@ -13,7 +13,7 @@
             @foreach($orders as $order)
                 <div class="uk-card uk-card-default uk-card-hover uk-grid-collapse uk-margin custom-card-click" orderId="{{ $order->id }}" uk-grid>
                     <div class="uk-card-media-left uk-cover-container uk-width-1-3 uk-width-1-5@m">
-                        <img src="{{ $order->lot->blImages->first()->url }}" alt="" uk-cover>
+                        <img src="{{ $order->orderItems->first() ? $order->orderItems->first()->lot->blImages->first()->url : '' }}" alt="" uk-cover>
                     </div>
                     <div class="uk-width-expand">
 
@@ -24,14 +24,30 @@
                                 </label>
                             </div>
                             <hr>
-                            <h3 class="uk-card-title" style="margin: 0 0 0 0">ID.{{ $order->lot->id }}
-                                - {{ $order->lot->name }}</h3>
+                            <h3 class="uk-card-title" style="margin: 0 0 0 0">
+                                @if($order->orderItems->count() > 0)
+                                    @php
+                                        $firstItem = $order->orderItems->first();
+                                        $totalItems = $order->orderItems->count();
+                                    @endphp
+                                    ID.{{ $firstItem->lot->id }} - {{ $firstItem->lot->name }}
+                                    @if($totalItems > 1)
+                                        <span class="uk-text-small uk-text-muted">以及 {{ $totalItems - 1 }} 件物品</span>
+                                    @endif
+                                @else
+                                    無商品資訊
+                                @endif
+                            </h3>
                             <hr>
                             <div>
                                 <div class="uk-grid-small uk-child-width-1-2@s" uk-grid>
                                     <div>
                                         <span>
-                                            以 NT${{ number_format($order->lot->current_bid) }} 得標
+                                            @if($order->orderItems->count() > 1)
+                                                總計 NT${{ number_format($order->total) }}
+                                            @else
+                                                以 NT${{ number_format($order->orderItems->first() ? $order->orderItems->first()->lot->current_bid : 0) }} 得標
+                                            @endif
                                         </span>
                                     </div>
                                     <div>

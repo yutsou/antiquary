@@ -75,7 +75,9 @@ class MartController extends Controller
     {
         $banners = $this->bannerService->getAllBanners()->sortBy('index');
         $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
-        return view('home_page')->with('auctions', $auctions)->with('head', 'Home Page')->with('title', 'Antiquary')->with('banners', $banners);
+        $products = $this->lotService->getPublishedLots();
+
+        return view('home_page')->with('auctions', $auctions)->with('head', 'Home Page')->with('title', 'Antiquary')->with('banners', $banners)->with('products', $products);
     }
 
     public function payEcpayReceive(Request $request)
@@ -95,9 +97,11 @@ class MartController extends Controller
 
     public function indexMessages($orderId)
     {
-        $order = $this->orderService->getOrder($orderId);
-        $this->orderService->setAllmessageRead($order);
-        return CustomClass::viewWithTitle(view('mart.chatroom.show')->with('order', $order), $order->lot->name);
+        $order = app(OrderService::class)->getOrder($orderId);
+        $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
+        $messages = $order->messages()->with('user')->orderBy('created_at', 'asc')->get();
+        $with = ['order'=>$order, 'lot'=>$lot, 'messages'=>$messages];
+        return CustomClass::viewWithTitle(view('mart.chatroom.show')->with($with), $lot ? $lot->name : '聊天室');
     }
 
     public function sendMessage(Request $request, $orderId)
@@ -123,6 +127,14 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('mart.lots.index')->with('lots', $result), $request->q.' 搜尋結果');
     }
 
+    public function showProduct($lotId)
+    {
+        $lot = $this->lotService->getLot($lotId);
+        $categories = $this->categoryService->getCategories($lot);
+
+        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1]), $lot->name);
+    }
+
     public function showMCategory($mCategoryId)
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
@@ -134,8 +146,8 @@ class MartController extends Controller
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
-        $lots = $sCategory->lots->whereIn('status', [20,21])->sortBy('auction_end_at');
-        return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
+        $lots = $sCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
+        return CustomClass::viewWithTitle(view('mart.lots.index')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 
     public function showAbout()

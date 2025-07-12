@@ -74,10 +74,12 @@
                         </tr>
                         </thead>
                         <tbody>
+                        @foreach($order->orderItems as $orderItem)
                         <tr>
-                            <td>{{ $lot->name }}</td>
-                            <td>NT${{ number_format($lot->current_bid) }}</td>
+                            <td>{{ $orderItem->lot->name }}</td>
+                            <td>NT${{ number_format($orderItem->lot->current_bid) }}</td>
                         </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -95,7 +97,7 @@
                         <tbody>
                         <tr>
                             <td>小計：</td>
-                            <td>NT${{ number_format($lot->current_bid) }}</td>
+                            <td>NT${{ number_format($order->orderItems->sum(function($item) { return $item->lot->current_bid; })) }}</td>
                         </tr>
                         <tr>
                             <td>手續費：</td>

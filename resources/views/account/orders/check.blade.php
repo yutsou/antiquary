@@ -100,10 +100,12 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    @foreach($order->orderItems as $orderItem)
                                     <tr>
-                                        <td>{{ $order->lot->name }}</td>
-                                        <td>NT${{ number_format($order->lot->current_bid) }}</td>
+                                        <td>{{ $orderItem->lot->name }}</td>
+                                        <td>NT${{ number_format($orderItem->lot->current_bid) }}</td>
                                     </tr>
+                                    @endforeach
                                     </tbody>
                                 </table>
                             </div>

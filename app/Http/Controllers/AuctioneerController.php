@@ -12,14 +12,20 @@ use Illuminate\Support\Facades\Validator;
 use App\CustomFacades\CustomClass;
 use App\Services\UserService;
 use App\Services\CategoryService;
+use App\Services\DeliveryMethodService;
 use App\Services\ImageService;
 use App\Services\DomainService;
+use App\Services\SpecificationService;
+use App\Services\CartService;
+use Symfony\Component\ErrorHandler\Debug;
+use App\Models\MergeShippingRequest;
+use App\Models\MergeShippingItem;
 
 class AuctioneerController extends Controller
 {
-    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService, $lotService, $promotionService;
+    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService, $lotService, $promotionService, $specificationService, $deliveryMethodService, $cartService;
 
-    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService, BannerService $bannerService)
+    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService, BannerService $bannerService, SpecificationService $specificationService, DeliveryMethodService $deliveryMethodService, CartService $cartService)
     {
         $this->userService = $userService;
         $this->categoryService = $categoryService;
@@ -29,6 +35,9 @@ class AuctioneerController extends Controller
         $this->lotService = $lotService;
         $this->promotionService = $promotionService;
         $this->bannerService = $bannerService;
+        $this->specificationService = $specificationService;
+        $this->deliveryMethodService = $deliveryMethodService;
+        $this->cartService = $cartService;
     }
 
     static function showDashboard()
@@ -155,7 +164,7 @@ class AuctioneerController extends Controller
     public function showOrder($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        $lot = $order->lot;
+        $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
         $logisticInfo = $this->orderService->getLogisticInfo($order, 0);
         $with = ['order'=>$order, 'lot'=>$lot, 'logisticInfo'=>$logisticInfo];
         $customView = CustomClass::viewWithTitle(view('auctioneer.orders.show')->with($with), '訂單#'.$orderId);
@@ -239,21 +248,30 @@ class AuctioneerController extends Controller
     {
         $order = $this->orderService->getOrder($orderId);
         $this->orderService->updateOrderStatus(51, $order); // 失效 - 付款逾期
-        $lot = $order->lot;
-        $this->lotService->updateLotStatus(25, $lot); // 棄標
+        $firstItem = $order->orderItems->first();
+        if ($firstItem) {
+            $this->lotService->updateLotStatus(25, $firstItem->lot); // 棄標
+        }
     }
 
     public function indexMessages($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        $this->orderService->setAllmessageRead($order);
-        return CustomClass::viewWithTitle(view('auctioneer.orders.chatroom')->with('order', $order), $order->lot->name);
+        $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
+        $messages = $order->messages()->with('user')->orderBy('created_at', 'asc')->get();
+        $with = ['order'=>$order, 'lot'=>$lot, 'messages'=>$messages];
+        $customView = CustomClass::viewWithTitle(view('auctioneer.orders.chatroom')->with($with), $lot ? $lot->name : '聊天室');
+        return $customView;
     }
 
     public function indexMemberMessages($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        return CustomClass::viewWithTitle(view('auctioneer.orders.member_chatroom')->with('order', $order), $order->lot->name);
+        $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
+        $messages = $order->messages()->with('user')->orderBy('created_at', 'asc')->get();
+        $with = ['order'=>$order, 'lot'=>$lot, 'messages'=>$messages];
+        $customView = CustomClass::viewWithTitle(view('auctioneer.orders.member_chatroom')->with($with), $lot ? $lot->name : '聊天室');
+        return $customView;
     }
 
     public function indexPromotions()
@@ -388,5 +406,304 @@ class AuctioneerController extends Controller
     {
         $user = $this->userService->getUser($request->userId);
         $this->userService->statusUpdate($user, 0);
+    }
+
+    public function showProducts()
+    {
+        $customView = CustomClass::viewWithTitle(view('auctioneer.products.index'), '商品管理');
+        return $customView;
+    }
+
+    public function ajaxGetProducts()
+    {
+        $datatable = $this->lotService->ajaxGetProducts();
+        return $datatable;
+    }
+
+    public function createProduct()
+    {
+        $mainCategories = $this->categoryService->getRoots();
+
+        $customView = CustomClass::viewWithTitle(view('auctioneer.products.create')->with('mainCategories', $mainCategories), '商品創建');
+        return $customView;
+    }
+
+    public function ajaxDefaultSpecificationTitles($mainCategoryId)
+    {
+        $mainCategory = $this->categoryService->getCategory($mainCategoryId);
+        $defaultSpecificationTitles = $mainCategory->defaultSpecificationTitles;
+        return $defaultSpecificationTitles;
+    }
+
+    public function ajaxSubCategories($mainCategoryId)
+    {
+        $mainCategory = $this->categoryService->getCategory($mainCategoryId);
+        $subCategories = $mainCategory->children;
+        return $subCategories;
+    }
+
+    protected function lotValidation($request, $imageValid)
+    {
+        $input = $request->all();
+
+        $rules = [
+            'name' => 'required',
+            'mainCategoryId' => 'required',
+            'specificationValues.*' => 'required',
+            'description' => 'required',
+        ];
+
+        if($imageValid === 0)
+        {
+            $rules['images'] = 'required';
+        }
+
+        if(isset($request->checkReversePrice)) {
+            $rules['reserve_price'] = 'required|gte:3000';
+        }
+        if(isset($request->crossBorderDelivery)) {
+            $rules['crossBorderDeliveryCost'] = 'required';
+        }
+        if(isset($request->homeDelivery)) {
+            $rules['homeDeliveryCost'] = 'required';
+        }
+        if($request->faceToFace === null && $request->crossBorderDelivery === null && $request->homeDelivery === null) {
+            $rules['deliveryMethods'] = 'required';
+        }
+        $messages = [
+            'name.required'=>'未填寫商品名稱',
+            'mainCategoryId.required'=>'未選擇物品分類',
+            'specificationValues.*.required' => '規格未填寫完整',
+            'description.required' => '未填寫描述',
+            'images.required' => '未上傳圖片',
+            'reserve_price.required' => '未填寫底價',
+            'reserve_price.gte' => '底價需大於等於3000',
+            'homeDeliveryCost.required'=> '未填寫台灣區物流費用',
+            'crossBorderDeliveryCost.required' => '未填寫跨境物流費用',
+            'deliveryMethods.required' => '未選擇運送方式'
+        ];
+        $validator = Validator::make($input, $rules, $messages);
+
+        return $validator;
+    }
+
+    public function storeLot(Request $request)
+    {
+
+        $validator = $this->lotValidation($request, 0);
+
+        if ($validator->fails()) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
+
+        // Create a new lot with type 60, which represents a direct-sale
+        // marketplace item; returns the newly created lot ID
+        $lotId = $this->lotService->createLot($request, 60);
+
+        $this->lotService->syncCategoryLot($lotId, [$request->mainCategoryId=>['main'=>1], $request->sub_category_id]);
+
+        $this->specificationService->createSpecifications($request, $lotId);
+
+        $this->deliveryMethodService->createDeliveryMethods($request, $lotId);
+
+        $syncImageIds = array();
+
+        foreach ($request->images as $index=>$file) {
+            $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
+            $alt = null;
+            $imageable_id = $lotId;
+            $imageable_type = 'App\Models\Lot';
+            $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+            $syncImageIds[$imageId] = ['main'=>$index];
+        }
+
+        $this->lotService->syncLotImages($lotId, $syncImageIds);
+
+
+        return Response::json(array(
+            'success' => route('auctioneer.products.index'),
+            'errors' => false
+        ), 200);
+    }
+
+    public function editProduct($lotId)
+    {
+        $lot = $this->lotService->getLot($lotId);
+        $mainCategories = $this->categoryService->getRoots();
+        $customView = CustomClass::viewWithTitle(view('auctioneer.products.edit')->with('lot', $lot)->with('mainCategories', $mainCategories), '商品修改');
+        return $customView;
+    }
+
+    public function updateProduct(Request $request, $lotId)
+    {
+        $validator = $this->lotValidation($request, 1);
+
+        if ($validator->fails()) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 400); // 400 being the HTTP code for an invalid request.
+        }
+
+        $lot = $this->lotService->getLot($lotId);
+
+        if (isset($request->images)) {
+            $olderImageIds = $lot->blImages->pluck('id')->toArray();
+            $lot->blImages()->detach($olderImageIds);
+            foreach($olderImageIds as $imageId)
+            {
+                $this->imageService->deleteImage($imageId);
+            }
+            $newImageIds = array();
+            foreach ($request->images as $index=>$file) {
+                $folderName = '/lots'.'/'.$request->mainCategoryId.'/'.strlen($lotId).'/'.$lotId;
+                $alt = null;
+                $imageable_id = $lotId;
+                $imageable_type = 'App\Models\Lot';
+                $imageId = $this->imageService->storeImage($file, $folderName, $alt, $imageable_id, $imageable_type);
+                $newImageIds[$imageId] = ['main'=>$index];
+
+            }
+            $this->lotService->attachLotImages($lotId, $newImageIds);
+        } else {
+            $this->imageService->changeImagesOrder($request->imageOrderArray, $lot);
+        }
+
+        if ($request->mainCategoryId == $lot->main_category->id) {
+            #判斷是否變更了主分類，沒變更的話則單純修改規格
+            $this->specificationService->updateSpecifications($request, $lotId);
+        } else {
+            #判斷是否變更了主分類，如變更的話則清除規格，並產生新規格
+            $this->lotService->syncCategoryLot($lotId, [$request->mainCategoryId]);#同步分類
+            $lot->specifications()->delete();#清除舊的規格
+            $this->specificationService->createSpecifications($request, $lotId);#創建新的規格
+        }
+        $this->lotService->updateProduct($request, $lotId);
+        $this->deliveryMethodService->syncDeliveryMethods($request, $lot);#同步分類
+
+        return Response::json(array(
+            'success' => route('auctioneer.products.index'),
+            'errors' => false
+        ), 200);
+    }
+
+    public function publishProduct($lotId)
+    {
+        $lot = $this->lotService->getLot($lotId);
+        $this->lotService->updateLotStatus(61, $lot); // 上架
+        return back()->with('notification', '上架成功');
+    }
+
+    public function unpublishProduct($lotId)
+    {
+        $lot = $this->lotService->getLot($lotId);
+        $this->lotService->updateLotStatus(60, $lot); // 下架
+        return back()->with('notification', '下架成功');
+    }
+
+    // 合併運費請求管理
+    public function indexMergeShippingRequests()
+    {
+        $requests = MergeShippingRequest::with(['user', 'items.lot.blImages'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return CustomClass::viewWithTitle(
+            view('auctioneer.merge_shipping_requests.index')->with('requests', $requests),
+            '合併運費請求管理'
+        );
+    }
+
+    public function showMergeShippingRequest($requestId)
+    {
+        $request = MergeShippingRequest::with(['user', 'items.lot.blImages'])
+            ->findOrFail($requestId);
+
+        return CustomClass::viewWithTitle(
+            view('auctioneer.merge_shipping_requests.show')->with('request', $request),
+            '合併運費請求詳情'
+        );
+    }
+
+    public function updateMergeShippingRequest(Request $request, $requestId)
+    {
+        $mergeRequest = MergeShippingRequest::findOrFail($requestId);
+
+        $input = $request->all();
+        $status = $request->input('status');
+
+        // 根據狀態設定不同的驗證規則
+        if ($status == 1) {
+            // 同意合併運費時，新運費為必填
+            $rules = [
+                'new_shipping_fee' => 'required|numeric|min:0',
+                'status' => 'required|in:1,2', // 1: 已處理, 2: 已拒絕
+                'remark' => 'nullable|string|max:500',
+            ];
+
+            $messages = [
+                'new_shipping_fee.required' => '新運費為必填',
+                'new_shipping_fee.numeric' => '新運費必須為數字',
+                'new_shipping_fee.min' => '新運費不能為負數',
+                'status.required' => '狀態為必填',
+                'status.in' => '狀態值無效',
+                'remark.max' => '備註不能超過500字',
+            ];
+        } else {
+            // 拒絕合併運費時，新運費為可選
+            $rules = [
+                'new_shipping_fee' => 'nullable|numeric|min:0',
+                'status' => 'required|in:1,2', // 1: 已處理, 2: 已拒絕
+                'remark' => 'nullable|string|max:500',
+            ];
+
+            $messages = [
+                'new_shipping_fee.numeric' => '新運費必須為數字',
+                'new_shipping_fee.min' => '新運費不能為負數',
+                'status.required' => '狀態為必填',
+                'status.in' => '狀態值無效',
+                'remark.max' => '備註不能超過500字',
+            ];
+        }
+
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 400);
+        }
+
+        // 準備更新資料
+        $updateData = [
+            'status' => $request->status,
+            'remark' => $request->remark,
+        ];
+
+        // 只有在有提供新運費時才更新
+        if ($request->has('new_shipping_fee') && $request->new_shipping_fee !== null && $request->new_shipping_fee !== '') {
+            $updateData['new_shipping_fee'] = $request->new_shipping_fee;
+        }
+
+        $mergeRequest->update($updateData);
+
+        // 如果拒絕合併運費請求，將物品加回用戶的購物車
+        if ($request->status == 2) {
+            $userId = $mergeRequest->user_id;
+
+            // 將每個物品加回購物車
+            foreach ($mergeRequest->items as $item) {
+                $this->cartService->addToCart($userId, $item->lot_id, $item->quantity);
+            }
+        }
+
+        return Response::json(array(
+            'success' => true,
+            'message' => $request->status == 2 ? '合併運費請求已拒絕，物品已加回購物車' : '合併運費請求已更新'
+        ), 200);
     }
 }

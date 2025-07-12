@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\CustomFacades\CustomClass;
 use App\Services\AuctionService;
 use App\Services\BidService;
+use App\Services\CartService;
 use App\Services\CategoryService;
 use App\Services\EcpayService;
 use App\Services\GomypayService;
@@ -18,13 +19,16 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Models\MergeShippingRequest;
+use App\Models\MergeShippingItem;
 
 class MemberController extends Controller
 {
-    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService;
+    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService, $cartService;
 
     public function __construct(
         CategoryService $categoryService,
@@ -37,6 +41,7 @@ class MemberController extends Controller
         EcpayService $ecpayService,
         BidService $bidService,
         GomypayService $gomypayService,
+        CartService $cartService
     ) {
         $this->categoryService = $categoryService;
         $this->lotService = $lotService;
@@ -48,6 +53,7 @@ class MemberController extends Controller
         $this->ecpayService = $ecpayService;
         $this->bidService = $bidService;
         $this->gomypayService = $gomypayService;
+        $this->cartService = $cartService;
     }
 
     public function showDashboard()
@@ -67,7 +73,7 @@ class MemberController extends Controller
     public function showFavorites()
     {
         $user = Auth::user();
-        $favorites =$user->favoriteLots()->whereIn('status', [20, 21])->get();
+        $favorites =$user->favoriteLots()->whereIn('status', [20, 21, 61])->get();
         $customView = CustomClass::viewWithTitle(view('account.favorites.index')->with('favorites', $favorites), '感興趣的物品');
         return $customView;
     }
@@ -76,16 +82,16 @@ class MemberController extends Controller
     {
         $user = Auth::user();
         $orders = $user->orders->sortByDesc('created_at');
-        $customView = CustomClass::viewWithTitle(view('account.orders.index')->with('orders', $orders), '已得標的物品');
+        $customView = CustomClass::viewWithTitle(view('account.orders.index')->with('orders', $orders), '訂單');
         return $customView;
     }
 
     public function showOrder($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        $lot = $order->lot;
+        $orderItems = $order->orderItems;
         $logisticInfo = $this->orderService->getLogisticInfo($order, 0);
-        $with = ['order'=>$order, 'lot'=>$lot, 'logisticInfo'=>$logisticInfo];
+        $with = ['order'=>$order, 'orderItems'=>$orderItems, 'logisticInfo'=>$logisticInfo];
         $customView = CustomClass::viewWithTitle(view('account.orders.show')->with($with), '訂單#'.$orderId);
         return $customView;
     }
@@ -104,7 +110,7 @@ class MemberController extends Controller
             $customView = CustomClass::viewWithTitle(view('account.orders.delivery_method_choice')->with('order', $order)->with('paymentMethod', $paymentMethod), '選擇取貨方式');
         } elseif ($request->paymentMethod !== null && $request->deliveryMethod !== null) {
 
-            $subtotal = $order->lot->current_bid;
+            $subtotal = $order->orderItems->sum(function($item) { return $item->lot->current_bid; });
 
             $output = [
                 'order'=>$order,
@@ -145,8 +151,10 @@ class MemberController extends Controller
 
     public function confirmOrder(Request $request, $orderId)
     {
+        $order = $this->orderService->getOrder($orderId);
+        $subtotal = $order->orderItems->sum(function($item) { return $item->lot->current_bid; });
         $this->orderService->confirmOrder($request, $orderId);
-        return redirect()->route('account.orders.pay', $orderId);
+        return redirect()->route('account.orders.show', $orderId);
     }
 
     public function completeOrder($orderId)
@@ -158,14 +166,10 @@ class MemberController extends Controller
     public function pay($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        switch ($order->payment_method) {
-            case 0:#信用卡付款
-                #$this->ecpayService->creditCardPay($order);
-                #$this->gomypayService->creditCardPay($order);
-                return redirect()->route('account.credit_card_info.check', $orderId);
-            case 1:#ATM轉帳
-                return redirect()->route('account.atm_pay_info.show', $orderId);
-        }
+        // 進入付款流程時，先將狀態設為 10
+        $this->orderService->updateOrderStatus(10, $order);
+        $this->ecpayService->creditCardPay($order);
+        exit;
     }
 
     public function showAtmPayInfo($orderId) {
@@ -762,6 +766,702 @@ class MemberController extends Controller
         $user = Auth::user();
         $lots = $this->lotService->getBiddingLot($user);
          return CustomClass::viewWithTitle(view('account.bidding_lots.index')->with('lots', $lots), '您的競標');
+    }
+
+    public function handleProduct(Request $request, $lotId)
+    {
+        $lot = $this->lotService->getLot($lotId);
+        if ($request->paymentMethod !== null && $request->deliveryMethod === null) {
+            $paymentMethod = $request->paymentMethod;
+            $customView = CustomClass::viewWithTitle(view('account.products.delivery_method_choice')->with('paymentMethod', $paymentMethod)->with('lot', $lot), '選擇取貨方式');
+        } elseif ($request->paymentMethod !== null && $request->deliveryMethod !== null) {
+
+            $output = [
+                'lot'=>$lot,
+                'paymentMethod'=>intval($request->paymentMethod),
+                'deliveryMethod'=>intval($request->deliveryMethod),
+                'delivery_cost'=>$request->delivery_cost,
+                'recipientName'=>$request->recipient_name,
+                'recipientPhone'=>$request->recipient_phone,
+                'subtotal'=>$lot->reserve_price,
+                'total'=>intval($lot->reserve_price)+intval($request->delivery_cost)
+            ];
+
+            switch ($request->deliveryMethod){
+                case 1:
+                    $output = array_merge($output, [
+                        'zipcode'=>$request->zipcode,
+                        'county'=>$request->county,
+                        'district'=>$request->district,
+                        'address'=>$request->address,
+                    ]);
+                    break;
+                case 2:
+                    $output = array_merge($output, [
+                        'country'=>$request->country,
+                        'countryCode'=>$request->country_selector_code,
+                        'crossBoardAddress'=>$request->cross_board_address,
+                    ]);
+                    break;
+            }
+
+            $customView = CustomClass::viewWithTitle(view('account.products.check')->with($output), '訂單確認');
+
+        } else {
+            $customView = CustomClass::viewWithTitle(view('account.products.payment_method_choice')->with('lot', $lot), '選擇付款方式');
+        }
+        return $customView;
+    }
+
+    public function confirmProduct(Request $request, $lotId)
+    {
+        try {
+            $lot = $this->lotService->getLot($lotId);
+            $order = $this->orderService->createProductOrder($lot);
+            $this->orderService->confirmOrder($request, $order->id);
+            return redirect()->route('account.orders.pay', $order->id);
+        } catch (\Exception $e) {
+            // 處理庫存不足等錯誤
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function cartValidation($request, $lot, $userId)
+    {
+        $input = $request->all();
+        $inventory = $lot->inventory ?? 0;
+
+        // 查目前 cart 已有數量（假設你是 cart_items 設計，或 cart 表中一筆一商品）
+        $currentCartQuantity = \App\Models\Cart::where('user_id', $userId)
+            ->where('lot_id', $lot->id)
+            ->value('quantity') ?? 0;
+
+        // 計算這次加入後的總數量
+        $afterAdd = $currentCartQuantity + intval($input['quantity'] ?? 0);
+
+        // 自訂驗證規則
+        $rules = [
+            'quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($inventory, $currentCartQuantity) {
+                    // 新增後總數量不能超過庫存
+                    if (($currentCartQuantity + $value) > $inventory) {
+                        $fail('購物車累計數量不可超過現有庫存（剩餘 '.$inventory.' 件）');
+                    }
+                }
+            ],
+        ];
+        $messages = [
+            'quantity.required' => '請輸入購買數量',
+            'quantity.integer'  => '數量必須為整數',
+            'quantity.min'      => '購買數量至少 1 件',
+        ];
+
+        return Validator::make($input, $rules, $messages);
+    }
+
+    public function storeCart(Request $request)
+    {
+        $user = Auth::user();
+        $lot = $this->lotService->findOrFail($request->lot_id);
+
+        // 驗證
+        $validator = $this->cartValidation($request, $lot, $user->id);
+
+        if ($validator->fails()) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 422); // 400 being the HTTP code for an invalid request.
+        }
+
+        // 驗證通過才加入購物車
+        $this->cartService->addToCart($user->id, $request->lot_id, $request->quantity);
+
+        return Response::json(array(
+            'success' => url()->previous(),
+            'errors' => false
+        ), 200);
+    }
+
+    public function showCart()
+    {
+        $user = Auth::user();
+        $cartItems = $this->cartService->getCartItems($user->id);
+        $mergeShippingRequests = $user->mergeShippingRequests()
+            ->where('status', '!=', 3)
+            ->with('items.lot.blImages')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $customView = CustomClass::viewWithTitle(
+            view('account.cart.show')
+                ->with('cartItems', $cartItems)
+                ->with('mergeShippingRequests', $mergeShippingRequests),
+            '購物車'
+        );
+        return $customView;
+    }
+
+    public function updateCart(Request $request)
+    {
+        $user = Auth::user();
+        $lot = $this->lotService->findOrFail($request->lot_id);
+
+        // 驗證數量
+        $input = $request->all();
+        $inventory = $lot->inventory ?? 0;
+
+        $rules = [
+            'lot_id' => 'required|exists:lots,id',
+            'quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($inventory) {
+                    if ($value > $inventory) {
+                        $fail('購買數量不可超過現有庫存（剩餘 '.$inventory.' 件）');
+                    }
+                }
+            ],
+        ];
+
+        $messages = [
+            'lot_id.required' => '商品 ID 不能為空',
+            'lot_id.exists' => '商品不存在',
+            'quantity.required' => '請輸入購買數量',
+            'quantity.integer' => '數量必須為整數',
+            'quantity.min' => '購買數量至少 1 件',
+        ];
+
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => $validator->getMessageBag()->toArray()
+            ), 422);
+        }
+
+        // 更新購物車數量
+        $cartItem = $this->cartService->updateCartQuantity($user->id, $request->lot_id, $request->quantity);
+
+        if (!$cartItem) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => ['cart' => '購物車中找不到此商品']
+            ), 404);
+        }
+
+        return Response::json(array(
+            'success' => true,
+            'message' => '購物車數量更新成功'
+        ), 200);
+    }
+
+    public function removeCart(Request $request)
+    {
+        $user = Auth::user();
+        $lotId = $request->input('lot_id');
+
+        // 驗證商品是否存在
+        $lot = $this->lotService->findOrFail($lotId);
+
+        try {
+            // 從購物車中移除商品
+            $removed = $this->cartService->removeCartItem($user->id, $lotId);
+
+            if (!$removed) {
+                return Response::json(array(
+                    'success' => false,
+                    'errors' => ['cart' => '購物車中找不到此商品']
+                ), 404);
+            }
+
+            // 取得更新後的購物車數量
+            $cartCount = $this->cartService->getCartCount($user->id);
+
+            return Response::json(array(
+                'success' => true,
+                'message' => '商品已從購物車中移除',
+                'cart_count' => $cartCount
+            ), 200);
+        } catch (\Exception $e) {
+            return Response::json(array(
+                'success' => false,
+                'errors' => ['cart' => $e->getMessage()]
+            ), 422);
+        }
+    }
+
+    public function cartDeliveryMethodChoice(Request $request)
+    {
+        $user = Auth::user();
+        $selectedLotIds = $request->input('selected_lots', []);
+
+        if (empty($selectedLotIds)) {
+            return redirect()->route('account.cart.show')->with('error', '請選擇要結帳的商品');
+        }
+
+        // 獲取選中的商品
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+
+        if ($selectedLots->isEmpty()) {
+            return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
+        }
+
+        // 計算所有商品的運送方式交集
+        $deliveryMethodsArr = [];
+        foreach ($selectedLots as $lot) {
+            $deliveryMethodsArr[] = $lot->deliveryMethods->pluck('code')->toArray();
+        }
+        $commonDeliveryCodes = array_reduce($deliveryMethodsArr, function($carry, $item) {
+            return $carry === null ? $item : array_intersect($carry, $item);
+        }, null);
+
+        // 計算總數量
+        $totalQuantity = $selectedLots->sum('cart_quantity');
+
+        // 計算宅配總費用 (code=1)
+        $homeDeliveryTotal = 0;
+        if (!empty($commonDeliveryCodes) && in_array(1, $commonDeliveryCodes)) {
+            foreach ($selectedLots as $lot) {
+                $method = $lot->deliveryMethods->where('code', 1)->first();
+                if ($method) {
+                    $homeDeliveryTotal += $method->cost;
+                }
+            }
+        }
+
+        // 計算境外物流總費用 (code=2)
+        $crossBorderTotal = 0;
+        if (!empty($commonDeliveryCodes) && in_array(2, $commonDeliveryCodes)) {
+            foreach ($selectedLots as $lot) {
+                $method = $lot->deliveryMethods->where('code', 2)->first();
+                if ($method) {
+                    $crossBorderTotal += $method->cost;
+                }
+            }
+        }
+
+        return CustomClass::viewWithTitle(
+            view('account.cart.delivery_method_choice')
+                ->with('selectedLots', $selectedLots)
+                ->with('selectedLotIds', $selectedLotIds)
+                ->with('commonDeliveryCodes', $commonDeliveryCodes)
+                ->with('totalQuantity', $totalQuantity)
+                ->with('homeDeliveryTotal', $homeDeliveryTotal)
+                ->with('crossBorderTotal', $crossBorderTotal),
+            '選擇運送方式'
+        );
+    }
+
+    public function cartPaymentMethodChoice(Request $request)
+    {
+        $user = Auth::user();
+        $selectedLotIds = $request->input('selected_lots', []);
+        $deliveryMethod = $request->input('delivery_method');
+        $deliveryCost = $request->input('delivery_cost');
+        $recipientName = $request->input('recipient_name');
+        $recipientPhone = $request->input('recipient_phone');
+        $zipCode = $request->input('zip_code');
+        $county = $request->input('county');
+        $district = $request->input('district');
+        $address = $request->input('address');
+        $country = $request->input('country');
+        $countrySelectorCode = $request->input('country_selector_code');
+        $crossBoardAddress = $request->input('cross_board_address');
+
+        if (empty($selectedLotIds) || !isset($deliveryMethod)) {
+            return redirect()->route('account.cart.show')->with('error', '請選擇要結帳的商品和運送方式');
+        }
+
+        // 獲取選中的商品
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+
+        if ($selectedLots->isEmpty()) {
+            return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
+        }
+
+        return CustomClass::viewWithTitle(
+            view('account.cart.payment_method_choice')
+                ->with('selectedLots', $selectedLots)
+                ->with('selectedLotIds', $selectedLotIds)
+                ->with('deliveryMethod', $deliveryMethod)
+                ->with('deliveryCost', $deliveryCost)
+                ->with('recipientName', $recipientName)
+                ->with('recipientPhone', $recipientPhone)
+                ->with('zipCode', $zipCode)
+                ->with('county', $county)
+                ->with('district', $district)
+                ->with('address', $address)
+                ->with('country', $country)
+                ->with('countrySelectorCode', $countrySelectorCode)
+                ->with('crossBoardAddress', $crossBoardAddress),
+            '選擇付款方式'
+        );
+    }
+
+    public function cartCheck(Request $request)
+    {
+        $user = Auth::user();
+        $selectedLotIds = $request->input('selected_lots', []);
+        $paymentMethod = $request->input('payment_method');
+        $deliveryMethod = $request->input('delivery_method');
+        $deliveryCost = $request->input('delivery_cost');
+
+        if (empty($selectedLotIds) || !isset($paymentMethod) || !isset($deliveryMethod)) {
+            return redirect()->route('account.cart.show')->with('error', '請完成所有必要選擇');
+        }
+
+        // 獲取選中的商品
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+
+        if ($selectedLots->isEmpty()) {
+            return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
+        }
+
+        // 計算總計（包含運費）
+        $subtotal = $selectedLots->sum('subtotal');
+        $total = $subtotal + $deliveryCost;
+
+        // 準備運送資訊
+        $deliveryInfo = $this->prepareDeliveryInfo($request, [$deliveryMethod]);
+
+        return CustomClass::viewWithTitle(
+            view('account.cart.check')
+                ->with('selectedLots', $selectedLots)
+                ->with('selectedLotIds', $selectedLotIds)
+                ->with('paymentMethod', $paymentMethod)
+                ->with('deliveryMethod', $deliveryMethod)
+                ->with('deliveryCost', $deliveryCost)
+                ->with('subtotal', $subtotal)
+                ->with('total', $total)
+                ->with($deliveryInfo),
+            '訂單確認'
+        );
+    }
+
+    public function cartConfirm(Request $request)
+    {
+        $user = Auth::user();
+        $selectedLotIds = $request->input('selected_lots', []);
+        $paymentMethod = $request->input('payment_method');
+        $deliveryMethod = $request->input('delivery_method');
+        $deliveryCost = $request->input('delivery_cost');
+        $recipientName = $request->input('recipient_name');
+        $recipientPhone = $request->input('recipient_phone');
+
+        if (empty($selectedLotIds) || !isset($paymentMethod) || !isset($deliveryMethod) || !isset($deliveryCost) || !isset($recipientName) || !isset($recipientPhone)) {
+            return redirect()->route('account.cart.show')->with('error', '請完成所有必要選擇');
+        }
+
+        try {
+            // 創建訂單
+            $order = $this->orderService->createCartOrder($user->id, $selectedLotIds, $request->all());
+
+            // 從購物車中移除已購買的商品（包括競標商品）
+            try {
+                $this->cartService->removeSelectedItems($user->id, $selectedLotIds, false);
+            } catch (\Exception $e) {
+                // 如果移除失敗，記錄錯誤但不中斷流程
+                \Log::warning('Failed to remove items from cart after order creation: ' . $e->getMessage());
+            }
+
+            // 根據付款方式導向不同頁面
+            if ($paymentMethod == 0) {
+                // 信用卡付款 - 導向付款頁面
+                return redirect()->route('account.orders.pay', $order->id);
+            } elseif ($paymentMethod == 1) {
+                // ATM轉帳 - 導向ATM付款資訊頁面
+                return redirect()->route('account.atm_pay_info.show', $order->id);
+            } else {
+                // 預設導向付款頁面
+                return redirect()->route('account.orders.pay', $order->id);
+            }
+        } catch (\Exception $e) {
+            // 處理庫存不足等錯誤
+            return redirect()->route('account.cart.show')->with('error', $e->getMessage());
+        }
+    }
+
+    private function prepareDeliveryInfo(Request $request, $delivery_methods)
+    {
+        $info = [
+            'recipientName' => $request->input('recipient_name'),
+            'recipientPhone' => $request->input('recipient_phone'),
+        ];
+
+        // 檢查是否有需要地址的運送方式
+        $hasHomeDelivery = in_array(1, $delivery_methods);
+        $hasCrossBorder = in_array(2, $delivery_methods);
+
+        if ($hasHomeDelivery) {
+            $info['zipCode'] = $request->input('zip_code');
+            $info['county'] = $request->input('county');
+            $info['district'] = $request->input('district');
+            $info['address'] = $request->input('address');
+        }
+
+        if ($hasCrossBorder) {
+            $info['country'] = $request->input('country');
+            $info['countryCode'] = $request->input('country_selector_code');
+            $info['crossBoardAddress'] = $request->input('cross_board_address');
+        }
+
+        return $info;
+    }
+
+    public function createMergeShippingRequest(Request $request)
+    {
+
+        $user = Auth::user();
+        $selectedLotIds = $request->input('selected_lots', []);
+        $delivery_method = $request->input('delivery_method');
+
+        if (empty($selectedLotIds) || !in_array($delivery_method, ['1-merge', '2-merge'])) {
+            return redirect()->route('account.cart.show')->with('error', '請選擇要合併運費的商品和運送方式');
+        }
+
+        // 獲取選中的商品
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+
+        if ($selectedLots->isEmpty()) {
+            return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
+        }
+
+        // 計算原本運費總計
+        $originalShippingFee = 0;
+        $deliveryMethodCode = $delivery_method === '1-merge' ? 1 : 2;
+
+        foreach ($selectedLots as $lot) {
+            $method = $lot->deliveryMethods->where('code', $deliveryMethodCode)->first();
+            if ($method) {
+                $originalShippingFee += $method->cost;
+            }
+        }
+
+        // 建立合併運費請求
+        $mergeRequest = MergeShippingRequest::create([
+            'user_id' => $user->id,
+            'original_shipping_fee' => $originalShippingFee,
+            'delivery_method' => $deliveryMethodCode,
+            'status' => MergeShippingRequest::STATUS_PENDING,
+        ]);
+
+        // 建立合併運費商品記錄
+        foreach ($selectedLots as $lot) {
+            $method = $lot->deliveryMethods->where('code', $deliveryMethodCode)->first();
+            if ($method) {
+                MergeShippingItem::create([
+                    'merge_shipping_request_id' => $mergeRequest->id,
+                    'lot_id' => $lot->id,
+                    'quantity' => $lot->cart_quantity,
+                    'original_shipping_fee' => $method->cost,
+                ]);
+            }
+        }
+
+        // 從購物車中移除已申請合併運費的商品（包括競標商品）
+        $this->cartService->removeSelectedItems($user->id, $selectedLotIds, false);
+
+
+        return redirect()->route('account.cart.show')->with('success', '合併運費請求已送出，請等待拍賣師處理');
+    }
+
+    public function mergeShippingDeliveryMethodEdit($requestId)
+    {
+        $user = Auth::user();
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+            ->where('user_id', $user->id)
+            ->where('id', $requestId)
+            ->where('status', MergeShippingRequest::STATUS_APPROVED)
+            ->firstOrFail();
+
+        return CustomClass::viewWithTitle(
+            view('account.cart.merge_shipping.delivery_method_edit')
+                ->with('mergeRequest', $mergeRequest),
+            '合併運費結帳'
+        );
+    }
+
+    public function mergeShippingDeliveryUpdate(Request $request, $requestId)
+    {
+        $user = Auth::user();
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+            ->where('user_id', $user->id)
+            ->where('id', $requestId)
+            ->where('status', MergeShippingRequest::STATUS_APPROVED)
+            ->firstOrFail();
+
+        $deliveryMethod = $request->input('delivery_method');
+        $deliveryCost = $request->input('delivery_cost');
+        $recipientName = $request->input('recipient_name');
+        $recipientPhone = $request->input('recipient_phone');
+        $zipCode = $request->input('zip_code');
+        $county = $request->input('county');
+        $district = $request->input('district');
+        $address = $request->input('address');
+        $country = $request->input('country');
+        $countrySelectorCode = $request->input('country_selector_code');
+        $crossBoardAddress = $request->input('cross_board_address');
+
+        if (!isset($deliveryMethod)) {
+            return redirect()->route('account.cart.merge_shipping.delivery_method.edit', $requestId)->with('error', '請選擇運送方式');
+        }
+
+        return CustomClass::viewWithTitle(
+            view('account.cart.merge_shipping.payment_choice')
+                ->with('mergeRequest', $mergeRequest)
+                ->with('deliveryMethod', $deliveryMethod)
+                ->with('deliveryCost', $deliveryCost)
+                ->with('recipientName', $recipientName)
+                ->with('recipientPhone', $recipientPhone)
+                ->with('zipCode', $zipCode)
+                ->with('county', $county)
+                ->with('district', $district)
+                ->with('address', $address)
+                ->with('country', $country)
+                ->with('countrySelectorCode', $countrySelectorCode)
+                ->with('crossBoardAddress', $crossBoardAddress),
+            '選擇付款方式'
+        );
+    }
+
+    public function mergeShippingCheck(Request $request, $requestId)
+    {
+        $user = Auth::user();
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+            ->where('user_id', $user->id)
+            ->where('id', $requestId)
+            ->where('status', MergeShippingRequest::STATUS_APPROVED)
+            ->firstOrFail();
+
+        $paymentMethod = $request->input('paymentMethod');
+        $deliveryMethod = $request->input('delivery_method');
+        $deliveryCost = $request->input('delivery_cost');
+        $recipientName = $request->input('recipient_name');
+        $recipientPhone = $request->input('recipient_phone');
+        $zipCode = $request->input('zip_code');
+        $county = $request->input('county');
+        $district = $request->input('district');
+        $address = $request->input('address');
+        $country = $request->input('country');
+        $countrySelectorCode = $request->input('country_selector_code');
+        $crossBoardAddress = $request->input('cross_board_address');
+
+        if (!isset($paymentMethod) || !isset($deliveryMethod)) {
+            return redirect()->route('account.cart.merge_shipping_checkout', $requestId)->with('error', '請完成所有必要選擇');
+        }
+
+        // 計算總計
+        $subtotal = $mergeRequest->items->sum(function($item) {
+            return $item->lot->reserve_price * $item->quantity;
+        });
+        $total = $subtotal + $mergeRequest->new_shipping_fee;
+
+        // 準備運送資訊
+        $deliveryInfo = $this->prepareMergeShippingDeliveryInfo($request);
+
+        return CustomClass::viewWithTitle(
+            view('account.cart.merge_shipping.check')
+                ->with('mergeRequest', $mergeRequest)
+                ->with('paymentMethod', $paymentMethod)
+                ->with('deliveryMethod', $deliveryMethod)
+                ->with('deliveryCost', $mergeRequest->new_shipping_fee)
+                ->with('subtotal', $subtotal)
+                ->with('total', $total)
+                ->with('recipientName', $recipientName)
+                ->with('recipientPhone', $recipientPhone)
+                ->with('zipCode', $zipCode)
+                ->with('county', $county)
+                ->with('district', $district)
+                ->with('address', $address)
+                ->with('country', $country)
+                ->with('countrySelectorCode', $countrySelectorCode)
+                ->with('crossBoardAddress', $crossBoardAddress),
+            '訂單確認'
+        );
+    }
+
+
+
+    public function mergeShippingConfirm(Request $request, $requestId)
+    {
+        $user = Auth::user();
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+            ->where('user_id', $user->id)
+            ->where('id', $requestId)
+            ->where('status', MergeShippingRequest::STATUS_APPROVED)
+            ->firstOrFail();
+
+        try {
+            // 創建訂單
+            $order = $this->orderService->createMergeShippingOrder($user->id, $mergeRequest, $request->all());
+
+            // 更新合併運費請求狀態為已完成
+            $mergeRequest->update(['status' => 3]); // 3: 已完成
+
+            // 根據付款方式導向不同頁面
+            $paymentMethod = $request->input('payment_method');
+
+            if ($paymentMethod == 0) {
+                // 信用卡付款 - 導向付款頁面
+                return redirect()->route('account.orders.pay', $order->id);
+            } elseif ($paymentMethod == 1) {
+                // ATM轉帳 - 導向ATM付款資訊頁面
+                return redirect()->route('account.atm_pay_info.show', $order->id);
+            } else {
+                // 預設導向付款頁面
+                return redirect()->route('account.orders.pay', $order->id);
+            }
+        } catch (\Exception $e) {
+            // 處理庫存不足等錯誤
+            return redirect()->route('account.cart.merge_shipping_checkout', $requestId)->with('error', $e->getMessage());
+        }
+    }
+
+    private function prepareMergeShippingDeliveryInfo(Request $request)
+    {
+        $info = [
+            'recipientName' => $request->input('recipient_name'),
+            'recipientPhone' => $request->input('recipient_phone'),
+        ];
+
+        $deliveryMethod = $request->input('delivery_method');
+
+        if ($deliveryMethod == 1) {
+            $info['zipCode'] = $request->input('zip_code');
+            $info['county'] = $request->input('county');
+            $info['district'] = $request->input('district');
+            $info['address'] = $request->input('address');
+        } elseif ($deliveryMethod == 2) {
+            $info['country'] = $request->input('country');
+            $info['countryCode'] = $request->input('country_selector_code');
+            $info['crossBoardAddress'] = $request->input('cross_board_address');
+        }
+
+        return $info;
+    }
+
+    public function removeMergeShippingRequest(Request $request, $requestId)
+    {
+        $user = Auth::user();
+
+        // 查找屬於該用戶的合併運費請求
+        $mergeRequest = MergeShippingRequest::with(['items'])
+            ->where('user_id', $user->id)
+            ->where('id', $requestId)
+            ->firstOrFail();
+
+        // 刪除合併運費請求（會自動刪除相關的 items，因為有外鍵約束）
+        $mergeRequest->delete();
+
+        return Response::json(array(
+            'success' => true,
+            'message' => '合併運費請求已移除'
+        ), 200);
     }
 
 }

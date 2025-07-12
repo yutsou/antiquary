@@ -79,22 +79,21 @@
                                 @endif
                             </a>
                         @else
-                            <a href="#favorite-login-notice" class="custom-link" uk-toggle>
-                                 <span id="favoriteStatus" class="google-icon">
+                            <!-- Modal HTML embedded directly into document -->
+                            <div id="favorite-login-notice" class="modal">
+                                <p class="uk-text-left uk-text-large">物品加入追蹤清單前需要先登入</p>
+                                <p class="uk-text-right">
+                                    <a class="uk-button custom-button-1"
+                                    href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a>                                </p>
+                            </div>
+
+                            <!-- Link to open the modal -->
+                            <a href="#favorite-login-notice" class="custom-link" rel="modal:open">
+                                <span id="favoriteStatus" class="google-icon">
                                     <span class="material-symbols-outlined uk-text-middle">favorite</span>
                                     <span id="favoriteStatusText" class="uk-text-middle">加到追蹤清單</span>
                                 </span>
                             </a>
-                            <div id="favorite-login-notice" class="uk-flex-top" uk-modal>
-                                <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
-                                    <button class="uk-modal-close-default" type="button" uk-close></button>
-                                    <h2 class="uk-modal-title">物品加入追蹤清單前需要先登入</h2>
-                                    <div class="uk-flex uk-flex-right">
-                                        <a class="uk-button custom-button-1"
-                                           href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a>
-                                    </div>
-                                </div>
-                            </div>
                         @endif
 
                     </div>
@@ -267,25 +266,26 @@
                                                                 <a id="autoBid" class="uk-button custom-button-1">確認</a>
                                                             </p>
                                                         </div>
-                                                        <a href="#confirmAutoBid" id="confirmAutoBidButton" class="uk-button custom-button-1">設定</a>
+                                                        <a href="#confirmAutoBid" id="confirmAutoBidButton" class="uk-button custom-button-1 uk-width-expand">設定</a>
 
                                                     @endauth
                                                     @guest
-                                                        <a class="uk-button custom-button-1" href="#auto-bid-login-notice" uk-toggle>
+
+                                                        <!-- Modal HTML embedded directly into document -->
+                                                        <div id="auto-bid-login-notice" class="modal">
+                                                            <p class="uk-text-left uk-text-large">自動出價前需要先登入</p>
+                                                            <p class="uk-text-right">
+                                                                <a class="uk-button custom-button-1"
+                                                                href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a>
+                                                            </p>
+                                                        </div>
+
+                                                        <!-- Link to open the modal -->
+                                                        <a href="#auto-bid-login-notice" class="uk-button custom-button-1 uk-width-expand" rel="modal:open">
                                                             設定
                                                         </a>
-                                                        <div id="auto-bid-login-notice" class="uk-flex-top" uk-modal>
-                                                            <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
-                                                                <button class="uk-modal-close-default" type="button" uk-close></button>
-                                                                <h2 class="uk-modal-title">自動出價前需要先登入</h2>
-                                                                <div class="uk-flex uk-flex-right">
-                                                                    <a class="uk-button custom-button-1"
-                                                                       href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    @endguest                                                </div>
+                                                    @endguest
+                                                </div>
                                             </div>
 
                                             @if(Auth::check())
@@ -480,6 +480,8 @@
 @endpush
 @push('scripts')
     <script src="{{ asset('js/app.js') }}"></script>
+
+
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
     <script>
         class UnitDate {
@@ -553,8 +555,8 @@
                 return '' +
                 '<a data-modal="#confirm-manual-bid-modal-' + bid + '" class="uk-button uk-width-expand confirm-manual-bid-buttons" style="margin: 1px; color: #003a6c" bid="' + bid + '">出價NT$' + number_format(bid) + '</a>' +
                 '<div id="confirm-manual-bid-modal-' + bid + '" class="modal">' +
-                '<h3>出價前需要先登入</h3>' +
-                '<div class="uk-grid-small uk-flex uk-flex-right" uk-grid>' +
+                '<p class="uk-text-left uk-text-large">出價前需要先登入</p>' +
+                '<div class="uk-flex uk-flex-right">' +
                 '<div><a class="uk-button custom-button-1" href="{{ route('login.show', ['redirectUrl'=> route('mart.lots.show', $lot->id)]) }}">登入</a></div>' +
                 '</div>' +
                 '</div>';
