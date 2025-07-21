@@ -46,6 +46,7 @@ class LotService extends LotRepository
         if ($status !== null) {
             $input['status'] = $status;
             if ($status == 60) {
+                $input['custom_id'] = $request->custom_id ?? null; // 直賣商品時可選填自訂商品編號
                 $input['type'] = 1; // 1: 直賣商品
                 $input['current_bid'] = $request->reserve_price;
             }
@@ -505,6 +506,10 @@ class LotService extends LotRepository
             {
                 return $lot->id;
             })
+            ->addColumn('custom-id', function ($lot)
+            {
+                return $lot->custom_id;
+            })
             ->addColumn('name', function ($lot)
             {
                 return '<a href="'.route('auctioneer.products.edit', $lot->id).'">'.$lot->name.'</a>';
@@ -534,6 +539,7 @@ class LotService extends LotRepository
     {
         $lot = $this->getLot($lotId);
         $lot->update([
+            'custom_id' => $request->custom_id, // 直賣商品時可選填自訂商品編號
             'name'=>$request->name,
             'description'=>$request->description,
             'reserve_price'=>$request->reserve_price,

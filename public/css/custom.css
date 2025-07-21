@@ -24,6 +24,17 @@
     text-decoration: none;
 }
 
+.custom-button-3 {
+    background-color: #f77f00;
+    color: white !important;
+}
+
+.custom-button-3:hover {
+    background-color: #b35d02;
+    color: white;
+    text-decoration: none;
+}
+
 .font-white{
     color: #fff !important;
 }

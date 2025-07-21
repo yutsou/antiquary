@@ -38,7 +38,7 @@ class AuctioneerProductPresenter
                                 </p>
                             </form>
                         </div>
-                        <a href="#receive-lot-' . $lot->id . '" rel="modal:open" class="uk-button custom-button-1">下架物品</a>
+                        <a href="#receive-lot-' . $lot->id . '" rel="modal:open" class="uk-button custom-button-3">下架物品</a>
                     </div>
                 ';
             default:

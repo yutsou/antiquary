@@ -10,6 +10,7 @@
         <thead>
         <tr>
             <th>ID</th>
+            <th>自訂編號</th>
             <th>名稱</th>
             <th>狀態</th>
             <th class="uk-table-shrink">動作</th>
@@ -54,6 +55,7 @@
                 "columns":
                     [
                         { "data": "id", "orderable": false},
+                        { "data": "custom_id", "orderable": false},
                         { "data": "name", "orderable": false},
                         { "data": "status", "orderable": false},
                         { "data": "action", "orderable": false, "className": "uk-text-nowrap"},

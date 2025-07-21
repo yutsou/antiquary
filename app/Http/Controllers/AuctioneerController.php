@@ -451,6 +451,8 @@ class AuctioneerController extends Controller
             'mainCategoryId' => 'required',
             'specificationValues.*' => 'required',
             'description' => 'required',
+            'custom_id' => 'nullable|unique:lots,custom_id', // Add this line
+
         ];
 
         if($imageValid === 0)
@@ -480,7 +482,9 @@ class AuctioneerController extends Controller
             'reserve_price.gte' => '底價需大於等於3000',
             'homeDeliveryCost.required'=> '未填寫台灣區物流費用',
             'crossBorderDeliveryCost.required' => '未填寫跨境物流費用',
-            'deliveryMethods.required' => '未選擇運送方式'
+            'deliveryMethods.required' => '未選擇運送方式',
+            'custom_id.unique' => '自訂編號已存在', // Add this line
+
         ];
         $validator = Validator::make($input, $rules, $messages);
 

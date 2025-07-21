@@ -29,6 +29,14 @@
                         </div>
                         <div class="uk-margin">
                             <div class="uk-card uk-card-default uk-card-body">
+                                <h3 class="uk-card-title uk-form-label">自訂編號</h3>
+                                <div class="uk-form-controls">
+                                    <input class="uk-input" id="custom-id" type="text" name="custom_id" placeholder="自訂商品編號 (可留空)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-margin">
+                            <div class="uk-card uk-card-default uk-card-body">
                                 <h3 class="uk-card-title">分類</h3>
                                 <label class="uk-form-label" for="sub-categories" style="margin-top: 1em;">為您的物品選擇子分類</label>
                                 <div class="uk-form-controls">
