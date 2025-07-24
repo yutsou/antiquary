@@ -269,7 +269,7 @@
         @media (min-width: 1200px) {
 
             .lot-head {
-                font-size: 3.5em;
+                font-size: 2.5em;
             }
 
         }
