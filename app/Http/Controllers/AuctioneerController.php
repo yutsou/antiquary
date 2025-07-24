@@ -20,6 +20,7 @@ use App\Services\CartService;
 use Symfony\Component\ErrorHandler\Debug;
 use App\Models\MergeShippingRequest;
 use App\Models\MergeShippingItem;
+use Illuminate\Validation\Rule;
 
 class AuctioneerController extends Controller
 {
@@ -442,7 +443,7 @@ class AuctioneerController extends Controller
         return $subCategories;
     }
 
-    protected function lotValidation($request, $imageValid)
+    protected function lotValidation($request, $imageValid, $lotId = null)
     {
         $input = $request->all();
 
@@ -451,8 +452,10 @@ class AuctioneerController extends Controller
             'mainCategoryId' => 'required',
             'specificationValues.*' => 'required',
             'description' => 'required',
-            'custom_id' => 'nullable|unique:lots,custom_id', // Add this line
-
+            'custom_id' => [
+            'nullable',
+                Rule::unique('lots', 'custom_id')->ignore($lotId),
+            ],
         ];
 
         if($imageValid === 0)
@@ -537,13 +540,15 @@ class AuctioneerController extends Controller
     {
         $lot = $this->lotService->getLot($lotId);
         $mainCategories = $this->categoryService->getRoots();
-        $customView = CustomClass::viewWithTitle(view('auctioneer.products.edit')->with('lot', $lot)->with('mainCategories', $mainCategories), '商品修改');
+        $lotMainCategoryId = $lot->main_category->id;
+        $subCategories = $this->categoryService->getCategory($lotMainCategoryId)->children;
+        $customView = CustomClass::viewWithTitle(view('auctioneer.products.edit')->with('lot', $lot)->with('mainCategories', $mainCategories)->with('subCategories', $subCategories), '商品修改');
         return $customView;
     }
 
     public function updateProduct(Request $request, $lotId)
     {
-        $validator = $this->lotValidation($request, 1);
+        $validator = $this->lotValidation($request, 1, $lotId);
 
         if ($validator->fails()) {
             return Response::json(array(
@@ -581,10 +586,14 @@ class AuctioneerController extends Controller
             $this->specificationService->updateSpecifications($request, $lotId);
         } else {
             #判斷是否變更了主分類，如變更的話則清除規格，並產生新規格
-            $this->lotService->syncCategoryLot($lotId, [$request->mainCategoryId]);#同步分類
             $lot->specifications()->delete();#清除舊的規格
             $this->specificationService->createSpecifications($request, $lotId);#創建新的規格
         }
+
+        $this->lotService->syncCategoryLot($lotId, [$request->mainCategoryId=>['main'=>1], $request->subCategoryId]);#同步分類
+
+
+
         $this->lotService->updateProduct($request, $lotId);
         $this->deliveryMethodService->syncDeliveryMethods($request, $lot);#同步分類
 

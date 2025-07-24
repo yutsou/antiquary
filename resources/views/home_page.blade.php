@@ -99,7 +99,7 @@
                             <div >
                                 <div class="uk-card uk-card-default uk-card-hover product-card-click" productId="{{ $product->id }}">
                                     <div class="uk-card-media-top">
-                                        <img src="{{ $products->first()->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
+                                        <img src="{{ $product->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
                                     </div>
                                     <div class="uk-card-body">
                                         <h3 class="uk-card-title">{{ $product->name }}</h3>

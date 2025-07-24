@@ -40,15 +40,29 @@
                             </div>
                             <div class="uk-margin">
                                 <div class="uk-card uk-card-default uk-card-body">
-                                    <h3 class="uk-card-title uk-form-label">為您的物品選擇分類</h3>
+                                    <h3 class="uk-card-title">分類</h3>
+                                    <label class="uk-form-label" for="sub-categories" style="margin-top: 1em;">為您的物品選擇子分類</label>
                                     <div class="uk-form-controls">
                                         <select class="uk-select" id="main-category" name="mainCategoryId">
-                                            @foreach ($mainCategories as $mainCategory)
-                                                <option value="{{ $mainCategory->id }}"
-                                                    {{ ($lot->main_category->id === $mainCategory->id ? 'selected' : '') }}
-                                                >{{ $mainCategory->name }}</option>
-                                            @endforeach
-                                        </select>
+    <option disabled {{ empty($lot->main_category) ? 'selected' : '' }}>選擇一個分類</option>
+    @foreach ($mainCategories as $mainCategory)
+        <option value="{{ $mainCategory->id }}"
+            {{ $lot->main_category->id == $mainCategory->id ? 'selected' : '' }}>
+            {{ $mainCategory->name }}
+        </option>
+    @endforeach
+</select>
+                                        <label class="uk-form-label" for="sub-categories" style="margin-top: 1em;">為您的物品選擇子分類</label>
+                                        <div class="uk-form-controls">
+                                            <select class="uk-select" id="sub-categories" name="subCategoryId">
+    @foreach ($subCategories as $subCategory)
+        <option value="{{ $subCategory->id }}"
+            {{ $lot->sub_category->id == $subCategory->id ? 'selected' : '' }}>
+            {{ $subCategory->name }}
+        </option>
+    @endforeach
+</select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -178,7 +192,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 type: "get",
-                url: '/account/ajax/main-categories/' + mainCategoryId + '/sub-categories',
+                url: '/auctioneer/ajax/main-categories/' + mainCategoryId + '/default-specification-titles',
                 success: function (defaultSpecificationTitles) {
                     $('#default-specifications').empty();
                     for (let i = 0; i < defaultSpecificationTitles.length; i++) {
@@ -212,6 +226,24 @@
                 )
             )
         };
+
+        let getSubCategories = function (mainCategoryId) {
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                type: "get",
+                url: '/auctioneer/ajax/main-categories/' + mainCategoryId + '/sub-categories',
+                success: function (subCategories) {
+                    $('#sub-categories').empty();
+                    for (let i = 0; i < subCategories.length; i++) {
+                        $('#sub-categories').append(
+                            $('<option>').val(subCategories[i].id).text(subCategories[i].name)
+                        );
+                    }
+                }
+            });
+        };
     </script>
 
     <script>
@@ -222,6 +254,7 @@
             $("#main-category").change(function () {
                 let mainCategoryId = $(this).val();
                 getDefaultSpecification(mainCategoryId);
+                getSubCategories(mainCategoryId);
             });
 
             $('#add-new-shipping-method').click(function () {

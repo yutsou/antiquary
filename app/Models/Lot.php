@@ -182,6 +182,11 @@ class Lot extends Model
         return  $this->categories()->wherePivot('main', 1)->first();
     }
 
+    public function getSubCategoryAttribute()
+    {
+        return  $this->categories()->wherePivot('main', null)->first();
+    }
+
     public function getFaceToFaceAttribute()
     {
         return  $this->deliveryMethods->firstWhere('code', 0);
