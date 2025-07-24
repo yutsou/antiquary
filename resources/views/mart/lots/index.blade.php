@@ -55,9 +55,9 @@
                                     <div class="uk-flex uk-flex-right">
                                         @include('mart.components.favorite-inline', $singleLot)
                                     </div>
-                                    <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
+                                    <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
                                     <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-                                    <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
+
                                 </div>
                             </div>
                         </div>

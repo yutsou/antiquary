@@ -68,18 +68,20 @@
         <div class="uk-visible@m">
             <div class="uk-slider-container-offset" uk-slider="finite: true">
                 <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
-                    <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
+                    <ul class="uk-slider-items uk-child-width-1-4@s uk-grid" >
                         @foreach($products as $product)
                             <li>
                                 <div class="uk-card uk-card-default uk-card-hover product-card-click" productId="{{ $product->id }}">
-                                    <div class="uk-card-media-top">
-                                        <img src="{{ $product->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
-                                    </div>
-                                    <div class="uk-card-body uk-text-center">
-                                        <h3 class="uk-card-title">{{ $product->name }}</h3>
-                                        <p>NT${{ number_format($product->reserve_price) }}</p>
-                                    </div>
-                                </div>
+    <div class="uk-card-media-top">
+        <img src="{{ $product->blImages->first()->url }}" alt="" style="width: 100%; height: 220px; object-fit: cover;">
+    </div>
+    <div class="uk-card-body uk-text-center d-flex-col">
+        <h3 class="uk-card-title custom-font-medium">{{ $product->name }}</h3>
+        <div style="margin-top:auto;">
+            <p class="uk-text-bold uk-margin-remove">NT${{ number_format($product->reserve_price) }}</p>
+        </div>
+    </div>
+</div>
                             </li>
                         @endforeach
                     </ul>
@@ -102,7 +104,7 @@
                                         <img src="{{ $product->blImages->first()->url }}" alt="" style="width: 100vw; height: 300px; object-fit: cover;">
                                     </div>
                                     <div class="uk-card-body">
-                                        <h3 class="uk-card-title">{{ $product->name }}</h3>
+                                        <h3 class="uk-card-title custom-font-medium">{{ $product->name }}</h3>
                                         <p>NT${{ number_format($product->reserve_price) }}</p>
                                     </div>
                                 </div>
@@ -164,6 +166,16 @@
         </div>
     @endif
 @endsection
+@push('style')
+    <style>
+        .d-flex-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 120px; /* 自訂你想要的內容區高度 */
+    height: 180px;     /* 也可以設定固定高度讓卡片齊 */
+}
+    </style>
+@endpush
 @push('scripts')
     <script>
         $(function () {
