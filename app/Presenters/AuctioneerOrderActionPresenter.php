@@ -48,7 +48,15 @@ class AuctioneerOrderActionPresenter
                     }
                 }
             case ($order->status == 40):
-                return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
+                $count = 0;
+                foreach($order->orderItems as $item) {
+                    if($item->lot->type == 0) { // 競標商品
+                        $count++;
+                    }
+                }
+                if($count != 0) {
+                    return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
+                }
             case ($order->status == 13):
                 $firstItem = $order->orderItems->first();
                 if (!$firstItem) {

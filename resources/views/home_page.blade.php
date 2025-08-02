@@ -66,7 +66,7 @@
     @if($products->count() != 0)
         <h3 class="uk-card-title">Antiquary 精選</h3>
         <div class="uk-visible@m">
-            <div class="uk-slider-container-offset" uk-slider="finite: true; sets: true; duration: 300;">
+            <div class="uk-slider-container-offset" uk-slider="finite: true; sets: true;">
                 <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
                     <ul class="uk-slider-items uk-child-width-1-4@s uk-grid" >
                         @foreach($products as $product)

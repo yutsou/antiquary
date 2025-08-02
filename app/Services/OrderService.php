@@ -220,6 +220,11 @@ class OrderService extends OrderRepository
     {
         $order = $this->getOrder($orderId);
         if($type == 0) { // 得標者通知已ATM付款
+            foreach($order->orderItems as $item) {
+                if($item->lot->type == 0) { // 競標商品
+                    $item->lot->update(['status'=>23]); // 競標成功 - 等待買家完成交易
+                } // 直賣商品
+            }
             if($order->status == 10) {
                 $status = 11; // 等待確認匯款
             } else {
@@ -233,26 +238,26 @@ class OrderService extends OrderRepository
                 'remitter_account'=>$request->account_last_five_number,
                 'payee_id'=>1
             ];
-
         } else { #type 1
             $status = 41;
             // 獲取第一個商品的賣家資訊
-            $firstItem = $order->orderItems->first();
-            if (!$firstItem) {
-                throw new \Exception('訂單中沒有商品');
+            foreach($order->orderItems as $item) {
+                if($item->lot->type == 0) { // 競標商品
+                    $owner = $item->lot->owner;
+                    $input = [
+                        'status' => $status,
+                        'payment_method' => 1,
+                        'amount'=>$order->owner_real_take,
+                        'remitter_id'=>Auth::user()->id,
+                        'remitter_account'=>Auth::user()->bank_account_number,
+                        'payee_id'=>$owner->id,
+                        'payee_account'=>$owner->bank_name.$owner->bank_branch_name.$owner->bank_account_name.$owner->bank_account_number
+                    ];
+
+                    $item->lot->update(['status'=>41]);
+                    CustomClass::sendTemplateNotice($item->lot->owner_id, 3, 4, $orderId);
+                } // 直賣商品
             }
-            $owner = $firstItem->lot->owner;
-            $input = [
-                'status' => $status,
-                'payment_method' => 1,
-                'amount'=>$order->owner_real_take,
-                'remitter_id'=>Auth::user()->id,
-                'remitter_account'=>Auth::user()->bank_account_number,
-                'payee_id'=>$owner->id,
-                'payee_account'=>$owner->bank_name.$owner->bank_branch_name.$owner->bank_account_name.$owner->bank_account_number
-            ];
-            $firstItem->lot->update(['status'=>41]);
-            CustomClass::sendTemplateNotice($firstItem->lot->owner_id, 3, 4, $orderId);
         }
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
 
@@ -445,6 +450,13 @@ class OrderService extends OrderRepository
         $deliveryCost = intval($requestData['delivery_cost']);
         $total = $subtotal + $deliveryCost;
 
+        $ownerRealTake = 0;
+        foreach ($selectedLots as $lot) {
+            if ($lot->type == 0) { // 競標商品
+                $ownerRealTake = $ownerRealTake + $lot->current_bid;
+            }
+        }
+
         // 建立一筆訂單
         $input = [
             'user_id' => $userId,
@@ -452,6 +464,7 @@ class OrderService extends OrderRepository
             'payment_method' => intval($requestData['payment_method']),
             'delivery_method' => intval($requestData['delivery_method']),
             'payment_due_at' => $now->addDays(7),
+            'owner_real_take' => $ownerRealTake,
             'subtotal' => $subtotal,
             'delivery_cost' => $deliveryCost,
             'total' => $total,
