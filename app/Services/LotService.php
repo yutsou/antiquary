@@ -401,7 +401,7 @@ class LotService extends LotRepository
         $results = collect();
         $words = explode(" ", $query);
         foreach($words as $word) {
-            $results->push(Lot::search($word)->whereIn('status', [21, 61])->get());
+            $results->push(Lot::search($word)->whereIn('status', [21, 61])->where("inventory", "!=", 0)->get());
         }
         return $results->flatten()->unique('id');
         #
@@ -549,7 +549,7 @@ class LotService extends LotRepository
 
     public function getPublishedLots()
     {
-        return LotRepository::all()->where('status', 61)->sortByDesc('created_at');
+        return LotRepository::all()->where('status', 61)->where("inventory", "!=", 0)->sortByDesc('created_at');
     }
 
     public function findOrFail($id)
