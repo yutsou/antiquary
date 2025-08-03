@@ -75,10 +75,31 @@
                         </thead>
                         <tbody>
                         @foreach($order->orderItems as $orderItem)
-                        <tr>
-                            <td>{{ $orderItem->lot->name }}</td>
-                            <td>NT${{ number_format($orderItem->lot->current_bid) }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ $orderItem->lot->name }}</td>
+                                <td>NT${{ number_format($orderItem->lot->current_bid) }}</td>
+                            </tr>
+                            @if ($orderItem->lot->type == 0)
+                                <tr>
+                                    <td colspan="2">
+                                        <table style="width: 100%;">
+                                            <tr>
+                                                <td>
+                                                    委賣人姓名: {{ $orderItem->lot->owner->name }}<br>
+                                                    銀行名稱: {{ $orderItem->lot->owner->bank_name }}<br>
+                                                    戶名: {{ $orderItem->lot->owner->bank_account_name }}<br>
+                                                </td>
+                                                <td>
+                                                    委賣人電話: {{ $orderItem->lot->owner->phone }}<br>
+                                                    分行名稱: {{ $orderItem->lot->owner->bank_branch_name }}
+                                                    帳號: {{ $orderItem->lot->owner->bank_account_number }}<br>
+                                                    匯款金額: NT${{ number_format($order->owner_real_take) }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                         </tbody>
                     </table>
@@ -125,35 +146,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-            <hr>
-            <div>
-                <table class="uk-table uk-table-divider">
-                    <tbody>
-                    <tr>
-                        <td class="uk-table-expand">委賣人姓名</td>
-                        <td class="uk-table-expand">{{ $lot->owner->name }}</td>
-                        <td class="uk-table-expand">委賣人電話</td>
-                        <td class="uk-table-expand">{{ $lot->owner->phone }}</td>
-                    </tr>
-                    <tr>
-                        <td class="uk-table-expand">銀行名稱</td>
-                        <td class="uk-table-expand">{{ $lot->owner->bank_name }}</td>
-                        <td class="uk-table-expand">分行名稱</td>
-                        <td class="uk-table-expand">{{ $lot->owner->bank_branch_name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="uk-table-expand">帳號</td>
-                        <td class="uk-table-expand">{{ $lot->owner->bank_account_number }}</td>
-                        <td class="uk-table-expand">戶名</td>
-                        <td class="uk-table-expand">{{ $lot->owner->bank_account_name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="uk-table-expand">匯款金額</td>
-                        <td class="uk-table-expand">NT${{ number_format($order->owner_real_take) }}</td>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
             <hr>
             <div uk-grid>

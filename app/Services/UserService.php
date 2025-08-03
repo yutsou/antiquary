@@ -319,7 +319,7 @@ class UserService extends UserRepository
     public function getOwnerSellingLotNoticeCount($userId)
     {
         $user = $this->getUser($userId);
-        $count = UserRepository::getLotNoticeCount([23, 24, 25], $userId);
+        $count = UserRepository::getLotNoticeCount([24, 25, 26], $userId);
 
         $noEntrustLots = $user->ownLots->where('entrust', 0);
 

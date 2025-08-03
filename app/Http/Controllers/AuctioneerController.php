@@ -165,9 +165,8 @@ class AuctioneerController extends Controller
     public function showOrder($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
         $logisticInfo = $this->orderService->getLogisticInfo($order, 0);
-        $with = ['order'=>$order, 'lot'=>$lot, 'logisticInfo'=>$logisticInfo];
+        $with = ['order'=>$order, 'logisticInfo'=>$logisticInfo];
         $customView = CustomClass::viewWithTitle(view('auctioneer.orders.show')->with($with), '訂單#'.$orderId);
         return $customView;
     }

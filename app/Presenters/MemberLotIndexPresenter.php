@@ -102,7 +102,7 @@ class MemberLotIndexPresenter
                 return '<button class="uk-button custom-button-1 edit-lot" lotId="'.$lot->id.'">修改</button>';
             case $lot->status == 2:
                 return '<button class="uk-button custom-button-1 application-logistic-info uk-text-nowrap" lotId="'.$lot->id.'">查看/填寫運送資訊</button>';
-            case $lot->status == 23 || $lot->status == 24 || $lot->status == 25:
+            case $lot->status == 24 || $lot->status == 25 || $lot->status == 26:
                 return '<button class="uk-button custom-button-1 unsold-lot-process" lotId="'.$lot->id.'">流標/棄標 處理</button>';
             case $lot->status == 22:
                 $order = $lot->order;
