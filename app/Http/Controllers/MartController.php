@@ -97,7 +97,7 @@ class MartController extends Controller
 
     public function indexMessages($orderId)
     {
-        $order = app(OrderService::class)->getOrder($orderId);
+        $order = $this->orderService->getOrder($orderId);
         $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
         $messages = $order->messages()->with('user')->orderBy('created_at', 'asc')->get();
         $with = ['order'=>$order, 'lot'=>$lot, 'messages'=>$messages];
@@ -236,6 +236,11 @@ class MartController extends Controller
     public function showBiddingRules()
     {
         return CustomClass::viewWithTitle(view('bidding_rules'), '競標增額');
+    }
+
+    public function showReturnAndExchangePolicy()
+    {
+        return CustomClass::viewWithTitle(view('return_and_exchange_policy'), '退換貨政策');
     }
 
     public function showTest()

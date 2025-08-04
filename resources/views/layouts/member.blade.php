@@ -294,7 +294,7 @@
                     <a href="mailto:service@antiquary.com.tw" class="uk-link-text"><span uk-icon="mail"></span> service@antiquary.com.tw</a>
                 </div>
                 <div class="uk-margin uk-text-center">
-                    <span><a href="{{ route('mart.terms.show') }}" class="uk-link-text">使用者條款</a> | <a href="{{ route('mart.privacy-policy.show') }}" class="uk-link-text">隱私政策</a></span>
+                    <span><a href="{{ route('mart.terms.show') }}" class="uk-link-text">使用者條款</a> | <a href="{{ route('mart.privacy-policy.show') }}" class="uk-link-text">隱私政策</a> | <a href="{{ route('mart.return-and-exchange-policy.show') }}" class="uk-link-text">退換貨政策</a></span>
                 </div>
                 <div class="uk-margin">
                     <div class="uk-text-center uk-child-width-1-1">© {{ now()->year }} Antiquary</div>

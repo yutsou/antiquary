@@ -275,3 +275,5 @@ Route::get('/bidding-notes', [MartController::class, 'showBiddingNotes'])->name(
 Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->name('mart.privacy-policy.show');
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
+Route::get('/return-and-exchange-policy', [MartController::class, 'showReturnAndExchangePolicy'])->name('mart.return-and-exchange-policy.show');
+

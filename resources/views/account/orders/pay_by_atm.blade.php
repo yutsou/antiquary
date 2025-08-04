@@ -12,10 +12,10 @@
             <h1 class="uk-card-title">訂單#{{ $order->id }}</h1>
             <ul class="uk-list">
                 <li>銀行名稱 - 台新銀行</li>
-                <li>分行名稱 - 桃園分行</li>
+                <li>分行名稱 - 南京東路分行</li>
                 <li>銀行代號 - 812</li>
                 <li>帳號 - 20111050104837</li>
-                <li>戶名 - Jason拍賣行</li>
+                <li>戶名 - 趙士彤</li>
                 <li>匯款金額 - NT${{ number_format($order->total) }}</li>
                 <li>匯款期限 - {{ $order->payment_due_at }}</li>
             </ul>

@@ -86,7 +86,12 @@
                         <tbody>
                         @foreach($orderItems as $orderItem)
                         <tr>
-                            <td>{{ $orderItem->lot->name }}</td>
+                            @if($orderItem->lot->type == '0')
+                                <td><a href="{{ route("mart.lots.show", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
+                            @else
+                                <td><a href="{{ route("mart.products.show", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
+                            @endif
+
                             <td>NT${{ number_format($orderItem->subtotal) }}</td>
                         </tr>
                         @endforeach

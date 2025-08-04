@@ -123,7 +123,7 @@
                                             </button>
                                         </div>
                                         <hr>
-                                        <h3 class="uk-card-title" style="margin: 0 0 0 0">{{ $lot->name }}</h3>
+                                        <h3 class="uk-card-title" style="margin: 0 0 0 0"><a href="{{ route('mart.products.show', $lot) }}" class="custom-link">{{ $lot->name }}</a></h3>
                                         <hr>
                                         <div class="uk-margin uk-text-right">
                                             <label for="cart-quantity-{{ $lot->id }}" class="uk-margin-small-right">數量:</label>
@@ -163,7 +163,7 @@
                                             <span class="uk-label uk-label-warning">競標商品</span>
                                         </div>
                                         <hr>
-                                        <h3 class="uk-card-title" style="margin: 0 0 0 0">{{ $lot->name }}</h3>
+                                        <h3 class="uk-card-title" style="margin: 0 0 0 0"><a href="{{ route('mart.lots.show', $lot) }}" class="custom-link">{{ $lot->name }}</a></h3>
                                         <hr>
                                         <div class="uk-margin uk-text-right">
                                             <span class="uk-margin-small-right">數量: {{ $lot->cart_quantity }}</span>
