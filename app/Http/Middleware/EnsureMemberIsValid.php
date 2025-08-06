@@ -17,7 +17,7 @@ class EnsureMemberIsValid
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::user()->verification_status === 1) {
+        if (Auth::user()->verification_status >= 1) {
                 return $next($request);
             } else {
                 if ($request->expectsJson()) {
