@@ -273,6 +273,7 @@ class OrderService extends OrderRepository
         }
         $order = OrderRepository::updateOrderStatus($status, $orderId);
         CustomClass::sendTemplateNotice($order->user_id, 3, 2, $order->id, 1);
+        CustomClass::sendTemplateNotice(1, 7, 0, $order->id, 1); // notice auctioneer to confirm payment
     }
 
     public function sendMessage($request, $orderId)

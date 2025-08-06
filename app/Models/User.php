@@ -169,9 +169,11 @@ class User extends Authenticatable
     public function getVerificationStatusAttribute()
     {
         if($this->email_verified_at !== null && $this->phone_verified_at !== null) {
-            return true;
+            return 2;
+        } else if($this->email_verified_at !== null && $this->phone_verified_at === null) {
+            return 1;
         } else {
-            return false;
+            return 0;
         }
     }
 

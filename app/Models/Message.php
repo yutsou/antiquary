@@ -36,4 +36,9 @@ class Message extends Model
     protected $guarded = ['id'];
 
     protected $dates = ['read_at'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

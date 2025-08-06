@@ -93,6 +93,11 @@ class NoticePresenter
                         1 => ['付款逾時', '物品 No.'.$model->id. ' 逾期付款，此次棄標將導致您停權一週，若棄標第二次，我們將永久停權您的帳號。'],
                         2 => ['付款逾時', '物品 No.'.$model->id. ' 逾期付款，此次棄標將導致您的帳號永久停權。'],
                     };
+                case 7:
+                    $model = Order::find($notice->target_id);
+                    return match ($notice->code) {
+                        0 => ['確認匯款通知', '提醒您，訂單 No.'.$model->id. ' 已匯款，請確認匯款。'],
+                    };
             }
         } catch (Exception $e) {
             $model = Message::find($notice->target_id);

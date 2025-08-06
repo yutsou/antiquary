@@ -345,17 +345,23 @@
                     }, 1100);
                 },
                 error: function(xhr) {
-                    let errorMsg = '加入購物車失敗！';
+                    let errorMsg = '';
+                    switch(xhr.status) {
+                        case 422:
+                            errorMsg = '加入購物車失敗！';
+                            break;
+                        case 403:
+                            errorMsg = '需先進行用戶信箱驗證！';
+                            break;
+                        default:
+                            errorMsg = '加入購物車失敗！';
+                    }
 
-                    // Laravel 回傳 422 時通常是 validation error
-                    if (xhr.status === 422) {
-                        // 取出所有錯誤訊息，組成字串
-                        let errors = xhr.responseJSON.errors;
-                        if (errors) {
-                            errorMsg = Object.values(errors).map(function(arr){
-                                return arr.join('<br>');
-                            }).join('<br>');
-                        }
+                    let errors = xhr.responseJSON.errors;
+                    if (errors) {
+                        errorMsg = Object.values(errors).map(function(arr){
+                            return arr.join('<br>');
+                        }).join('<br>');
                     }
 
                     Swal.fire({
@@ -365,6 +371,17 @@
                         showConfirmButton: false,
                         timer: 2000,
                     });
+
+                    if (xhr.status === 403) {
+                        // 如果是403錯誤，跳轉到個人資料編輯頁面
+
+                        setTimeout(function (){
+                           window.location.replace("{{ route('account.profile.edit')  }}");
+                        }, 2100);
+                    }
+                    r
+
+
                 }
             });
         }
