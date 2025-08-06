@@ -351,7 +351,7 @@
                             errorMsg = '加入購物車失敗！';
                             break;
                         case 403:
-                            errorMsg = '需先進行用戶信箱驗證！';
+                            errorMsg = '需先進行信箱驗證！';
                             break;
                         default:
                             errorMsg = '加入購物車失敗！';
