@@ -259,6 +259,7 @@ class AuctioneerController extends Controller
         $order = $this->orderService->getOrder($orderId);
         $lot = $order->orderItems->first() ? $order->orderItems->first()->lot : null;
         $messages = $order->messages()->with('user')->orderBy('created_at', 'asc')->get();
+        $this->orderService->messagesHaveRead($messages);
         $with = ['order'=>$order, 'lot'=>$lot, 'messages'=>$messages];
         $customView = CustomClass::viewWithTitle(view('auctioneer.orders.chatroom')->with($with), $lot ? $lot->name : '聊天室');
         return $customView;

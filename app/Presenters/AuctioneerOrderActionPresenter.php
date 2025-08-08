@@ -57,6 +57,7 @@ class AuctioneerOrderActionPresenter
                 if($count != 0) {
                     return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
                 }
+                break;
             case ($order->status == 13):
                 $firstItem = $order->orderItems->first();
                 if (!$firstItem) {

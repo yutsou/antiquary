@@ -227,20 +227,14 @@
                     $('form').attr('action', '{{ route("account.cart.payment_method_choice") }}');
                 }
 
-                // 顯示運送資訊欄位（合併運費不需要填寫運送資訊）
-                if (val === '1-merge' || val === '2-merge') {
-                    // 合併運費不需要填寫運送資訊，隱藏所有運送欄位
-                    $('#delivery-field').prop('hidden', true);
-                } else {
-                    // 一般運送方式需要填寫運送資訊
-                    hideAllSubField();
-                    if(val == '0') {
-                        $('#face-to-face-field').prop('hidden', false);
-                    } else if(val == '1') {
-                        $('#home-delivery-field').prop('hidden', false);
-                    } else if(val == '2') {
-                        $('#cross-border-delivery-field').prop('hidden', false);
-                    }
+                // 顯示運送資訊欄位（合併運費與一般運送方式處理）
+                hideAllSubField();
+                if(val == '0') {
+                    $('#face-to-face-field').prop('hidden', false);
+                } else if(val == '1' || val === '1-merge') {
+                    $('#home-delivery-field').prop('hidden', false);
+                } else if(val == '2' || val === '2-merge') {
+                    $('#cross-border-delivery-field').prop('hidden', false);
                 }
 
                 $('#delivery-cost').val(cost);

@@ -238,6 +238,7 @@ class OrderService extends OrderRepository
                 'remitter_account'=>$request->account_last_five_number,
                 'payee_id'=>1
             ];
+            CustomClass::sendTemplateNotice(1, 7, 0, $order->id, 1); // notice auctioneer to confirm payment
         } else { #type 1
             $status = 41;
             // 獲取第一個商品的賣家資訊
@@ -273,7 +274,6 @@ class OrderService extends OrderRepository
         }
         $order = OrderRepository::updateOrderStatus($status, $orderId);
         CustomClass::sendTemplateNotice($order->user_id, 3, 2, $order->id, 1);
-        CustomClass::sendTemplateNotice(1, 7, 0, $order->id, 1); // notice auctioneer to confirm payment
     }
 
     public function sendMessage($request, $orderId)
@@ -308,6 +308,15 @@ class OrderService extends OrderRepository
     public function haveRead($messageId)
     {
         Message::find($messageId)->update(['read_at'=>Carbon::now()]);
+    }
+
+    public function messagesHaveRead($messages)
+    {
+        foreach($messages as $message) {
+            if($message->read_at === null && $message->user_id !== Auth::user()->id) {
+                $message->update(['read_at'=>Carbon::now()]);
+            }
+        }
     }
 
     public function setAllmessageRead(Order $order): void
@@ -617,5 +626,12 @@ class OrderService extends OrderRepository
         }
 
         return OrderRepository::createLogisticRecord($input, $orderId);
+    }
+
+    public function getOrderCountByStatus($statuses)
+    {
+        $orders = OrderRepository::all()->whereIn('status', $statuses);
+
+        return  $orders->count();
     }
 }
