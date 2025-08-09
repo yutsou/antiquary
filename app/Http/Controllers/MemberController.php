@@ -1263,9 +1263,13 @@ class MemberController extends Controller
             }
         }
 
+        // 保存地址信息到 logistic_records
+        $this->storeMergeShippingRequestLogisticInfo($request, $mergeRequest->id);
+
         // 從購物車中移除已申請合併運費的商品（包括競標商品）
         $this->cartService->removeSelectedItems($user->id, $selectedLotIds, false);
 
+        CustomClass::sendTemplateNotice(1, 8, 0, $mergeRequest->id, 1);
 
         return redirect()->route('account.cart.show')->with('success', '合併運費請求已送出，請等待拍賣師處理');
     }
@@ -1273,7 +1277,7 @@ class MemberController extends Controller
     public function mergeShippingDeliveryMethodEdit($requestId)
     {
         $user = Auth::user();
-        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods', 'logisticRecords'])
             ->where('user_id', $user->id)
             ->where('id', $requestId)
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
@@ -1289,7 +1293,7 @@ class MemberController extends Controller
     public function mergeShippingDeliveryUpdate(Request $request, $requestId)
     {
         $user = Auth::user();
-        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods', 'logisticRecords'])
             ->where('user_id', $user->id)
             ->where('id', $requestId)
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
@@ -1306,6 +1310,7 @@ class MemberController extends Controller
         $country = $request->input('country');
         $countrySelectorCode = $request->input('country_selector_code');
         $crossBoardAddress = $request->input('cross_board_address');
+
 
         if (!isset($deliveryMethod)) {
             return redirect()->route('account.cart.merge_shipping.delivery_method.edit', $requestId)->with('error', '請選擇運送方式');
@@ -1332,7 +1337,7 @@ class MemberController extends Controller
     public function mergeShippingCheck(Request $request, $requestId)
     {
         $user = Auth::user();
-        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods', 'logisticRecords'])
             ->where('user_id', $user->id)
             ->where('id', $requestId)
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
@@ -1390,7 +1395,7 @@ class MemberController extends Controller
     public function mergeShippingConfirm(Request $request, $requestId)
     {
         $user = Auth::user();
-        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods'])
+        $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods', 'logisticRecords'])
             ->where('user_id', $user->id)
             ->where('id', $requestId)
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
@@ -1462,6 +1467,33 @@ class MemberController extends Controller
             'success' => true,
             'message' => '合併運費請求已移除'
         ), 200);
+    }
+
+    private function storeMergeShippingRequestLogisticInfo(Request $request, $requestId)
+    {
+        $input = [
+            'type' => 0, // 主物流資訊 - logistic_records type 定義：0=application(正常流程賣場寄給拍賣會), 1=returned(退還競標物品), 2=unsold(競標失敗退還), 3=未付款退回
+            'addressee_name' => $request->input('recipient_name'),
+            'addressee_phone' => $request->input('recipient_phone'),
+        ];
+
+        $deliveryMethod = $request->input('delivery_method');
+        $deliveryMethodCode = $deliveryMethod === '1-merge' ? 1 : 2;
+
+        if ($deliveryMethodCode == 1) {
+            $input['delivery_zip_code'] = $request->input('zip_code') ?? null;
+            $input['county'] = $request->input('county') ?? null;
+            $input['district'] = $request->input('district') ?? null;
+            $input['delivery_address'] = $request->input('address') ?? null;
+        } elseif ($deliveryMethodCode == 2) {
+            $input['cross_board_delivery_country'] = $request->input('country') ?? null;
+            $input['cross_board_delivery_country_code'] = $request->input('country_selector_code') ?? null;
+            $input['cross_board_delivery_address'] = $request->input('cross_board_address') ?? null;
+        }
+
+        // 使用 MergeShippingRequestRepository 創建 logistic record
+        $mergeShippingRequestRepository = app(\App\Repositories\MergeShippingRequestRepository::class);
+        return $mergeShippingRequestRepository->createLogisticRecord($input, $requestId);
     }
 
 }

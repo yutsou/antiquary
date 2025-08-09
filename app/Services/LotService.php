@@ -424,7 +424,9 @@ class LotService extends LotRepository
             'addressee_name' => $request->addressee_name,
             'addressee_phone' => $request->addressee_phone,
             'delivery_zip_code' => $request->zipcode,
-            'delivery_address'=>$request->county.$request->district.$request->address,
+            'county' => $request->county,
+            'district' => $request->district,
+            'delivery_address'=>$request->address,
             'type'=>$type
         ];
         LotRepository::createLogisticRecord($input, $lotId);
@@ -441,7 +443,9 @@ class LotService extends LotRepository
             'addressee_name' => $request->addressee_name,
             'addressee_phone' => $request->addressee_phone,
             'delivery_zip_code' => $request->zipcode,
-            'delivery_address'=>$request->county.$request->district.$request->address,
+            'county' => $request->county,
+            'district' => $request->district,
+            'delivery_address'=>$request->address,
             'type'=>1
         ];
         LotRepository::createLogisticRecord($input, $lotId);

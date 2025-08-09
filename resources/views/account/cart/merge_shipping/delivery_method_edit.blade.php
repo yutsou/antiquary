@@ -100,58 +100,64 @@
                     </div>
                 </div>
 
-                <div class="uk-margin" id="delivery-field" hidden>
+                @php
+                    $logisticRecord = $mergeRequest->logisticRecords->where('type', 0)->first();
+                @endphp
+                <div class="uk-margin" id="delivery-field">
                     <div class="uk-card uk-card-default uk-card-body">
+                        <h3 class="uk-card-title">收貨地址</h3>
                         <div class="uk-margin">
                             <div class="uk-margin">
                                 <label>收貨人/取貨人 姓名
-                                    <input class="uk-input" type="text" name="recipient_name">
+                                    <input class="uk-input" type="text" name="recipient_name" value="{{ $logisticRecord->addressee_name ?? '' }}" readonly>
                                 </label>
                             </div>
                             <div class="uk-margin">
                                 <label>收貨人/取貨人 電話
-                                    <input class="uk-input" type="tel" name="recipient_phone" pattern="[0-9]{3}[0-9]{3}[0-9]{4}">
+                                    <input class="uk-input" type="tel" name="recipient_phone" value="{{ $logisticRecord->addressee_phone ?? '' }}" readonly>
                                 </label>
                             </div>
                         </div>
-                        <div class="sub-field uk-margin" id="home-delivery-field" hidden>
-                            <h3 class="uk-card-title">收件人縣市、鄉鎮</h3>
-                            <div class="uk-grid-small uk-child-width-1-3 uk-form-controls twzipcode" uk-grid>
-                                <div data-role="county" data-style="uk-select" data-name="county" id="county"
-                                     data-value="{{ Auth::user()->county ?? null }}"></div>
-                                <div data-role="district" data-style="uk-select" data-name="district" id="district"
-                                     data-value="{{ Auth::user()->district ?? null }}"></div>
-                                <div data-role="zipcode" data-style="uk-select" data-name="zip_code" id="zip-code"
-                                     data-value="{{ Auth::user()->zip_code ?? null }}"></div>
-                            </div>
-                            <div class="uk-margin">
-                                <label class="uk-form-label" for="address">街道地址</label>
-                                <div class="uk-form-controls">
-                                    <input class="uk-input" type="text" id="address" name="address" placeholder="輸入您的地址"
-                                           value="{{ Auth::user()->address ?? null }}" autocomplete="street-address">
+                        @if($mergeRequest->delivery_method == 1)
+                            <div class="sub-field uk-margin" id="home-delivery-field">
+                                <h3 class="uk-card-title">收件人縣市、鄉鎮</h3>
+                                <div class="uk-grid-small uk-child-width-1-3 uk-form-controls twzipcode" uk-grid>
+                                    <div data-role="county" data-style="uk-select" data-name="county" id="county"
+                                         data-value="{{ $logisticRecord->county ?? '' }}"></div>
+                                    <div data-role="district" data-style="uk-select" data-name="district" id="district"
+                                         data-value="{{ $logisticRecord->district ?? '' }}"></div>
+                                    <div data-role="zipcode" data-style="uk-select" data-name="zip_code" id="zip-code"
+                                         data-value="{{ $logisticRecord->delivery_zip_code ?? '' }}"></div>
+                                </div>
+                                <div class="uk-margin">
+                                    <label class="uk-form-label" for="address">街道地址</label>
+                                    <div class="uk-form-controls">
+                                        <input class="uk-input" type="text" id="address" name="address" value="{{ $logisticRecord->delivery_address ?? '' }}" readonly>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="sub-field uk-margin" id="cross-border-delivery-field" hidden>
-                            <h3 class="uk-card-title">選擇國家</h3>
-                            <div class="form-item">
-                                <input class="uk-input uk-width-1-3" id="country_selector" name="country" type="text" readonly>
-                                <label for="country_selector" style="display:none;">Select a country here...</label>
-                            </div>
-                            <div class="form-item" style="display:none;">
-                                <input type="text" id="country_selector_code" name="country_selector_code"
-                                       data-countrycodeinput="1" readonly placeholder="Selected country code will appear here"/>
-                                <label for="country_selector_code">...and the selected country code will be updated here</label>
-                            </div>
-                            <button type="submit" style="display:none;">Submit</button>
-                            <div class="uk-margin">
-                                <label class="uk-form-label" for="cross-board-address">跨境目的地完整地址</label>
-                                <div class="uk-form-controls">
-                                    <input class="uk-input" type="text" id="cross-board-address" name="cross_board_address"
-                                           value="{{ Auth::user()->address ?? null }}">
+                        @elseif($mergeRequest->delivery_method == 2)
+                            <div class="sub-field uk-margin" id="cross-border-delivery-field">
+                                <h3 class="uk-card-title">選擇國家</h3>
+                                <div class="form-item">
+                                    <input class="uk-input uk-width-1-3" id="country_selector" name="country" type="text" value="{{ $logisticRecord->cross_board_delivery_country ?? '' }}" readonly>
+                                    <label for="country_selector" style="display:none;">Select a country here...</label>
+                                </div>
+                                <div class="form-item" style="display:none;">
+                                    <input type="text" id="country_selector_code" name="country_selector_code"
+                                           data-countrycodeinput="1" value="{{ $logisticRecord->cross_board_delivery_country_code ?? '' }}" readonly placeholder="Selected country code will appear here"/>
+                                    <label for="country_selector_code">...and the selected country code will be updated here</label>
+                                </div>
+                                <button type="submit" style="display:none;">Submit</button>
+                                <div class="uk-margin">
+                                    <label class="uk-form-label" for="cross-board-address">跨境目的地完整地址</label>
+                                    <div class="uk-form-controls">
+                                        <input class="uk-input" type="text" id="cross-board-address" name="cross_board_address"
+                                               value="{{ $logisticRecord->cross_board_delivery_address ?? '' }}" readonly>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
                 <div class="uk-margin uk-align-right">
@@ -203,24 +209,35 @@
             var delivery_method = {{ $mergeRequest->delivery_method }};
             $('input[value="' + delivery_method + '"]').prop('checked', true);
 
-            hideAllSubField();
-            if(delivery_method == 1) {
-                $('#home-delivery-field').prop('hidden', false);
-            } else if(delivery_method == 2) {
-                $('#cross-border-delivery-field').prop('hidden', false);
-            }
+            // 地址信息已經顯示，不需要隱藏
             $('#delivery-method').val(delivery_method);
+
+            // 讓所有選擇欄位變成只讀
+            setTimeout(function() {
+                // 讓縣市選擇器的下拉選單變成只讀
+                $('.twzipcode select').prop('readonly', true);
+                $('.twzipcode select').addClass('uk-form-blank');
+
+                // 讓國家選擇器變成只讀
+                $('#country_selector').prop('readonly', true);
+                $('#country_selector').addClass('uk-form-blank');
+
+                // 防止用戶點擊選擇器
+                $('.twzipcode select').on('click', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+
+                $('#country_selector').on('click', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+            }, 1000);
 
             $('.deliveryMethod').click(function () {
                 var val = $(this).val();
                 var cost = $(this).attr('cost');
 
-                hideAllSubField();
-                if(val == 1) {
-                    $('#home-delivery-field').prop('hidden', false);
-                } else if(val == 2) {
-                    $('#cross-border-delivery-field').prop('hidden', false);
-                }
                 $('#delivery-method').val(val);
             });
         });

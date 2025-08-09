@@ -13,7 +13,10 @@
 
                     <li>{{ $logisticInfo->addressee_name ?? '' }}</li>
                     <li>{{ $logisticInfo->addressee_phone ?? '' }}</li>
-                    <li>{{ $logisticInfo->delivery_zip_code.$logisticInfo->delivery_address ?? '' }}</li>
+                    <li>郵遞區號：{{ $logisticInfo->delivery_zip_code ?? '' }}</li>
+                    <li>縣市：{{ $logisticInfo->county ?? '' }}</li>
+                    <li>區：{{ $logisticInfo->district ?? '' }}</li>
+                    <li>街道地址：{{ $logisticInfo->delivery_address ?? '' }}</li>
 
                 </ul>
             </div>

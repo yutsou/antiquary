@@ -46,6 +46,37 @@
                         </div>
                     </div>
 
+                    <!-- 收貨地址 -->
+                    @if($request->logisticRecords->where('type', 0)->first())
+                        @php
+                            $logisticRecord = $request->logisticRecords->where('type', 0)->first();
+                        @endphp
+                        <div class="uk-card uk-card-default uk-margin">
+                            <div class="uk-card-header">
+                                <h3 class="uk-card-title">收貨地址</h3>
+                            </div>
+                            <div class="uk-card-body">
+                                <div class="uk-grid-small" uk-grid>
+                                    <div class="uk-width-1-2">
+                                        <p><strong>收貨人:</strong> {{ $logisticRecord->addressee_name }}</p>
+                                        <p><strong>聯絡電話:</strong> {{ $logisticRecord->addressee_phone }}</p>
+                                    </div>
+                                    <div class="uk-width-1-2">
+                                        @if($request->delivery_method == 1)
+                                            <p><strong>郵遞區號:</strong> {{ $logisticRecord->delivery_zip_code }}</p>
+                                            <p><strong>縣市:</strong> {{ $logisticRecord->county }}</p>
+                                            <p><strong>區:</strong> {{ $logisticRecord->district }}</p>
+                                            <p><strong>街道地址:</strong> {{ $logisticRecord->delivery_address }}</p>
+                                        @elseif($request->delivery_method == 2)
+                                            <p><strong>國家:</strong> {{ $logisticRecord->cross_board_delivery_country }}</p>
+                                            <p><strong>收貨地址:</strong> {{ $logisticRecord->cross_board_delivery_address }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- 包含商品 -->
                     <div class="uk-card uk-card-default uk-margin">
                         <div class="uk-card-header">

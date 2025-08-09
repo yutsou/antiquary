@@ -100,6 +100,8 @@ class OrderService extends OrderRepository
             case 1:
                 $input = array_merge($input, [
                     'delivery_zip_code' => $request->delivery_zip_code,
+                    'county' => $request->county,
+                    'district' => $request->district,
                     'delivery_address' => $request->delivery_address,
                 ]);
                 break;
@@ -524,7 +526,9 @@ class OrderService extends OrderRepository
 
         if ($deliveryMethod == 1) {
             $input['delivery_zip_code'] = $requestData['zip_code'] ?? null;
-            $input['delivery_address'] = ($requestData['county'] ?? '') . ($requestData['district'] ?? '') . ($requestData['address'] ?? '');
+            $input['county'] = $requestData['county'] ?? null;
+            $input['district'] = $requestData['district'] ?? null;
+            $input['delivery_address'] = $requestData['address'] ?? null;
         } elseif ($deliveryMethod == 2) {
             $input['cross_board_delivery_country'] = $requestData['country'] ?? null;
             $input['cross_board_delivery_country_code'] = $requestData['country_selector_code'] ?? null;
@@ -598,10 +602,8 @@ class OrderService extends OrderRepository
             ]);
         }
 
-        // 創建運送資訊
-        $this->storeMergeShippingOrderLogisticInfo($requestData, $order->id);
-
-
+        // 創建運送資訊 - 從 merge request 的 logistic records 中獲取地址信息
+        $this->storeMergeShippingOrderLogisticInfoFromRequest($mergeRequest, $order->id);
 
         return $order;
     }
@@ -618,11 +620,44 @@ class OrderService extends OrderRepository
 
         if ($deliveryMethod == 1) {
             $input['delivery_zip_code'] = $requestData['zip_code'] ?? null;
-            $input['delivery_address'] = ($requestData['county'] ?? '') . ($requestData['district'] ?? '') . ($requestData['address'] ?? '');
+            $input['county'] = $requestData['county'] ?? null;
+            $input['district'] = $requestData['district'] ?? null;
+            $input['delivery_address'] = $requestData['address'] ?? null;
         } elseif ($deliveryMethod == 2) {
             $input['cross_board_delivery_country'] = $requestData['country'] ?? null;
             $input['cross_board_delivery_country_code'] = $requestData['country_selector_code'] ?? null;
             $input['cross_board_delivery_address'] = $requestData['cross_board_address'] ?? null;
+        }
+
+        return OrderRepository::createLogisticRecord($input, $orderId);
+    }
+
+    private function storeMergeShippingOrderLogisticInfoFromRequest($mergeRequest, $orderId)
+    {
+        // 從 merge request 的 logistic records 中獲取地址信息
+        $logisticRecord = $mergeRequest->logisticRecords()->where('type', 0)->first();
+
+        if (!$logisticRecord) {
+            throw new \Exception('找不到合併運費請求的地址信息');
+        }
+
+        $input = [
+            'type' => 0, // 主物流資訊
+            'addressee_name' => $logisticRecord->addressee_name,
+            'addressee_phone' => $logisticRecord->addressee_phone,
+        ];
+
+        $deliveryMethod = $mergeRequest->delivery_method;
+
+        if ($deliveryMethod == 1) {
+            $input['delivery_zip_code'] = $logisticRecord->delivery_zip_code;
+            $input['county'] = $logisticRecord->county;
+            $input['district'] = $logisticRecord->district;
+            $input['delivery_address'] = $logisticRecord->delivery_address;
+        } elseif ($deliveryMethod == 2) {
+            $input['cross_board_delivery_country'] = $logisticRecord->cross_board_delivery_country;
+            $input['cross_board_delivery_country_code'] = $logisticRecord->cross_board_delivery_country_code;
+            $input['cross_board_delivery_address'] = $logisticRecord->cross_board_delivery_address;
         }
 
         return OrderRepository::createLogisticRecord($input, $orderId);

@@ -50,8 +50,16 @@
                         @switch($order->delivery_method)
                             @case(1)
                                 <tr>
-                                    <td class="uk-width-small">宅配地址：</td>
-                                    <td class="uk-table-expand">{{ $logisticInfo->delivery_zipcode }}{{ $logisticInfo->delivery_address }}</td>
+                                    <td class="uk-width-small">郵遞區號：</td>
+                                    <td class="uk-table-expand">{{ $logisticInfo->delivery_zip_code }}</td>
+                                    <td class="uk-width-small">縣市：</td>
+                                    <td class="uk-table-expand">{{ $logisticInfo->county }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="uk-width-small">區：</td>
+                                    <td class="uk-table-expand">{{ $logisticInfo->district }}</td>
+                                    <td class="uk-width-small">街道地址：</td>
+                                    <td class="uk-table-expand">{{ $logisticInfo->delivery_address }}</td>
                                 </tr>
                                 @break
                             @case(2)

@@ -47,8 +47,23 @@
                     <li><a href="{{ route('auctioneer.main_categories.create') }}">主分類創建</a></li>
                     <li><a href="{{ route('auctioneer.main_categories.index') }}">主分類管理</a></li>
                     <li class="uk-nav-header uk-margin-top" style="color: white; font-size: 1.2em;">訂單</li>
-                    <li><a href="{{ route('auctioneer.orders.index') }}">訂單管理<span class="uk-badge" style="background-color: #d62828;">{{ $orderCount }}</span></a></li>
-                    <li><a href="{{ route('auctioneer.merge_shipping_requests.index') }}">合併運費請求</a></li>
+                    <li>
+                        <a href="{{ route('auctioneer.orders.index') }}">
+                            訂單管理
+                            @if($orderCount > 0)
+                                <span class="uk-badge" style="background-color: #d62828;">{{ $orderCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('auctioneer.merge_shipping_requests.index') }}">
+                            合併運費請求
+                            @if($mergeShippingRequestCount > 0)
+                                <span class="uk-badge" style="background-color: #d62828;">{{ $mergeShippingRequestCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+
                     <li class="uk-nav-divider"></li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

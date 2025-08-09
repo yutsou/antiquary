@@ -240,6 +240,42 @@
                 $('#delivery-cost').val(cost);
             });
 
+            // 為合併運費選項添加驗證
+            $('form').on('submit', function(e) {
+                var deliveryMethod = $('#deliveryMethod').val();
+
+                if (deliveryMethod === '1-merge' || deliveryMethod === '2-merge') {
+                    var recipientName = $('input[name="recipient_name"]').val();
+                    var recipientPhone = $('input[name="recipient_phone"]').val();
+
+                    if (!recipientName || !recipientPhone) {
+                        e.preventDefault();
+                        alert('請填寫收貨人姓名和電話');
+                        return false;
+                    }
+
+                    if (deliveryMethod === '1-merge') {
+                        var zipCode = $('input[name="zip_code"]').val();
+                        var address = $('input[name="address"]').val();
+
+                        if (!zipCode || !address) {
+                            e.preventDefault();
+                            alert('請填寫完整的宅配地址信息');
+                            return false;
+                        }
+                    } else if (deliveryMethod === '2-merge') {
+                        var country = $('input[name="country"]').val();
+                        var crossBoardAddress = $('input[name="cross_board_address"]').val();
+
+                        if (!country || !crossBoardAddress) {
+                            e.preventDefault();
+                            alert('請填寫完整的跨境地址信息');
+                            return false;
+                        }
+                    }
+                }
+            });
+
         });
     </script>
 @endpush

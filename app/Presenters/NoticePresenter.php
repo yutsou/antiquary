@@ -3,6 +3,7 @@
 namespace App\Presenters;
 
 use App\Models\Lot;
+use App\Models\MergeShippingRequest;
 use App\Models\Message;
 use App\Models\Order;
 use Carbon\Carbon;
@@ -97,6 +98,11 @@ class NoticePresenter
                     $model = Order::find($notice->target_id);
                     return match ($notice->code) {
                         0 => ['確認匯款通知', '提醒您，訂單 No.'.$model->id. ' 已匯款，請確認匯款。'],
+                    };
+                case 8:
+                    $model = MergeShippingRequest::find($notice->target_id);
+                    return match ($notice->code) {
+                        0 => ['合併運費請求', '提醒您，合併請求 No.'.$model->id. ' 請求合併運費。'],
                     };
             }
         } catch (Exception $e) {

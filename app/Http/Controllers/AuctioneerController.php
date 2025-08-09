@@ -620,7 +620,7 @@ class AuctioneerController extends Controller
     // 合併運費請求管理
     public function indexMergeShippingRequests()
     {
-        $requests = MergeShippingRequest::with(['user', 'items.lot.blImages'])
+        $requests = MergeShippingRequest::with(['user', 'items.lot.blImages', 'logisticRecords'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -632,7 +632,7 @@ class AuctioneerController extends Controller
 
     public function showMergeShippingRequest($requestId)
     {
-        $request = MergeShippingRequest::with(['user', 'items.lot.blImages'])
+        $request = MergeShippingRequest::with(['user', 'items.lot.blImages', 'logisticRecords'])
             ->findOrFail($requestId);
 
         return CustomClass::viewWithTitle(

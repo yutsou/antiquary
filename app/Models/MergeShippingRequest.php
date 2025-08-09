@@ -30,6 +30,12 @@ class MergeShippingRequest extends Model
         return $this->hasMany(MergeShippingItem::class);
     }
 
+    // 關聯 LogisticRecord
+    public function logisticRecords()
+    {
+        return $this->morphMany(LogisticRecord::class, 'logistic_recordable');
+    }
+
     // 狀態常數
     const STATUS_PENDING = 0;
     const STATUS_APPROVED = 1;

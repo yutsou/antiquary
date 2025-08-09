@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $tracking_code
  * @property string|null $face_to_face_address
  * @property string|null $delivery_zip_code
+ * @property string|null $county
+ * @property string|null $district
  * @property string|null $delivery_address
  * @property string|null $cross_board_delivery_country
  * @property string|null $cross_board_delivery_country_code
