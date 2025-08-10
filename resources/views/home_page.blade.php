@@ -85,6 +85,19 @@
                                     </div>
                                 </li>
                             @endforeach
+                            <li>
+                                <div class="uk-card uk-card-default uk-card-hover main-category-card-click" main-categoryId="{{ $categoryData['category']->id }}">
+                                    <div class="uk-card-media-top">
+                                        <img src="{{ $categoryData['category']->image->url ?? '/images/web/common/no-picture.jpg' }}" alt="" style="width: 100%; height: 220px; object-fit: cover;">
+                                    </div>
+                                    <div class="uk-card-body uk-text-center d-flex-col">
+                                        <h3 class="uk-card-title custom-font-medium">更多商品</h3>
+                                        <div style="margin-top:auto;">
+                                            <p class="uk-text-bold uk-margin-remove">查看更多</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
                         </ul>
                         <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous
                             uk-slider-item="previous"></a>
@@ -188,6 +201,10 @@
             $('.product-card-click').on('click', function() {
                 let productId = $(this).attr('productId');
                 window.location.assign('/products/'+productId);
+            });
+            $('.main-category-card-click').on('click', function() {
+                let mainCategoryId = $(this).attr('main-categoryId');
+                window.location.assign('/m-categories/'+ mainCategoryId);
             });
         });
     </script>

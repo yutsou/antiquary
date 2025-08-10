@@ -569,7 +569,7 @@ class LotService extends LotRepository
      */
     public function getPublishedLotsByMainCategories()
     {
-        $mainCategories = \App\Models\Category::whereNull('parent_id')->get();
+        $mainCategories = \App\Models\Category::whereNull('parent_id')->with('image')->get();
         $result = [];
 
         foreach ($mainCategories as $mainCategory) {
