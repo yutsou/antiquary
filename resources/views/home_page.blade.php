@@ -91,7 +91,7 @@
                                         <img src="{{ $categoryData['category']->image->url ?? '/images/web/common/no-picture.jpg' }}" alt="" style="width: 100%; height: 220px; object-fit: cover;">
                                     </div>
                                     <div class="uk-card-body uk-text-center d-flex-col">
-                                        <h3 class="uk-card-title custom-font-medium">更多商品</h3>
+                                        <h3 class="uk-card-title custom-font-medium">更多{{ $categoryData['category']->name }}的商品</h3>
                                         <div style="margin-top:auto;">
                                             <p class="uk-text-bold uk-margin-remove">查看更多</p>
                                         </div>
