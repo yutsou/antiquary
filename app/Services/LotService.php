@@ -400,8 +400,7 @@ class LotService extends LotRepository
     {
         // 使用數據庫查詢替代 Scout 搜尋，因為 collection 驅動可能有問題
         $words = explode(" ", $query);
-        $query = Lot::whereIn('status', [21, 61])
-                    ->where('inventory', '>', 0);
+        $query = Lot::whereIn('status', [21, 61]);
 
         foreach($words as $word) {
             $query->where(function($q) use ($word) {
@@ -563,6 +562,36 @@ class LotService extends LotRepository
     public function getPublishedLots()
     {
         return LotRepository::all()->where('status', 61)->where("inventory", "!=", 0)->sortByDesc('created_at');
+    }
+
+    /**
+     * 按主分類獲取已發布的商品，每個分類最多20個
+     */
+    public function getPublishedLotsByMainCategories()
+    {
+        $mainCategories = \App\Models\Category::whereNull('parent_id')->get();
+        $result = [];
+
+        foreach ($mainCategories as $mainCategory) {
+            $lots = Lot::whereHas('categories', function($query) use ($mainCategory) {
+                $query->where('category_id', $mainCategory->id);
+            })
+            ->where('status', 61)
+            ->where('inventory', '>', 0)
+            ->with(['blImages', 'categories'])
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+            if ($lots->count() > 0) {
+                $result[] = [
+                    'category' => $mainCategory,
+                    'lots' => $lots
+                ];
+            }
+        }
+
+        return $result;
     }
 
     public function findOrFail($id)

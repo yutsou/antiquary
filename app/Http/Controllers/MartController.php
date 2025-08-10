@@ -75,9 +75,14 @@ class MartController extends Controller
     {
         $banners = $this->bannerService->getAllBanners()->sortBy('index');
         $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
-        $products = $this->lotService->getPublishedLots();
+        $productsByCategory = $this->lotService->getPublishedLotsByMainCategories();
 
-        return view('home_page')->with('auctions', $auctions)->with('head', 'Home Page')->with('title', 'Antiquary')->with('banners', $banners)->with('products', $products);
+        return view('home_page')
+            ->with('auctions', $auctions)
+            ->with('head', 'Home Page')
+            ->with('title', 'Antiquary')
+            ->with('banners', $banners)
+            ->with('productsByCategory', $productsByCategory);
     }
 
     public function payEcpayReceive(Request $request)
@@ -148,7 +153,7 @@ class MartController extends Controller
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
-        $lots = $sCategory->lots->whereIn('status', [20,21,61])->where("inventory", "!=", 0)->sortBy('auction_end_at');
+        $lots = $sCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
         return CustomClass::viewWithTitle(view('mart.lots.index')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 

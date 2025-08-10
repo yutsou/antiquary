@@ -54,7 +54,7 @@
                                 <li>
                                     <a href="#">分類</a>
                                     <div uk-dropdown class="uk-width-1-1">
-                                        <div class="uk-child-width-1-5@s uk-text-center" uk-grid>
+                                        <div class="uk-child-width-1-4@s uk-text-center" uk-grid>
                                             @foreach($categories as $category)
                                                 <div>
                                                     <div class="uk-card uk-card-default uk-card-small uk-card-hover uk-grid-collapse uk-margin custom-category-card-click" uk-grid
