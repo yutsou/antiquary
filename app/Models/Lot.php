@@ -255,7 +255,7 @@ class Lot extends Model
             'name' => $this->name,
             'description' => $this->description,
             'categories' => $this->categories()->pluck('name')->implode(' '),
-            'specifications' => $this->specifications,
+            'specifications' => $this->specifications()->pluck('value')->implode(' '),
         ];
     }
 }

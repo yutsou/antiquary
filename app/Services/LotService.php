@@ -398,13 +398,19 @@ class LotService extends LotRepository
 
     public function searchLots($query)
     {
-        $results = collect();
+        // 使用數據庫查詢替代 Scout 搜尋，因為 collection 驅動可能有問題
         $words = explode(" ", $query);
+        $query = Lot::whereIn('status', [21, 61])
+                    ->where('inventory', '>', 0);
+
         foreach($words as $word) {
-            $results->push(Lot::search($word)->whereIn('status', [21, 61])->where("inventory", "!=", 0)->get());
+            $query->where(function($q) use ($word) {
+                $q->where('name', 'LIKE', '%' . $word . '%')
+                  ->orWhere('description', 'LIKE', '%' . $word . '%');
+            });
         }
-        return $results->flatten()->unique('id');
-        #
+
+        return $query->get();
     }
 
     #type 0 application 1 returned 2 unsold
