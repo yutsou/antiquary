@@ -134,7 +134,6 @@
                                                 class="uk-input cart-quantity-input"
                                                 style="width: 80px; display: inline-block;"
                                                 min="1"
-                                                max="{{ $lot->inventory ?? 99 }}"
                                                 value="{{ $lot->cart_quantity }}"
                                                 data-lot-id="{{ $lot->id }}"
                                             />

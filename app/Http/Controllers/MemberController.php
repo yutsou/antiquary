@@ -1011,6 +1011,25 @@ class MemberController extends Controller
             return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
         }
 
+        // 檢查庫存是否足夠
+        $lotService = app(LotService::class);
+        $inventoryItems = [];
+        foreach ($selectedLots as $lot) {
+            $inventoryItems[] = [
+                'lot_id' => $lot->id,
+                'quantity' => $lot->cart_quantity
+            ];
+        }
+
+        $inventoryResult = $lotService->checkMultipleInventory($inventoryItems);
+        if (!$inventoryResult['sufficient']) {
+            $errorMessage = '以下商品庫存不足：';
+            foreach ($inventoryResult['insufficient_items'] as $item) {
+                $errorMessage .= "\n{$item['lot_name']} - 需要 {$item['requested_quantity']} 件，庫存 {$item['available_inventory']} 件";
+            }
+            return redirect()->route('account.cart.show')->with('error', $errorMessage);
+        }
+
         // 計算所有商品的運送方式交集
         $deliveryMethodsArr = [];
         foreach ($selectedLots as $lot) {
@@ -1082,6 +1101,25 @@ class MemberController extends Controller
 
         if ($selectedLots->isEmpty()) {
             return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
+        }
+
+        // 再次檢查庫存是否足夠（以防在運送方式選擇期間庫存發生變化）
+        $lotService = app(LotService::class);
+        $inventoryItems = [];
+        foreach ($selectedLots as $lot) {
+            $inventoryItems[] = [
+                'lot_id' => $lot->id,
+                'quantity' => $lot->cart_quantity
+            ];
+        }
+
+        $inventoryResult = $lotService->checkMultipleInventory($inventoryItems);
+        if (!$inventoryResult['sufficient']) {
+            $errorMessage = '以下商品庫存不足：';
+            foreach ($inventoryResult['insufficient_items'] as $item) {
+                $errorMessage .= "\n{$item['lot_name']} - 需要 {$item['requested_quantity']} 件，庫存 {$item['available_inventory']} 件";
+            }
+            return redirect()->route('account.cart.show')->with('error', $errorMessage);
         }
 
         return CustomClass::viewWithTitle(
