@@ -891,7 +891,7 @@ class MemberController extends Controller
         $user = Auth::user();
         $cartItems = $this->cartService->getCartItems($user->id);
         $mergeShippingRequests = $user->mergeShippingRequests()
-            ->where('status', '!=', 3)
+            ->whereNotIn('status', [MergeShippingRequest::STATUS_COMPLETED, MergeShippingRequest::STATUS_REMOVED])
             ->with('items.lot.blImages')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -1215,7 +1215,6 @@ class MemberController extends Controller
 
     public function createMergeShippingRequest(Request $request)
     {
-
         $user = Auth::user();
         $selectedLotIds = $request->input('selected_lots', []);
         $delivery_method = $request->input('delivery_method');
@@ -1250,7 +1249,7 @@ class MemberController extends Controller
             'status' => MergeShippingRequest::STATUS_PENDING,
         ]);
 
-        // 建立合併運費商品記錄
+        // 建立合併運費商品記錄並扣減庫存
         foreach ($selectedLots as $lot) {
             $method = $lot->deliveryMethods->where('code', $deliveryMethodCode)->first();
             if ($method) {
@@ -1260,6 +1259,15 @@ class MemberController extends Controller
                     'quantity' => $lot->cart_quantity,
                     'original_shipping_fee' => $method->cost,
                 ]);
+
+                // 扣減庫存 - 直接操作數據庫，因為 merge request 需要對所有商品扣減庫存
+                $lot->decrement('inventory', $lot->cart_quantity);
+
+                // 檢查庫存是否為0，如果是則下架商品
+                $updatedLot = $lot->fresh();
+                if ($updatedLot->inventory <= 0) {
+                    $updatedLot->update(['status' => 60]); // 60 是下架狀態
+                }
             }
         }
 
@@ -1406,7 +1414,7 @@ class MemberController extends Controller
             $order = $this->orderService->createMergeShippingOrder($user->id, $mergeRequest, $request->all());
 
             // 更新合併運費請求狀態為已完成
-            $mergeRequest->update(['status' => 3]); // 3: 已完成
+            $mergeRequest->update(['status' => MergeShippingRequest::STATUS_COMPLETED]);
 
             // 根據付款方式導向不同頁面
             $paymentMethod = $request->input('payment_method');
@@ -1423,6 +1431,7 @@ class MemberController extends Controller
             }
         } catch (\Exception $e) {
             // 處理庫存不足等錯誤
+            dd($e);
             return redirect()->route('account.cart.merge_shipping_checkout', $requestId)->with('error', $e->getMessage());
         }
     }
@@ -1460,8 +1469,8 @@ class MemberController extends Controller
             ->where('id', $requestId)
             ->firstOrFail();
 
-        // 刪除合併運費請求（會自動刪除相關的 items，因為有外鍵約束）
-        $mergeRequest->delete();
+        // 不刪除記錄，而是設定狀態為已移除
+        $mergeRequest->update(['status' => MergeShippingRequest::STATUS_REMOVED]);
 
         return Response::json(array(
             'success' => true,
@@ -1472,7 +1481,7 @@ class MemberController extends Controller
     private function storeMergeShippingRequestLogisticInfo(Request $request, $requestId)
     {
         $input = [
-            'type' => 0, // 主物流資訊 - logistic_records type 定義：0=application(正常流程賣場寄給拍賣會), 1=returned(退還競標物品), 2=unsold(競標失敗退還), 3=未付款退回
+            'type' => 4, // 主物流資訊 - logistic_records type 定義：0=application(正常流程賣場寄給拍賣會), 1=returned(退還競標物品), 2=unsold(競標失敗退還), 3=未付款退回, 4=merge request
             'addressee_name' => $request->input('recipient_name'),
             'addressee_phone' => $request->input('recipient_phone'),
         ];

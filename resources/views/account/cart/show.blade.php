@@ -84,7 +84,7 @@
                                                 進行結帳
                                             </a>
                                         </div>
-                                    @elseif($request->status == 2)
+                                    @elseif($request->status == 2 || $request->status == 4)
                                         <div class="uk-margin uk-text-right">
                                             <button
                                                 type="button"

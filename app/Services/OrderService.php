@@ -542,28 +542,8 @@ class OrderService extends OrderRepository
     {
         $now = Carbon::now();
 
-        // 準備庫存檢查項目
-        $inventoryItems = [];
-        foreach ($mergeRequest->items as $item) {
-            $inventoryItems[] = [
-                'lot_id' => $item->lot_id,
-                'quantity' => $item->quantity
-            ];
-        }
-
-        // 檢查並扣減庫存
-        $lotService = app(LotService::class);
-        $inventoryResult = $lotService->checkAndDeductInventory($inventoryItems);
-
-        if (!$inventoryResult['success']) {
-            // 如果有庫存不足的商品，拋出異常
-            $insufficientItems = $inventoryResult['insufficient_items'] ?? [];
-            $errorMessage = '以下商品庫存不足：';
-            foreach ($insufficientItems as $item) {
-                $errorMessage .= "\n{$item['lot_name']} - 需要 {$item['requested_quantity']} 件，庫存 {$item['available_inventory']} 件";
-            }
-            throw new \Exception($errorMessage);
-        }
+        // 注意：庫存已經在創建 merge request 時扣減過了，這裡不需要再次檢查和扣減
+        // 因為 merge request 創建時已經預先扣減了庫存，所以這裡直接創建訂單即可
 
         // 計算總計
         $subtotal = $mergeRequest->items->sum(function($item) {
@@ -635,7 +615,7 @@ class OrderService extends OrderRepository
     private function storeMergeShippingOrderLogisticInfoFromRequest($mergeRequest, $orderId)
     {
         // 從 merge request 的 logistic records 中獲取地址信息
-        $logisticRecord = $mergeRequest->logisticRecords()->where('type', 0)->first();
+        $logisticRecord = $mergeRequest->logisticRecords()->where('type', 4)->first();
 
         if (!$logisticRecord) {
             throw new \Exception('找不到合併運費請求的地址信息');

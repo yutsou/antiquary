@@ -1,5 +1,6 @@
 @extends('layouts.auctioneer')
 @inject('lotEditPresenter', 'App\Presenters\LotEditPresenter')
+@inject('auctioneerProductPresenter', 'App\Presenters\AuctioneerProductPresenter')
 @section('content')
     <div class="uk-margin-medium">
         <h1 class="uk-heading-medium">{{ $head }}</h1>
@@ -7,6 +8,10 @@
     <div class="uk-margin-medium">
         <h1 class="uk-heading-small">商品號碼: {{ $lot->id }}</h1>
     </div>
+    <div class="uk-margin-medium">
+        {!! $auctioneerProductPresenter->present($lot) !!}
+    </div>
+
     <div class="uk-flex uk-flex-center">
         <div class="uk-width-1-1">
 

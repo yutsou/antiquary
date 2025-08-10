@@ -9,7 +9,7 @@ class AuctioneerProductPresenter
         switch (true) {
             case $lot->status == 60:
                 return '
-                    <div class="uk-text-left">
+                    <div class="uk-text-right">
                         <div id="receive-lot-' . $lot->id . '" class="modal">
                             <h2>確定上架物品 #' . $lot->id . ' 嗎？</h2>
                             <form method="post" action="' . route('auctioneer.products.publish', [$lot->id]) . '">
@@ -26,10 +26,10 @@ class AuctioneerProductPresenter
                 ';
             case $lot->status == 61:
                 return '
-                    <div class="uk-text-left">
+                    <div class="uk-text-right">
                         <div id="receive-lot-' . $lot->id . '" class="modal">
                             <h2>確定下架物品 #' . $lot->id . ' 嗎？</h2>
-                            <form method="post" action="' . route('auctioneer.products.uppublish', [$lot->id]) . '">
+                            <form method="post" action="' . route('auctioneer.products.unpublish', [$lot->id]) . '">
                                 <input type="hidden" name="_token" value="' . csrf_token() . '">
                                 <input type="hidden" name="lotId" value="' . $lot->id . '">
                                 <p class="uk-text-right">

@@ -122,7 +122,7 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::get('/products/{lotId}', [AuctioneerController::class, 'editProduct'])->name('auctioneer.products.edit');
     Route::post('/products/{lotId}', [AuctioneerController::class, 'updateProduct'])->name('auctioneer.products.update');
     Route::post('/products/{lotId}/publish', [AuctioneerController::class, 'publishProduct'])->name('auctioneer.products.publish');
-    Route::post('/products/{lotId}/unpublish', [AuctioneerController::class, 'unpublishProduct'])->name('auctioneer.products.uppublish');
+    Route::post('/products/{lotId}/unpublish', [AuctioneerController::class, 'unpublishProduct'])->name('auctioneer.products.unpublish');
 
     // 合併運費請求管理
     Route::get('/merge-shipping-requests', [AuctioneerController::class, 'indexMergeShippingRequests'])->name('auctioneer.merge_shipping_requests.index');

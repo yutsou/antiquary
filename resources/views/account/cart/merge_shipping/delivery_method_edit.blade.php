@@ -101,7 +101,7 @@
                 </div>
 
                 @php
-                    $logisticRecord = $mergeRequest->logisticRecords->where('type', 0)->first();
+                    $logisticRecord = $mergeRequest->logisticRecords->where('type', 4)->first();
                 @endphp
                 <div class="uk-margin" id="delivery-field">
                     <div class="uk-card uk-card-default uk-card-body">
@@ -121,13 +121,16 @@
                         @if($mergeRequest->delivery_method == 1)
                             <div class="sub-field uk-margin" id="home-delivery-field">
                                 <h3 class="uk-card-title">收件人縣市、鄉鎮</h3>
-                                <div class="uk-grid-small uk-child-width-1-3 uk-form-controls twzipcode" uk-grid>
-                                    <div data-role="county" data-style="uk-select" data-name="county" id="county"
-                                         data-value="{{ $logisticRecord->county ?? '' }}"></div>
-                                    <div data-role="district" data-style="uk-select" data-name="district" id="district"
-                                         data-value="{{ $logisticRecord->district ?? '' }}"></div>
-                                    <div data-role="zipcode" data-style="uk-select" data-name="zip_code" id="zip-code"
-                                         data-value="{{ $logisticRecord->delivery_zip_code ?? '' }}"></div>
+                                <div class="uk-grid-small uk-child-width-1-3 uk-form-controls" uk-grid>
+                                    <div>
+                                        <input class="uk-input" type="text" name="county" id="county" value="{{ $logisticRecord->county ?? '' }}" readonly>
+                                    </div>
+                                    <div>
+                                        <input class="uk-input" type="text" name="district" id="district" value="{{ $logisticRecord->district ?? '' }}" readonly>
+                                    </div>
+                                    <div>
+                                        <input class="uk-input" type="text" name="zip_code" id="zip-code" value="{{ $logisticRecord->delivery_zip_code ?? '' }}" readonly>
+                                    </div>
                                 </div>
                                 <div class="uk-margin">
                                     <label class="uk-form-label" for="address">街道地址</label>
@@ -141,14 +144,11 @@
                                 <h3 class="uk-card-title">選擇國家</h3>
                                 <div class="form-item">
                                     <input class="uk-input uk-width-1-3" id="country_selector" name="country" type="text" value="{{ $logisticRecord->cross_board_delivery_country ?? '' }}" readonly>
-                                    <label for="country_selector" style="display:none;">Select a country here...</label>
                                 </div>
                                 <div class="form-item" style="display:none;">
                                     <input type="text" id="country_selector_code" name="country_selector_code"
-                                           data-countrycodeinput="1" value="{{ $logisticRecord->cross_board_delivery_country_code ?? '' }}" readonly placeholder="Selected country code will appear here"/>
-                                    <label for="country_selector_code">...and the selected country code will be updated here</label>
+                                           value="{{ $logisticRecord->cross_board_delivery_country_code ?? '' }}" readonly/>
                                 </div>
-                                <button type="submit" style="display:none;">Submit</button>
                                 <div class="uk-margin">
                                     <label class="uk-form-label" for="cross-board-address">跨境目的地完整地址</label>
                                     <div class="uk-form-controls">
@@ -168,71 +168,15 @@
     </div>
 @endsection
 
-@push('style')
-    <link rel="stylesheet" href="{{ asset('extensions/countrySelect/css/countrySelect.css') }}">
-@endpush
-
 @push('scripts')
-    <script src="{{ asset('js/jQuery-TWzipcode/twzipcode.js') }}"></script>
-    <script src="{{ asset('extensions/countrySelect/js/countrySelect.js') }}"></script>
     <script>
-        let hideAllSubField = function () {
-            $('#delivery-field').prop('hidden', false);
-            $('.sub-field').prop('hidden', true);
-        }
-        let clearAllSubField = function (twzipcode) {
-            twzipcode.set({
-                'county': '',
-                'district': ''
-            });
-        }
         $(function () {
-            const twzipcode = new TWzipcode(".twzipcode", {
-                'county': {
-                    'css': 'uk-select',
-                    'required': false,
-                    'onSelect': function (e) {}
-                },
-                'district': {
-                    'required': false,
-                    'css': 'uk-select',
-                },
-                'zipcode': {
-                    'required': false,
-                    'css': 'uk-input',
-                    'readonly': true,
-                },
-            });
-            $("#country_selector").countrySelect({});
-
             // 自動選擇運送方式並顯示對應欄位
             var delivery_method = {{ $mergeRequest->delivery_method }};
             $('input[value="' + delivery_method + '"]').prop('checked', true);
 
             // 地址信息已經顯示，不需要隱藏
             $('#delivery-method').val(delivery_method);
-
-            // 讓所有選擇欄位變成只讀
-            setTimeout(function() {
-                // 讓縣市選擇器的下拉選單變成只讀
-                $('.twzipcode select').prop('readonly', true);
-                $('.twzipcode select').addClass('uk-form-blank');
-
-                // 讓國家選擇器變成只讀
-                $('#country_selector').prop('readonly', true);
-                $('#country_selector').addClass('uk-form-blank');
-
-                // 防止用戶點擊選擇器
-                $('.twzipcode select').on('click', function(e) {
-                    e.preventDefault();
-                    return false;
-                });
-
-                $('#country_selector').on('click', function(e) {
-                    e.preventDefault();
-                    return false;
-                });
-            }, 1000);
 
             $('.deliveryMethod').click(function () {
                 var val = $(this).val();

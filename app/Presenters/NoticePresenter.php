@@ -103,6 +103,8 @@ class NoticePresenter
                     $model = MergeShippingRequest::find($notice->target_id);
                     return match ($notice->code) {
                         0 => ['合併運費請求', '提醒您，合併請求 No.'.$model->id. ' 請求合併運費。'],
+                        1 => ['合併運費已通過', '提醒您，合併請求 No.'.$model->id. ' 已同意。'],
+                        2 => ['合併運費已拒絕', '提醒您，合併請求 No.'.$model->id. ' 已拒絕。'],
                     };
             }
         } catch (Exception $e) {

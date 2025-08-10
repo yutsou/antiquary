@@ -37,6 +37,8 @@
                                             <span class="uk-label uk-label-success">已處理</span>
                                         @elseif($request->status == 3)
                                             <span class="uk-label uk-label-primary">已完成</span>
+                                        @elseif($request->status == 4)
+                                            <span class="uk-label uk-label-danger">已過期</span>
                                         @else
                                             <span class="uk-label uk-label-danger">已拒絕</span>
                                         @endif
@@ -47,9 +49,9 @@
                     </div>
 
                     <!-- 收貨地址 -->
-                    @if($request->logisticRecords->where('type', 0)->first())
-                        @php
-                            $logisticRecord = $request->logisticRecords->where('type', 0)->first();
+                                    @if($request->logisticRecords->where('type', 4)->first())
+                    @php
+                    $logisticRecord = $request->logisticRecords->where('type', 4)->first();
                         @endphp
                         <div class="uk-card uk-card-default uk-margin">
                             <div class="uk-card-header">

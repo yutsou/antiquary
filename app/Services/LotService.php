@@ -523,10 +523,13 @@ class LotService extends LotRepository
                 $specification = $lot->specifications->pluck('value')->toArray();
                 return implode(", ", $specification);
             })*/
+            ->addColumn('inventory', function ($lot)
+            {
+                return $lot->inventory;
+            })
             ->addColumn('status', function ($lot)
             {
                 $lotStatusPresenter = new LotStatusPresenter;
-                $orderStatusPresenter = new OrderStatusPresenter;
                 return $lotStatusPresenter->present($lot->status);
             })
             ->addColumn('action', function ($lot) use($auctioneerProductPresenter)

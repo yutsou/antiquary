@@ -12,6 +12,7 @@
             <th>ID</th>
             <th>自訂編號</th>
             <th>名稱</th>
+            <th>庫存</th>
             <th>狀態</th>
             <th class="uk-table-shrink">動作</th>
         </tr>
@@ -57,6 +58,7 @@
                         { "data": "id", "orderable": false},
                         { "data": "custom_id", "orderable": false},
                         { "data": "name", "orderable": false},
+                        { "data": "inventory", "orderable": false},
                         { "data": "status", "orderable": false},
                         { "data": "action", "orderable": false, "className": "uk-text-nowrap"},
                     ]

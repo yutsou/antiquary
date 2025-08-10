@@ -41,6 +41,8 @@ class MergeShippingRequest extends Model
     const STATUS_APPROVED = 1;
     const STATUS_REJECTED = 2;
     const STATUS_COMPLETED = 3;
+    const STATUS_EXPIRED = 4;
+    const STATUS_REMOVED = 5;
 
     // 運送方式常數
     const DELIVERY_HOME = 1;
@@ -58,6 +60,10 @@ class MergeShippingRequest extends Model
                 return '已拒絕';
             case self::STATUS_COMPLETED:
                 return '已完成';
+            case self::STATUS_EXPIRED:
+                return '已過期';
+            case self::STATUS_REMOVED:
+                return '已移除';
             default:
                 return '未知';
         }

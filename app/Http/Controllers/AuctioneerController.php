@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use App\CustomFacades\CustomClass;
+use App\Jobs\ExpireMergeShippingRequest;
 use App\Services\UserService;
 use App\Services\CategoryService;
 use App\Services\DeliveryMethodService;
@@ -621,6 +622,7 @@ class AuctioneerController extends Controller
     public function indexMergeShippingRequests()
     {
         $requests = MergeShippingRequest::with(['user', 'items.lot.blImages', 'logisticRecords'])
+            ->where('status', '!=', MergeShippingRequest::STATUS_REMOVED)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -704,19 +706,42 @@ class AuctioneerController extends Controller
 
         $mergeRequest->update($updateData);
 
-        // 如果拒絕合併運費請求，將物品加回用戶的購物車
-        if ($request->status == 2) {
+        // 根據處理結果執行相應操作
+        if ($request->status == 1) {
+            // 核准合併運費請求 - 設置1天後過期的 Job
+
+            if(config('app.env') == 'production') {
+                ExpireMergeShippingRequest::dispatch($mergeRequest->id)->delay(now()->addDay());
+            } else {
+                ExpireMergeShippingRequest::dispatch($mergeRequest->id)->delay(now()->addSeconds(60));
+            }
+
+            CustomClass::sendTemplateNotice($mergeRequest->user_id, 8, 1, $mergeRequest->id, 1); // 通知合併運費已通過
+        } elseif ($request->status == 2) {
+            // 拒絕合併運費請求 - 還原庫存並將物品加回購物車
             $userId = $mergeRequest->user_id;
 
-            // 將每個物品加回購物車
             foreach ($mergeRequest->items as $item) {
+                $lot = $item->lot;
+                if ($lot) {
+                    // 還原庫存
+                    $lot->increment('inventory', $item->quantity);
+
+                    // 如果庫存從0變為有庫存，且商品狀態是下架狀態，則重新上架
+                    if ($lot->fresh()->inventory > 0 && $lot->status == 60) { // 60 是下架狀態
+                        $lot->update(['status' => 61]); // 61 是正常狀態
+                    }
+                }
+
+                // 將物品加回購物車
                 $this->cartService->addToCart($userId, $item->lot_id, $item->quantity);
             }
+            CustomClass::sendTemplateNotice($mergeRequest->user_id, 8, 2, $mergeRequest->id, 1); // 通知合併運費已拒絕
         }
 
         return Response::json(array(
             'success' => true,
-            'message' => $request->status == 2 ? '合併運費請求已拒絕，物品已加回購物車' : '合併運費請求已更新'
+            'message' => $request->status == 2 ? '合併運費請求已拒絕，庫存已還原，物品已加回購物車' : '合併運費請求已更新'
         ), 200);
     }
 }

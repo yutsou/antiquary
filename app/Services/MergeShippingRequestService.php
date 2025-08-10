@@ -9,6 +9,7 @@ class MergeShippingRequestService extends MergeShippingRequestRepository
 {
     public function getMergeShippingRequestCount()
     {
-        return MergeShippingRequest::all()->where('status', 0)->count();
+        return MergeShippingRequest::where('status', MergeShippingRequest::STATUS_PENDING)
+            ->count();
     }
 }
