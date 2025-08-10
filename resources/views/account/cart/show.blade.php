@@ -67,7 +67,7 @@
                                                             <img src="{{ $item->lot->blImages->first()->url }}" alt="" style="height: 100px; object-fit: cover;">
                                                         </div>
                                                         <div class="uk-card-body">
-                                                            <h6 class="uk-card-title">{{ $item->lot->name }}</h6>
+                                                            <h6 class="uk-card-title"><a href="{{ route('mart.products.show', $item->lot->id) }}" class="custom-link">{{ $item->lot->name }}</a></h6>
                                                             <p class="uk-text-small">數量: {{ $item->quantity }}</p>
                                                             @if($request->status == 0)
                                                             <p class="uk-text-small">運費: NT${{ number_format($item->original_shipping_fee) }}</p>

@@ -78,7 +78,8 @@
                         <thead>
                         <tr>
                             <th class="uk-table-expand">物品</th>
-                            <th class="uk-table-expand">得標價格</th>
+                            <th class="uk-table-expand">自訂編號</th>
+                            <th class="uk-table-expand">價格</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -88,6 +89,7 @@
                                     <td><a href="{{ route("mart.lots.show", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
                                 @else
                                     <td><a href="{{ route("auctioneer.products.edit", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
+                                    <td>{{ $orderItem->lot->custom_id }}</td>
                                 @endif
                                 <td>NT${{ number_format($orderItem->lot->current_bid) }}</td>
                             </tr>

@@ -59,7 +59,8 @@
                                                         <img src="{{ $item->lot->blImages->first()->url }}" alt="" style="height: 80px; object-fit: cover;">
                                                     </div>
                                                     <div class="uk-card-body">
-                                                        <h6 class="uk-card-title uk-text-small">{{ $item->lot->name }}</h6>
+                                                        <h6 class="uk-card-title uk-text-small"><a href="{{ route('auctioneer.products.edit', $item->lot->id) }}" class="custom-link">{{ $item->lot->name }}</a></h6>
+                                                        <p class="uk-text-small">自訂編號: {{ $item->lot->custom_id }}</p>
                                                         <p class="uk-text-small">數量: {{ $item->quantity }}</p>
                                                     </div>
                                                 </div>

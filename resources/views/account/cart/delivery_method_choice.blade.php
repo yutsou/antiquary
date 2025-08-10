@@ -64,7 +64,7 @@
                                     </div>
                                     <div class="uk-width-expand">
                                         <div class="uk-card-body" style="padding: 20px 20px">
-                                            <h3 class="uk-card-title" style="margin: 0 0 10px 0">{{ $lot->name }}</h3>
+                                            <h3 class="uk-card-title" style="margin: 0 0 10px 0"><a href="{{ route('mart.products.show', $lot->id) }}" class="custom-link">{{ $lot->name }}</a></h3>
                                             <p>數量: {{ $lot->cart_quantity }} | 小計: NT${{ number_format($lot->subtotal) }}</p>
                                         </div>
                                     </div>
