@@ -161,7 +161,7 @@
                     <!-- Mobile Category Slider -->
             <div class="uk-hidden@m">
                         <div class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slider="center: true">
-                    <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 45" uk-grid>
+                    <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 75" uk-grid>
                         @foreach($categoryData['lots'] as $product)
                             <li class="uk-width-5-6">
                                         <div class="mobile-card product-card-click" productId="{{ $product->id }}">
@@ -889,7 +889,21 @@
 
         /* Animation Classes */
         .fade-in {
-            animation: fadeIn 0.8s ease-in-out;
+            animation: fadeIn 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 2.0s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .scale-in {
+            animation: scaleIn 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        /* Ensure elements stay visible after animation */
+        .animated {
+            opacity: 1 !important;
+            transform: none !important;
         }
 
         @keyframes fadeIn {
@@ -900,6 +914,28 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
             }
         }
 
@@ -938,25 +974,6 @@
 @push('scripts')
     <script>
         $(function () {
-            // Add animation classes to elements when they come into view
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('fade-in');
-                    }
-                });
-            }, observerOptions);
-
-            // Observe all cards and sections
-            document.querySelectorAll('.modern-card, .mobile-card, .section-header').forEach(el => {
-                observer.observe(el);
-            });
-
             // Click handlers
             $('.auction-card-click').on('click', function() {
                 let auctionId = $(this).attr('auctionId');
@@ -973,15 +990,14 @@
                 window.location.assign('/m-categories/'+ mainCategoryId);
             });
 
-            // Add hover sound effect (optional)
+            // Optional hover state toggle (no animations)
             $('.modern-card, .mobile-card').on('mouseenter', function() {
-                // You can add a subtle sound effect here if desired
                 $(this).addClass('card-hover');
             }).on('mouseleave', function() {
                 $(this).removeClass('card-hover');
             });
 
-            // Smooth scroll for navigation
+            // Smooth scroll for in-page anchors (no reveal animations)
             $('a[href^="#"]').on('click', function(e) {
                 e.preventDefault();
                 const target = $(this.getAttribute('href'));
