@@ -155,7 +155,7 @@ class MartController extends Controller
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
         $lots = $sCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
-        return CustomClass::viewWithTitle(view('mart.lots.index')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
+        return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
     }
 
     public function showAbout()

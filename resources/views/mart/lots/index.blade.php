@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="uk-margin uk-text-small">
-        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('mart.m_categories.show', $mCategory->id) }}" class="custom-color-1 custom-link-mute">{{ $mCategory->name }}</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
+        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
     </div>
     <div class="uk-flex uk-flex-center">
         <div class="uk-width-1-1">
