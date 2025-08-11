@@ -90,16 +90,6 @@
                             @endguest
                             @auth
                                 <ul class="uk-navbar-nav">
-                                    <li>
-                                        <a href="{{ route('account.cart.show') }}">
-                                            <div id="cart-status" class="google-icon">
-                                                <span class="material-symbols-outlined" uk-tooltip="title: 購物車; pos: top-left">shopping_cart</span>
-                                                @if(Auth::user()->cart_count > 0)
-                                                    <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="cart-count">{{ Auth::user()->cart_count }}</span>
-                                                @endif
-                                            </div>
-                                        </a>
-                                    </li>
                                     <li><a href="{{ route('account.unread_notices.index') }}">
                                             @if(Auth::user()->unreadNotices()->count() !== 0)
                                                 <div id="notification-status" class="google-icon-fill">
@@ -112,6 +102,16 @@
                                                 </div>
                                             @endif
                                         </a></li>
+                                        <li>
+                                            <a href="{{ route('account.cart.show') }}">
+                                                <div id="cart-status" class="google-icon">
+                                                    <span class="material-symbols-outlined" uk-tooltip="title: 購物車; pos: top-left">shopping_cart</span>
+                                                    @if(Auth::user()->cart_count > 0)
+                                                        <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="cart-count">{{ Auth::user()->cart_count }}</span>
+                                                    @endif
+                                                </div>
+                                            </a>
+                                        </li>
                                 </ul>
                                 <ul class="uk-navbar-nav">
                                     <li>
@@ -156,16 +156,6 @@
                         @auth
                             <ul class="uk-navbar-nav">
                                 <li>
-                                    <a href="{{ route('account.cart.show') }}">
-                                        <div id="cart-status" class="google-icon">
-                                            <span class="material-symbols-outlined" uk-tooltip="title: 購物車; pos: top-left">shopping_cart</span>
-                                            @if(Auth::user()->cart_count > 0)
-                                                <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="cart-count">{{ Auth::user()->cart_count }}</span>
-                                            @endif
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
                                     <a href="{{ route('account.unread_notices.index') }}">
                                         @if(Auth::user()->unreadNotices()->count() !== 0)
                                             <div id="notification-status" class="google-icon-fill">
@@ -184,6 +174,16 @@
                                         <span class="google-icon">
                                             <span class="material-symbols-outlined uk-text-middle">favorite</span>
                                         </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('account.cart.show') }}">
+                                        <div id="cart-status" class="google-icon">
+                                            <span class="material-symbols-outlined" uk-tooltip="title: 購物車; pos: top-left">shopping_cart</span>
+                                            @if(Auth::user()->cart_count > 0)
+                                                <span class="uk-badge uk-text-middle" style="background-color: #d62828;" id="cart-count">{{ Auth::user()->cart_count }}</span>
+                                            @endif
+                                        </div>
                                     </a>
                                 </li>
                             </ul>
