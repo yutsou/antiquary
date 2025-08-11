@@ -122,7 +122,6 @@
                                                 <div class="card-content">
                                                     <h3 class="card-title">{{ $product->name ?? '無名稱' }}</h3>
                                                     <div class="card-price">
-                                                        <span class="price-label">起標價</span>
                                                         <span class="price-value">NT${{ number_format($product->reserve_price) }}</span>
                                             </div>
                                         </div>
