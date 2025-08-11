@@ -65,11 +65,11 @@
 @section('content')
     @if($productsByCategory && count($productsByCategory) > 0)
         @foreach($productsByCategory as $categoryData)
-            <h3 class="uk-card-title">{{ $categoryData['category']->name }}</h3>
+            <h3>{{ $categoryData['category']->name }}</h3>
             <div class="uk-visible@m">
                 <div class="uk-slider-container-offset" uk-slider="finite: true; sets: true;">
                     <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1">
-                        <ul class="uk-slider-items uk-child-width-1-4@s uk-grid" >
+                        <ul class="uk-slider-items uk-child-width-1-4@s uk-grid-match" uk-grid>
                             @foreach($categoryData['lots'] as $product)
                                 <li>
                                     <div class="uk-card uk-card-default uk-card-hover product-card-click" productId="{{ $product->id }}">
@@ -109,7 +109,7 @@
             </div>
             <div class="uk-hidden@m">
                 <div class="uk-position-relative uk-visible-toggle uk-light" tabindex="-1" uk-slider="center: true">
-                    <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 30">
+                    <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 45" uk-grid>
                         @foreach($categoryData['lots'] as $product)
                             <li class="uk-width-5-6">
                                 <div >
