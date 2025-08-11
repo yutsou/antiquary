@@ -14,12 +14,11 @@
                 document.addEventListener('DOMContentLoaded', setVH, { once: true });
             } else { setVH(); }
             window.addEventListener('load', setVH, { once: true });
-            // Update on resize, orientation and when the browser UI shows/hides
-            window.addEventListener('resize', setVH);
-            window.addEventListener('orientationchange', setVH);
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', setVH);
-            }
+            // Update only on orientationchange (debounced), not on resize or visualViewport
+            window.addEventListener('orientationchange', function(){
+                // debounce to let the browser settle after rotation
+                setTimeout(setVH, 200);
+            });
         })();
     </script>
 @endpush
@@ -1010,13 +1009,13 @@
             .uk-slider-items > li .mobile-card:hover { z-index: 2; }
         }
 
-        /* Ensure mobile hero slides fit the visible viewport height immediately */
+        /* Ensure mobile hero slides use a stable viewport height to prevent gap growth on scroll */
         .mobile-hero .uk-slideshow-items > li {
-            height: calc(var(--vh) * 100); /* fallback using JS-computed vh */
+            height: 100vh; /* fallback for browsers without svh */
         }
         @supports (height: 100svh) {
             .mobile-hero .uk-slideshow-items > li {
-                height: 100svh; /* modern browsers use dynamic viewport that ignores URL bar */
+                height: 100svh; /* small viewport height is stable as the URL bar shows/hides */
             }
         }
     </style>
