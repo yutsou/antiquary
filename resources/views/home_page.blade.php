@@ -3,17 +3,24 @@
 @inject('carbonPresenter', 'App\Presenters\CarbonPresenter')
 @push('scripts')
     <script>
-        // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
-        let vh = window.innerHeight * 0.01;
-        // Then we set the value in the --vh custom property to the root of the document
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-        // We listen to the resize event
-        window.addEventListener('resize', () => {
-            // We execute the same script as before
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        });
+        (function(){
+            function setVH(){
+                var h = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+                var vh = h * 0.01;
+                document.documentElement.style.setProperty('--vh', vh + 'px');
+            }
+            // Run on DOM ready and also after full load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setVH, { once: true });
+            } else { setVH(); }
+            window.addEventListener('load', setVH, { once: true });
+            // Update on resize, orientation and when the browser UI shows/hides
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', setVH);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', setVH);
+            }
+        })();
     </script>
 @endpush
 
@@ -873,7 +880,7 @@
 
             .category-section,
             .auction-section {
-                margin-bottom: 40px;
+                margin-bottom: 80px;
             }
 
             .card-content {
@@ -967,7 +974,36 @@
                 opacity: 1;
                 transform: translateX(0);
             }
-}
+        }
+
+        /* Allow mobile card shadows to render outside slider bounds */
+        @media (max-width: 959px) {
+            /* UIkit creates a .uk-slider-container around .uk-slider-items with overflow:hidden by default */
+            .uk-slider-container {
+                overflow-x: clip; /* prevent horizontal scroll caused by grid negative margins and wide slides */
+                overflow-y: visible; /* keep shadows and overlays visible vertically */
+            }
+            .uk-slider-items { overflow: visible; }
+            .uk-slider-items.uk-grid {
+                margin-left: 0 !important; /* avoid extra width from grid negative margin */
+                padding-left: 10px; /* keep first card from touching the edge */
+                padding-right: 10px; /* keep last card from touching the edge */
+            }
+            .uk-slider-items > li { overflow: visible; padding-bottom: 16px; }
+            /* Ensure the card paints above neighbors so the shadow isn't hidden */
+            .uk-slider-items > li .mobile-card { position: relative; z-index: 1; }
+            .uk-slider-items > li .mobile-card:hover { z-index: 2; }
+        }
+
+        /* Ensure mobile hero slides fit the visible viewport height immediately */
+        .mobile-hero .uk-slideshow-items > li {
+            height: calc(var(--vh) * 100); /* fallback using JS-computed vh */
+        }
+        @supports (height: 100svh) {
+            .mobile-hero .uk-slideshow-items > li {
+                height: 100svh; /* modern browsers use dynamic viewport that ignores URL bar */
+            }
+        }
     </style>
 @endpush
 
