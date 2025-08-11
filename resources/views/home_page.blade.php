@@ -191,6 +191,21 @@
                                 </div>
                             </li>
                         @endforeach
+                        <li class="uk-width-5-6">
+                            <div class="mobile-card main-category-card-click" main-categoryId="{{ $categoryData['category']->id }}">
+                                <div class="mobile-card-image-container">
+                                    <img src="{{ $categoryData['category']->image->url ?? '/images/web/common/no-picture.jpg' }}" alt="{{ $categoryData['category']->name }}" class="mobile-card-image">
+                                    <div class="mobile-card-overlay">
+                                        <div class="mobile-overlay-content">
+                                            <span class="material-symbols-outlined mobile-overlay-icon">category</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mobile-card-content">
+                                    <h3 class="mobile-card-title">更多{{ $categoryData['category']->name }}的商品</h3>
+                                </div>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -9,6 +9,19 @@
         <div class="uk-width-1-1">
             <div class="uk-margin-medium">
                 <h1 class="uk-heading-medium">{{ $head }}</h1>
+                <style>
+                  /* Mobile-first card improvements */
+                  .cart-card .uk-card-body { padding: 16px; }
+                  .ratio-box { position: relative; width: 100%; padding-top: 75%; background: #f7f7f7; border-radius: 8px; overflow: hidden; }
+                  .ratio-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+                  .cart-title { margin: 0; font-size: 1.2rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                  .cart-meta { font-size: 13px; }
+                  .cart-actions { gap: 8px; }
+                  @media (min-width: 640px) { /* @s breakpoint */
+                    .cart-card .uk-card-body { padding: 20px; }
+                    .cart-title { font-size: 1.125rem; }
+                  }
+                </style>
             </div>
 
             <!-- 錯誤訊息顯示區塊 -->
@@ -107,98 +120,83 @@
                     @csrf
                     @foreach($cartItems as $lot)
                         @if($lot->type === 1)
-                            <div class="uk-card uk-card-default uk-grid-collapse uk-margin" uk-grid>
-                                <div class="uk-card-media-left uk-cover-container uk-width-1-5">
-                                    <img src="{{ $lot->blImages->first()->url }}" alt="" uk-cover>
+                            <div class="uk-card uk-card-default uk-margin cart-card">
+                              <div class="uk-grid-small uk-child-width-1-1 uk-child-width-1-3@s uk-grid-match uk-flex-middle" uk-grid>
+                                <div>
+                                  <div class="uk-card-media-top">
+                                    <div class="ratio-box">
+                                      <img src="{{ $lot->blImages->first()->url }}" alt="" loading="lazy" decoding="async">
+                                    </div>
+                                  </div>
                                 </div>
                                 <div class="uk-width-expand">
-                                    <div class="uk-card-body" style="padding: 20px 20px">
-                                        <div class="uk-margin uk-text-right">
-                                            <button
-                                                type="button"
-                                                class="uk-button uk-button-small custom-button-2 remove-cart-item"
-                                                data-lot-id="{{ $lot->id }}"
-                                            >
-                                                移除
-                                            </button>
-                                        </div>
-                                        <hr>
-                                        <h3 class="uk-card-title" style="margin: 0 0 0 0"><a href="{{ route('mart.products.show', $lot) }}" class="custom-link">{{ $lot->name }}</a></h3>
-                                        <hr>
-                                        <div class="uk-margin uk-text-right">
-                                            <label for="cart-quantity-{{ $lot->id }}" class="uk-margin-small-right">數量:</label>
-                                            <input
-                                                type="number"
-                                                id="cart-quantity-{{ $lot->id }}"
-                                                name="cart_quantities[{{ $lot->id }}]"
-                                                class="uk-input cart-quantity-input"
-                                                style="width: 80px; display: inline-block;"
-                                                min="1"
-                                                value="{{ $lot->cart_quantity }}"
-                                                data-lot-id="{{ $lot->id }}"
-                                            />
-                                            <span class="uk-margin-small-left">| 小計: NT${{ number_format($lot->subtotal) }}</span>
-                                            <label class="uk-margin-small-left">
-                                                <input
-                                                    type="checkbox"
-                                                    class="uk-checkbox cart-item-checkbox"
-                                                    name="selected_lots[]"
-                                                    value="{{ $lot->id }}"
-                                                > 選擇本商品
-                                            </label>
-
-                                        </div>
+                                  <div class="uk-card-body">
+                                    <div class="uk-margin uk-text-right@s uk-text-left">
+                                      <button type="button" class="uk-button uk-button-small custom-button-2 remove-cart-item" data-lot-id="{{ $lot->id }}">移除</button>
                                     </div>
+                                    <h3 class="cart-title"><a href="{{ route('mart.products.show', $lot) }}" class="custom-link">{{ $lot->name }}</a></h3>
+                                    <div class="uk-margin-small cart-meta uk-text-right@s uk-text-left">
+                                      <label for="cart-quantity-{{ $lot->id }}" class="uk-margin-small-right">數量:</label>
+                                      <input type="number" id="cart-quantity-{{ $lot->id }}" name="cart_quantities[{{ $lot->id }}]" class="uk-input cart-quantity-input" style="width: 80px; display: inline-block;" min="1" value="{{ $lot->cart_quantity }}" data-lot-id="{{ $lot->id }}" />
+                                      <span class="uk-margin-small-left">| 小計: NT${{ number_format($lot->subtotal) }}</span>
+                                      <label class="uk-margin-small-left">
+                                        <input type="checkbox" class="uk-checkbox cart-item-checkbox" name="selected_lots[]" value="{{ $lot->id }}"> 選擇本商品
+                                      </label>
+                                    </div>
+                                  </div>
                                 </div>
+                              </div>
                             </div>
                         @elseif($lot->type === 0)
-                            <div class="uk-card uk-card-default uk-grid-collapse uk-margin" uk-grid>
-                                <div class="uk-card-media-left uk-cover-container uk-width-1-5">
-                                    <img src="{{ $lot->blImages->first()->url }}" alt="" uk-cover>
+                            <div class="uk-card uk-card-default uk-margin cart-card">
+                              <div class="uk-grid-small uk-child-width-1-1 uk-child-width-1-3@s uk-grid-match uk-flex-middle" uk-grid>
+                                <div>
+                                  <div class="uk-card-media-top">
+                                    <div class="ratio-box">
+                                      <img src="{{ $lot->blImages->first()->url }}" alt="" loading="lazy" decoding="async">
+                                    </div>
+                                  </div>
                                 </div>
                                 <div class="uk-width-expand">
-                                    <div class="uk-card-body" style="padding: 20px 20px">
-                                        <div class="uk-margin uk-text-right">
-                                            <span class="uk-label uk-label-warning">競標商品</span>
-                                        </div>
-                                        <hr>
-                                        <h3 class="uk-card-title" style="margin: 0 0 0 0"><a href="{{ route('mart.lots.show', $lot) }}" class="custom-link">{{ $lot->name }}</a></h3>
-                                        <hr>
-                                        <div class="uk-margin uk-text-right">
-                                            <span class="uk-margin-small-right">數量: {{ $lot->cart_quantity }}</span>
-                                            <span class="uk-margin-small-left">| 單價: NT${{ number_format($lot->current_bid) }}</span>
-                                            <span class="uk-margin-small-left">| 小計: NT${{ number_format($lot->subtotal) }}</span>
-                                            <label class="uk-margin-small-left">
-                                                <input
-                                                    type="checkbox"
-                                                    class="uk-checkbox cart-item-checkbox"
-                                                    name="selected_lots[]"
-                                                    value="{{ $lot->id }}"
-                                                > 選擇本商品
-                                            </label>
-                                        </div>
+                                  <div class="uk-card-body">
+                                    <div class="uk-margin uk-text-right@s uk-text-left">
+                                      <span class="uk-label uk-label-warning">競標商品</span>
                                     </div>
+                                    <h3 class="cart-title"><a href="{{ route('mart.lots.show', $lot) }}" class="custom-link">{{ $lot->name }}</a></h3>
+                                    <div class="uk-margin-small cart-meta uk-text-right@s uk-text-left">
+                                      <span class="uk-margin-small-right">數量: {{ $lot->cart_quantity }}</span>
+                                      <span class="uk-margin-small-left">| 單價: NT${{ number_format($lot->current_bid) }}</span>
+                                      <span class="uk-margin-small-left">| 小計: NT${{ number_format($lot->subtotal) }}</span>
+                                      <label class="uk-margin-small-left">
+                                        <input type="checkbox" class="uk-checkbox cart-item-checkbox" name="selected_lots[]" value="{{ $lot->id }}"> 選擇本商品
+                                      </label>
+                                    </div>
+                                  </div>
                                 </div>
+                              </div>
                             </div>
                         @else
-                            <div class="uk-card uk-card-default uk-grid-collapse uk-margin" uk-grid>
-                                <div class="uk-card-media-left uk-cover-container uk-width-1-5">
-                                    <img src="{{ $lot->blImages->first()->url }}" alt="" uk-cover>
+                            <div class="uk-card uk-card-default uk-margin cart-card">
+                              <div class="uk-grid-small uk-child-width-1-1 uk-child-width-1-3@s uk-grid-match uk-flex-middle" uk-grid>
+                                <div>
+                                  <div class="uk-card-media-top">
+                                    <div class="ratio-box">
+                                      <img src="{{ $lot->blImages->first()->url }}" alt="" loading="lazy" decoding="async">
+                                    </div>
+                                  </div>
                                 </div>
                                 <div class="uk-width-expand">
-                                    <div class="uk-card-body" style="padding: 20px 20px">
-                                        <div class="uk-margin uk-text-right">
-                                            <p>{!! $carbonPresenter->lotPresent($lot->id, $lot->auction_end_at) !!}</p>
-                                        </div>
-                                        <hr>
-                                        <h3 class="uk-card-title" style="margin: 0 0 0 0">{{ $lot->name }}</h3>
-                                        <hr>
-                                        <div class="uk-margin uk-text-right">
-                                            <a href="{{ route('mart.lots.show', ['lotId'=>$lot->id]) }}"
-                                            class="uk-button custom-button-1">前往競標</a>
-                                        </div>
+                                  <div class="uk-card-body">
+                                    <div class="uk-margin uk-text-right@s uk-text-left">
+                                      <p>{!! $carbonPresenter->lotPresent($lot->id, $lot->auction_end_at) !!}</p>
                                     </div>
+                                    <h3 class="cart-title">{{ $lot->name }}</h3>
+                                    <div class="uk-margin-small uk-text-right@s uk-text-left">
+                                      <a href="{{ route('mart.lots.show', ['lotId'=>$lot->id]) }}" class="uk-button custom-button-1">前往競標</a>
+                                    </div>
+                                  </div>
                                 </div>
+                              </div>
                             </div>
                         @endif
                     @endforeach
