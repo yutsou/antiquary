@@ -1,10 +1,10 @@
 @extends('layouts.member')
 @inject('carbonPresenter', 'App\Presenters\CarbonPresenter')
+
 @section('content')
     <div class="uk-margin uk-text-small">
-        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
+        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
     </div>
-
     <div class="uk-flex uk-flex-center">
         <div class="uk-width-1-1">
             <div class="uk-margin-medium">
@@ -12,18 +12,19 @@
             </div>
 
             <!-- 拍賣商品區塊 -->
-            @if($favorites->where('auction_end_at', '!=', null)->count() > 0)
+            @if($lots->where('auction_end_at', '!=', null)->count() > 0)
                 <h3 class="uk-card-title">拍賣商品</h3>
                 <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
-                    @foreach($favorites->where('auction_end_at', '!=', null) as $singleLot)
+                    @foreach($lots->where('auction_end_at', '!=', null) as $singleLot)
                         <div>
-                            <div class="uk-card uk-card-default uk-card-hover custom-card-click" lotId="{{ $singleLot->id }}">
+                            <div class="uk-card uk-card-default uk-card-hover bidding-card-click" lotId="{{ $singleLot->id }}">
                                 <div class="uk-card-media-top">
                                     <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
                                          style="background-image: url({{ $singleLot->blImages->first()->url }});">
                                     </div>
                                 </div>
                                 <div class="uk-card-body">
+
                                     <div class="uk-flex uk-flex-right">
                                         @include('mart.components.favorite-inline', $singleLot)
                                     </div>
@@ -37,25 +38,26 @@
                 </div>
             @endif
 
-            <!-- Antiquary 精選區塊 -->
-            @if($favorites->where('auction_end_at', null)->count() > 0)
+            <!-- 商店直賣商品區塊 -->
+            @if($lots->where('auction_end_at', null)->count() > 0)
                 <h3 class="uk-card-title">Antiquary 精選</h3>
                 <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
-                    @foreach($favorites->where('auction_end_at', null) as $singleLot)
+                    @foreach($lots->where('auction_end_at', null) as $singleLot)
                         <div>
-                            <div class="uk-card uk-card-default uk-card-hover custom-card-click" lotId="{{ $singleLot->id }}">
+                            <div class="uk-card uk-card-default uk-card-hover antiquary-card-click" lotId="{{ $singleLot->id }}">
                                 <div class="uk-card-media-top">
                                     <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
                                          style="background-image: url({{ $singleLot->blImages->first()->url }});">
                                     </div>
                                 </div>
                                 <div class="uk-card-body">
+
                                     <div class="uk-flex uk-flex-right">
                                         @include('mart.components.favorite-inline', $singleLot)
                                     </div>
-                                    <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
+                                    <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
                                     <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-                                    <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
+
                                 </div>
                             </div>
                         </div>
@@ -73,10 +75,9 @@
 @push('scripts')
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
-
     <script>
         $(function () {
-            $(".custom-card-click").click(function(e){
+            $(".bidding-card-click").click(function(e){
                 // 如果點擊的是愛心元素或其子元素，不執行卡片點擊事件
                 if ($(e.target).closest('.favorite, .un-login-favorite').length > 0) {
                     return;
@@ -84,6 +85,19 @@
 
                 let lotId = $(this).attr('lotId');
                 let url = '{{ route("mart.lots.show", ":id") }}';
+                url = url.replace(':id', lotId);
+                window.location.assign(url);
+            });
+        });
+        $(function () {
+            $(".antiquary-card-click").click(function(e){
+                // 如果點擊的是愛心元素或其子元素，不執行卡片點擊事件
+                if ($(e.target).closest('.favorite, .un-login-favorite').length > 0) {
+                    return;
+                }
+
+                let lotId = $(this).attr('lotId');
+                let url = '{{ route("mart.products.show", ":id") }}';
                 url = url.replace(':id', lotId);
                 window.location.assign(url);
             });
