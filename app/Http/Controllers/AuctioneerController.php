@@ -599,7 +599,7 @@ class AuctioneerController extends Controller
         $this->deliveryMethodService->syncDeliveryMethods($request, $lot);#同步分類
 
         return Response::json(array(
-            'success' => back()->with('notification', '修改成功'),
+            'success' => route('auctioneer.products.edit', $lotId),
             'errors' => false
         ), 200);
     }
