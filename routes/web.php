@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MartController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Middleware\ChatOwnership;
 use App\Http\Middleware\EnsureMemberIsValid;
 use App\Http\Middleware\EnsureSellerIsValid;
@@ -276,4 +277,4 @@ Route::get('/privacy-policy', [MartController::class, 'showPrivacyPolicy'])->nam
 Route::get('/terms', [MartController::class, 'showTerms'])->name('mart.terms.show');
 Route::get('/bidding-rules', [MartController::class, 'showBiddingRules'])->name('mart.bidding-rules.show');
 Route::get('/return-and-exchange-policy', [MartController::class, 'showReturnAndExchangePolicy'])->name('mart.return-and-exchange-policy.show');
-
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);

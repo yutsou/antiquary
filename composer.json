@@ -18,6 +18,7 @@
         "pda/pheanstalk": "^4.0",
         "predis/predis": "^2.0",
         "pusher/pusher-php-server": "^7.0",
+        "spatie/laravel-sitemap": "^6.4",
         "yajra/laravel-datatables-oracle": "^9.19"
     },
     "require-dev": {
