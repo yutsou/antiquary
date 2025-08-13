@@ -15,7 +15,7 @@ class LotObserver
      */
     public function created(Lot $lot)
     {
-        $this->regenerateSitemap();
+        $this->logSitemapUpdate('created', $lot);
     }
 
     /**
@@ -26,14 +26,14 @@ class LotObserver
      */
     public function updated(Lot $lot)
     {
-        // 只有當狀態改變為已發布狀態時才重新生成 sitemap
+        // 只有當狀態改變為已發布狀態時才記錄
         if (in_array($lot->status, [20, 21, 61]) && $lot->wasChanged('status')) {
-            $this->regenerateSitemap();
+            $this->logSitemapUpdate('status_updated', $lot);
         }
 
-        // 如果拍賣開始時間改變，也重新生成 sitemap
+        // 如果拍賣開始時間改變，也記錄
         if ($lot->wasChanged('auction_start_at')) {
-            $this->regenerateSitemap();
+            $this->logSitemapUpdate('auction_start_updated', $lot);
         }
     }
 
@@ -45,7 +45,7 @@ class LotObserver
      */
     public function deleted(Lot $lot)
     {
-        $this->regenerateSitemap();
+        $this->logSitemapUpdate('deleted', $lot);
     }
 
     /**
@@ -56,7 +56,7 @@ class LotObserver
      */
     public function restored(Lot $lot)
     {
-        $this->regenerateSitemap();
+        $this->logSitemapUpdate('restored', $lot);
     }
 
     /**
@@ -67,19 +67,21 @@ class LotObserver
      */
     public function forceDeleted(Lot $lot)
     {
-        $this->regenerateSitemap();
+        $this->logSitemapUpdate('force_deleted', $lot);
     }
 
     /**
-     * 重新生成 sitemap
+     * 記錄 sitemap 更新日誌
      */
-    private function regenerateSitemap()
+    private function logSitemapUpdate($action, $lot)
     {
         try {
-            Artisan::call('sitemap:generate');
+            \Log::info("Sitemap needs update: Lot {$lot->id} {$action}. Sitemap will be served dynamically.");
+
+            // 可選：如果你想要自動生成靜態文件，取消下面的註釋
+            // Artisan::call('sitemap:generate', ['--static' => true]);
         } catch (\Exception $e) {
-            // 記錄錯誤但不中斷流程
-            \Log::error('Failed to regenerate sitemap: ' . $e->getMessage());
+            \Log::error('Failed to log sitemap update: ' . $e->getMessage());
         }
     }
 }

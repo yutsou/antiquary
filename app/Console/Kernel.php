@@ -17,12 +17,13 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
 
-        // 每天凌晨 2 點生成 sitemap
+        // 每天凌晨 2 點檢查 sitemap（動態模式）
         $schedule->command('sitemap:generate')
                 ->daily()
                 ->at('02:00')
                 ->withoutOverlapping()
-                ->runInBackground();
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/sitemap.log'));
     }
 
     /**

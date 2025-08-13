@@ -13,7 +13,7 @@ class GenerateSitemap extends Command
      *
      * @var string
      */
-    protected $signature = 'sitemap:generate';
+    protected $signature = 'sitemap:generate {--static : Generate static sitemap.xml file}';
 
     /**
      * The console command description.
@@ -33,19 +33,24 @@ class GenerateSitemap extends Command
 
         // 獲取所有已發布的拍賣品
         $lots = Lot::whereIn('status', [20, 21, 61])
-                  ->whereNotNull('auction_start_at')
                   ->latest()
                   ->get();
 
         // 生成 sitemap 內容
         $content = view('sitemap', compact('lots'))->render();
 
-        // 保存到 public 目錄
-        $path = public_path('sitemap.xml');
-        file_put_contents($path, $content);
+        if ($this->option('static')) {
+            // 保存到 public 目錄（靜態文件）
+            $path = public_path('sitemap.xml');
+            file_put_contents($path, $content);
+            $this->info('Static sitemap generated successfully at: ' . $path);
+        } else {
+            // 只顯示統計信息，不生成靜態文件
+            $this->info('Sitemap content generated (dynamic mode)');
+        }
 
-        $this->info('Sitemap generated successfully at: ' . $path);
         $this->info('Total lots included: ' . $lots->count());
+        $this->info('Sitemap will be served dynamically via SitemapController');
 
         return Command::SUCCESS;
     }
