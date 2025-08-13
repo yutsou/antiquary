@@ -76,13 +76,15 @@ class MartController extends Controller
         $banners = $this->bannerService->getAllBanners()->sortBy('index');
         $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
         $productsByCategory = $this->lotService->getPublishedLotsByMainCategories();
+        $description = 'Antiquary 是一個綜合古董舊物線上購物平台，我們出售古傢俬、燈飾、瓷器、水晶、藝術品、設計原創物品、裝飾品、收藏品、珍貴物品的平台。';
 
         return view('home_page')
             ->with('auctions', $auctions)
             ->with('head', 'Home Page')
             ->with('title', 'Antiquary')
             ->with('banners', $banners)
-            ->with('productsByCategory', $productsByCategory);
+            ->with('productsByCategory', $productsByCategory)
+            ->with('description', $description);
     }
 
     public function payEcpayReceive(Request $request)
@@ -138,8 +140,9 @@ class MartController extends Controller
     {
         $lot = $this->lotService->getLot($lotId);
         $categories = $this->categoryService->getCategories($lot);
+        $description = $lot->description;
 
-        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1]), $lot->name);
+        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1])->with('description', $description), $lot->name);
     }
 
     public function showMCategory($mCategoryId)
