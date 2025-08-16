@@ -98,11 +98,16 @@
                     <div class="uk-card uk-card-default uk-card-body">
                         <h3 class="uk-card-title">請選擇付款方式</h3>
                         <ul class="uk-list">
-
                             <li>
                                 <label>
                                     <input class="uk-radio" type="radio" name="paymentMethod" value="1" required>
                                     ATM轉帳
+                                </label>
+                            </li>
+                            <li>
+                                <label>
+                                    <input class="uk-radio" type="radio" name="paymentMethod" value="2" required>
+                                    LINE Pay
                                 </label>
                             </li>
                         </ul>

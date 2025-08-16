@@ -1,5 +1,5 @@
 @extends('layouts.member')
-
+@inject('methodPresenter', 'App\Presenters\MethodPresenter')
 @section('content')
     <div class="uk-margin uk-text-small">
         <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.cart.show') }}" class="custom-color-1 custom-link-mute">購物車</a>
@@ -39,7 +39,7 @@
                 <input type="hidden" name="country" value="{{ $country ?? null}}">
                 <input type="hidden" name="country_selector_code" value="{{ $countrySelectorCode ?? null}}">
                 <input type="hidden" name="cross_board_address" value="{{ $crossBoardAddress ?? null}}">
-                <input type="hidden" name="payment_method" value="{{ $paymentMethod }}">
+                <input type="hidden" name="paymentMethod" value="{{ $paymentMethod }}">
                 <div class="uk-margin">
                     <div class="uk-child-width-expand uk-grid-collapse" uk-grid>
                         <div>
@@ -76,9 +76,9 @@
                 <div class="uk-margin">
                     <div class="uk-card uk-card-default uk-card-body">
                         <h3 class="uk-card-title">運送與付款方式</h3>
-                        <p>運送方式：{{ $mergeRequest->delivery_method_text }}</p>
+                        <p>運送方式：{{ $methodPresenter->transferDeliveryMethod($mergeRequest->delivery_method) }}</p>
                         <p>運費：NT${{ number_format($deliveryCost) }}</p>
-                        <p>付款方式：@if($paymentMethod == 0)信用卡付款@elseif($paymentMethod == 1)ATM轉帳@endif</p>
+                        <p>付款方式：{{ $methodPresenter->transferPaymentMethod($paymentMethod) }}</p>
                     </div>
                 </div>
                 <div class="uk-margin">
@@ -107,8 +107,6 @@
                 <div class="uk-margin uk-align-right">
                     <button class="uk-button custom-button-1" type="submit">確認下單</button>
                 </div>
-                <input type="hidden" name="delivery_method" value="{{ $deliveryMethod }}">
-                <input type="hidden" name="delivery_cost" value="{{ $deliveryCost }}">
             </form>
         </div>
     </div>

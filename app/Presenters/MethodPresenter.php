@@ -19,6 +19,7 @@ class MethodPresenter
         return match ((int)$paymentMethod) {
             0 => '信用卡付款',
             1 => 'ATM轉帳',
+            2 => 'LINE Pay',
             default => '未知付款方式'
         };
     }

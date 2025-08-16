@@ -584,7 +584,7 @@ class OrderService extends OrderRepository
             'lot_id' => $mergeRequest->items->first()->lot_id, // 使用第一個商品作為主要商品
             'user_id' => $userId,
             'status' => 10,
-            'payment_method' => intval($requestData['payment_method']),
+            'payment_method' => intval($requestData['paymentMethod']),
             'delivery_method' => intval($requestData['delivery_method']),
             'payment_due_at' => $now->addDays(7),
             'subtotal' => $subtotal,

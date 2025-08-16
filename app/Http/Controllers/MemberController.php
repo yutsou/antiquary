@@ -1402,7 +1402,7 @@ class MemberController extends Controller
         $crossBoardAddress = $request->input('cross_board_address');
 
         if (!isset($paymentMethod) || !isset($deliveryMethod)) {
-            return redirect()->route('account.cart.merge_shipping_checkout', $requestId)->with('error', '請完成所有必要選擇');
+            return redirect()->route('account.cart.merge_shipping.delivery_method.edit', $requestId)->with('error', '請完成所有必要選擇');
         }
 
         // 計算總計
@@ -1454,7 +1454,7 @@ class MemberController extends Controller
             $mergeRequest->update(['status' => MergeShippingRequest::STATUS_COMPLETED]);
 
             // 根據付款方式導向不同頁面
-            $paymentMethod = $request->input('payment_method');
+            $paymentMethod = $request->input('paymentMethod');
 
             if ($paymentMethod == 0) {
                 // 信用卡付款 - 導向付款頁面
@@ -1462,14 +1462,16 @@ class MemberController extends Controller
             } elseif ($paymentMethod == 1) {
                 // ATM轉帳 - 導向ATM付款資訊頁面
                 return redirect()->route('account.atm_pay_info.show', $order->id);
+            } elseif ($paymentMethod == 2) {
+                // LINE Pay - 導向 LINE Pay 付款頁面
+                return redirect($this->lineService->getLinePayLink($order));
             } else {
                 // 預設導向付款頁面
                 return redirect()->route('account.orders.pay', $order->id);
             }
         } catch (\Exception $e) {
             // 處理庫存不足等錯誤
-            dd($e);
-            return redirect()->route('account.cart.merge_shipping_checkout', $requestId)->with('error', $e->getMessage());
+            return redirect()->route('account.cart.merge_shipping.delivery_method.edit', $requestId)->with('error', $e->getMessage());
         }
     }
 
