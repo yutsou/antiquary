@@ -25,10 +25,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\MergeShippingRequest;
 use App\Models\MergeShippingItem;
+use App\Services\LineService;
 
 class MemberController extends Controller
 {
-    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService, $cartService;
+    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService, $cartService, $lineService;
 
     public function __construct(
         CategoryService $categoryService,
@@ -41,7 +42,8 @@ class MemberController extends Controller
         EcpayService $ecpayService,
         BidService $bidService,
         GomypayService $gomypayService,
-        CartService $cartService
+        CartService $cartService,
+        LineService $lineService
     ) {
         $this->categoryService = $categoryService;
         $this->lotService = $lotService;
@@ -54,6 +56,7 @@ class MemberController extends Controller
         $this->bidService = $bidService;
         $this->gomypayService = $gomypayService;
         $this->cartService = $cartService;
+        $this->lineService = $lineService;
     }
 
     public function showDashboard()
@@ -166,10 +169,7 @@ class MemberController extends Controller
     public function pay($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
-        // 進入付款流程時，先將狀態設為 10
-        $this->orderService->updateOrderStatus(10, $order);
-        $this->ecpayService->creditCardPay($order);
-        exit;
+        return redirect($this->lineService->getLinePayLink($order));
     }
 
     public function showAtmPayInfo($orderId) {
@@ -1214,9 +1214,8 @@ class MemberController extends Controller
             } elseif ($paymentMethod == 1) {
                 // ATM轉帳 - 導向ATM付款資訊頁面
                 return redirect()->route('account.atm_pay_info.show', $order->id);
-            } else {
-                // 預設導向付款頁面
-                return redirect()->route('account.orders.pay', $order->id);
+            } elseif($paymentMethod == 2) {
+                return redirect($this->lineService->getLinePayLink($order));
             }
         } catch (\Exception $e) {
             // 處理庫存不足等錯誤
@@ -1541,6 +1540,12 @@ class MemberController extends Controller
         // 使用 MergeShippingRequestRepository 創建 logistic record
         $mergeShippingRequestRepository = app(\App\Repositories\MergeShippingRequestRepository::class);
         return $mergeShippingRequestRepository->createLogisticRecord($input, $requestId);
+    }
+
+    public function requestRefund(Request $request, $orderId)
+    {
+        $order = $this->orderService->getOrder($orderId);
+        $this->orderService->updateOrderStatus(60, $order);
     }
 
 }

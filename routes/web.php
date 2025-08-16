@@ -52,6 +52,8 @@ Route::post('/password-reset-confirm/send', [AuthController::class, 'sendPasswor
 Route::get('/password/reset/{token}', [AuthController::class, 'showPasswordReset'])->name('auth.password_reset.show');
 Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('auth.password.reset');
 
+Route::get('/pay/line/authorize', [MartController::class, 'payLineAuthorize'])->name('mart.pay.line.authorize');
+
 #line bind
 Route::get('/auth/line/generate-verify-code', [AuthController::class, 'generateLineVerifyCode'])->name('auth.line_verify_code.generate');
 Route::get('/auth/line/verify-bind', [AuthController::class, 'showLineVerifyBind'])->name('auth.line.verify_bind');
@@ -104,6 +106,8 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');
     Route::get('/orders/{orderId}/member-chatroom', [AuctioneerController::class, 'indexMemberMessages'])->name('auctioneer.orders.member_chatroom_show');
+
+    Route::post('/orders/{orderId}/confirm-refund', [AuctioneerController::class, 'confirmRefund'])->name('auctioneer.orders.confirm_refund');
 
 
     Route::get('/promotions', [AuctioneerController::class, 'indexPromotions'])->name('auctioneer.promotions.index');
@@ -247,6 +251,7 @@ Route::prefix('account')->middleware(['auth', OrderOwnership::class])->group(fun
     Route::get('/orders/{orderId}/shipping-info', [MemberController::class, 'showShippingInfo'])->name('account.orders.show_shipping_info');
     Route::post('/orders/{orderId}/notice-arrival', [MemberController::class, 'noticeArrival'])->name('account.orders.notice_arrival');
     Route::get('/orders/{orderId}/credit-card-info/check', [MartController::class, 'creditCardInfoCheck'])->name('account.credit_card_info.check');
+    Route::post('/orders/{orderId}/request-refund', [MemberController::class, 'requestRefund'])->name('account.orders.request_refund');
 });
 
 Route::prefix('account')->middleware(['auth', ChatOwnership::class])->group(function () {

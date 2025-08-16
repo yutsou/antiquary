@@ -49,25 +49,25 @@ class OrderRepository implements RepositoryInterface
         return $this->model->find($id)->fill($data)->save();
     }
 
-    public function updateOrderStatus(int $status, $id){
+    public function updateOrderStatus(int $status, $id, $remark = null){
         $model = $this->model->find($id);
         $model->update(['status' => $status]);
-        $model->orderRecords()->create(['status'=>$status]);
+        $model->orderRecords()->create(['status'=>$status, 'remark'=>$remark]);
         return $model;
     }
 
 
-    public function updateOrderStatusWithTransaction(array $data, int $status, $id){
+    public function updateOrderStatusWithTransaction(array $data, int $status, $id, $remark = null){
         $model = $this->model->find($id);
         $model->update(['status' => $status]);
-        $orderRecord = $model->orderRecords()->create(['status'=>$status]);
+        $orderRecord = $model->orderRecords()->create(['status'=>$status, 'remark'=>$remark]);
         $data = array_merge($data, ['status' => $status]);
         $orderRecord->transactionRecord()->create($data);
     }
 
-    public function createOrderRecord(int $status, $id)
+    public function createOrderRecord(int $status, $id, $remark = null)
     {
-        return $this->model->find($id)->orderRecords()->create(['status'=>$status]);
+        return $this->model->find($id)->orderRecords()->create(['status'=>$status, 'remark'=>$remark]);
     }
 
     public function createLogisticRecord(array $data, $id)

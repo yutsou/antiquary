@@ -30,6 +30,12 @@ class OrderRecord extends Model
 
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'order_id',
+        'status',
+        'remark'
+    ];
+
     public function transactionRecord()
     {
         return $this->hasOne(TransactionRecord::class);

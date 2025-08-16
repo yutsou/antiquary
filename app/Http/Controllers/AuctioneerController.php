@@ -21,13 +21,14 @@ use App\Services\CartService;
 use Symfony\Component\ErrorHandler\Debug;
 use App\Models\MergeShippingRequest;
 use App\Models\MergeShippingItem;
+use App\Services\LineService;
 use Illuminate\Validation\Rule;
 
 class AuctioneerController extends Controller
 {
-    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService, $lotService, $promotionService, $specificationService, $deliveryMethodService, $cartService;
+    private $userService, $categoryService, $imageService, $domainService, $orderService, $bannerService, $lotService, $promotionService, $specificationService, $deliveryMethodService, $cartService, $lineService;
 
-    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService, BannerService $bannerService, SpecificationService $specificationService, DeliveryMethodService $deliveryMethodService, CartService $cartService)
+    public function __construct(UserService $userService, CategoryService $categoryService, ImageService $imageService, DomainService $domainService, OrderService $orderService, LotService $lotService, PromotionService $promotionService, BannerService $bannerService, SpecificationService $specificationService, DeliveryMethodService $deliveryMethodService, CartService $cartService, LineService $lineService)
     {
         $this->userService = $userService;
         $this->categoryService = $categoryService;
@@ -40,6 +41,7 @@ class AuctioneerController extends Controller
         $this->specificationService = $specificationService;
         $this->deliveryMethodService = $deliveryMethodService;
         $this->cartService = $cartService;
+        $this->lineService = $lineService;
     }
 
     static function showDashboard()
@@ -743,5 +745,32 @@ class AuctioneerController extends Controller
             'success' => true,
             'message' => $request->status == 2 ? '合併運費請求已拒絕，庫存已還原，物品已加回購物車' : '合併運費請求已更新'
         ), 200);
+    }
+
+        public function confirmRefund(Request $request, $orderId)
+    {
+        // 準備備注內容
+        $remark = '退款金額：NT$' . number_format($request->refund_amount);
+        if ($request->refund_method == 'line_pay') {
+            $remark .= '，退款方式：LINE Pay';
+        } else {
+            $remark .= '，退款方式：銀行轉帳';
+        }
+
+        // 如果有自定義備注，加入其中
+        if ($request->filled('refund_remark')) {
+            $remark .= '，備注：' . $request->refund_remark;
+        }
+
+        if($request->refund_method == 'line_pay') {
+            $order = $this->orderService->getOrder($orderId);
+            $this->orderService->updateOrderStatus(61, $order, $remark);
+            $this->lineService->refund($request, $order);
+            $order->save();
+        } else {
+            $order = $this->orderService->getOrder($orderId);
+            $this->orderService->updateOrderStatus(61, $order, $remark);
+            $order->save();
+        }
     }
 }

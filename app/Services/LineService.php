@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Events\LineBindSuccess;
+use App\Models\Order;
 use App\Presenters\CarbonPresenter;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use LINE\LINEBot;
+use Jenssegers\Agent\Agent;
 use LINE\LINEBot\Constant\Flex\ComponentButtonHeight;
 use LINE\LINEBot\Constant\Flex\ComponentButtonStyle;
 use LINE\LINEBot\Constant\Flex\ComponentFontSize;
@@ -705,6 +707,183 @@ class LineService
                             ])
                     )
             );
+    }
+
+
+    public function getLinePayLink(\App\Models\Order $order)
+    {
+        $line_url = config('services.line.line_pay_url');//line api
+        $channel_ID = config('services.line.line_pay_channel_id');//your line sandbox ID
+        $channel_serect = config('services.line.line_pay_channel_secret');//your line sandbox serect
+        $R_URI = '/v3/payments/request';//Request API URI
+        $nonce = $this->generateUuid();//PHP uuid v4
+
+
+        $products = array();
+        $amount = 0;
+        foreach($order->orderItems as $orderItem) {
+            $price = intval($orderItem->price);
+            $quantity = $orderItem->quantity;
+            array_push($products, [
+                "id" => 'b'.strval($orderItem->lot->id),
+                "name" => $orderItem->lot->name,
+                "quantity" => $quantity,
+                "price" => $price
+            ]);
+            $amount = $amount + ($price*$quantity);
+        }
+
+        $delivery_cost = intval($order->delivery_cost);
+        array_push($products, [
+            "id" => "shipping_fee",
+            "name" => "運費",
+            "quantity" => 1,
+            "price" => $delivery_cost
+        ]);
+        $amount = $amount + $delivery_cost;
+
+        $packages = [[
+            "id" => "0",
+            "amount" => $amount,
+            "products" => $products,
+        ]];
+
+        $r_body = json_encode(array(
+            "amount" => intval($order->total),
+            "currency" => "TWD",
+            "orderId" => $order->id,
+            "packages" => $packages,
+            "redirectUrls" => array(
+                'confirmUrl' => route('mart.pay.line.authorize'),
+                'cancelUrl' => route('account.orders.show', $order)
+            ),
+            "options" => array(
+                "display"=>array(
+                    "checkConfirmUrlBrowser" => false
+                )
+            )
+        ));
+
+        $Signature_data = $channel_serect . $R_URI . $r_body . $nonce;
+        $Signature = base64_encode(hash_hmac('sha256', $Signature_data, $channel_serect,true));
+
+        $_header = [
+            'Content-Type'=>'application/json',
+            'X-LINE-ChannelId'=>$channel_ID,
+            'X-LINE-Authorization-Nonce'=>$nonce,
+            'X-LINE-Authorization'=>$Signature
+        ];
+
+        $client = new Client();
+        $response = $client->request('POST', $line_url.$R_URI, [
+            'headers' => $_header,
+            'body' => $r_body
+        ]);
+        $response =  json_decode($response->getBody()->getContents(), true);
+
+        // Check if the response is successful
+        if ($response['returnCode'] === '0000' && isset($response['info']['paymentUrl'])) {
+            $agent = new Agent();
+            if($agent->isPhone()) {
+                return $response['info']['paymentUrl']['app'];
+            } else {
+                return $response['info']['paymentUrl']['web'];
+            }
+        } else {
+            // Handle error case
+            throw new \Exception('LINE Pay request failed: ' . json_encode($response, JSON_UNESCAPED_UNICODE));
+        }
+
+    }
+
+    public function confirmPayment($request, $order)
+    {
+        $line_url = config('services.line.line_pay_url');//line api
+        $channel_ID = config('services.line.line_pay_channel_id');//your line sandbox ID
+        $channel_serect = config('services.line.line_pay_channel_secret');//your line sandbox serect
+        $R_URI = '/v3/payments/'.$request->transactionId.'/confirm';
+        $nonce = $this->generateUuid();//PHP uuid v4
+
+        $r_body = json_encode(
+            [
+                'amount'=>$order->total,
+                'currency'=>'TWD'
+            ]
+        );
+
+        $Signature_data = $channel_serect . $R_URI . $r_body . $nonce;
+        $Signature = base64_encode(hash_hmac('sha256', $Signature_data, $channel_serect,true));
+
+        $_header = [
+            'Content-Type'=>'application/json',
+            'X-LINE-ChannelId'=>$channel_ID,
+            'X-LINE-Authorization-Nonce'=>$nonce,
+            'X-LINE-Authorization'=>$Signature
+        ];
+
+        $client = new Client();
+        $response = $client->request('POST', $line_url.$R_URI, [
+            'headers' => $_header,
+            'body' => $r_body
+        ]);
+        $response =  json_decode($response->getBody()->getContents(), true);
+
+        if($response['returnCode'] === '0000') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function refund($request, Order $order)
+    {
+        $transactionId = $order->orderRecords->whereIn('status', [12, 13])->first()->transactionRecord->merchant_trade_no;
+        $line_url = config('services.line.line_pay_url');//line api
+        $channel_ID = config('services.line.line_pay_channel_id');//your line sandbox ID
+        $channel_serect = config('services.line.line_pay_channel_secret');//your line sandbox serect
+        $R_URI = '/v3/payments/'.$transactionId.'/refund';
+        $nonce = $this->generateUuid();//PHP uuid v4
+
+        $r_body = json_encode(
+            [
+                'refundAmount'=>$request->refundAmount,
+            ]
+        );
+
+        $Signature_data = $channel_serect . $R_URI . $r_body . $nonce;
+        $Signature = base64_encode(hash_hmac('sha256', $Signature_data, $channel_serect,true));
+
+        $_header = [
+            'Content-Type'=>'application/json',
+            'X-LINE-ChannelId'=>$channel_ID,
+            'X-LINE-Authorization-Nonce'=>$nonce,
+            'X-LINE-Authorization'=>$Signature
+        ];
+
+        $client = new Client();
+        $response = $client->request('POST', $line_url.$R_URI, [
+            'headers' => $_header,
+            'body' => $r_body
+        ]);
+        $response =  json_decode($response->getBody()->getContents(), true);
+
+        if($response['returnCode'] === '0000') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function generateUuid()
+    {
+        mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+        $charid = strtoupper(md5(uniqid(rand(), true)));
+        $uuid = substr($charid, 0, 8)
+            .substr($charid, 8, 4)
+            .substr($charid,12, 4)
+            .substr($charid,16, 4)
+            .substr($charid,20,12);
+        return $uuid;
     }
 }
 

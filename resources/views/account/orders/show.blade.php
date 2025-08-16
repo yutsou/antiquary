@@ -18,7 +18,7 @@
         </script>
     @endif
     <div class="uk-margin uk-text-small">
-        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.orders.index') }}" class="custom-color-1 custom-link-mute">已得標的物品</a> > <a href="" class="custom-color-1 custom-link-mute">訂單#{{ $order->id }}</a>
+        <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ route('dashboard') }}" class="custom-color-1 custom-link-mute">會員中心</a> > <a href="{{ route('account.orders.index') }}" class="custom-color-1 custom-link-mute">訂單</a> > <a href="" class="custom-color-1 custom-link-mute">訂單#{{ $order->id }}</a>
     </div>
     <div class="uk-margin-medium">
         <h1 class="uk-heading-medium">{{ $head }}</h1>
@@ -160,6 +160,6 @@
     <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
 @endpush
 @push('scripts')
-    <script src="{{ asset('js/orderAction.js') }}"></script>
+    <script src="{{ asset('js/orderAction.js') }}?v=06"></script>
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
 @endpush

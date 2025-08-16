@@ -10,10 +10,11 @@ class OrderStatusPresenter
     {
         $statusList = match ($type) {
             0 => ['等待確認訂單'],
-            1 => ['等待付款', '等待確認匯款', '付款完成，等待面交', '付款完成，等待出貨'],
+            1 => ['等待付款', '等待確認匯款', '付款完成，等待面交', '付款完成，等待出貨', '付款失敗，等待重新付款'],
             2 => ['已出貨', '等待買家確認物品'],
             4 => ['訂單已完成', '已匯款給賣家'],
-            5 => ['失效 - 未確認訂單', '失效 - 付款逾期', '爭議 - 等待確認匯款', '爭議 - 等待確認刷卡狀態', '']
+            5 => ['失效 - 未確認訂單', '失效 - 付款逾期', '爭議 - 等待確認匯款', '爭議 - 等待確認刷卡狀態'],
+            6 => ['爭議 - 要求退款', '爭議 - 已完成退款']
         };
         return $statusList[$status];
     }
@@ -50,8 +51,8 @@ class OrderStatusPresenter
                     break;
                 case ($orderRecord->status == 12 || $orderRecord->status == 13 || $orderRecord->status == 53):
                     $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                    if ($order->payment_method === 0) {
-                        $statusHtml = $statusHtml . '<br>ECPay付款編號：' . $orderRecord->transactionRecord->merchant_trade_no;
+                    if ($order->payment_method === 2) {
+                        $statusHtml = $statusHtml . '<br>LINE Pay付款編號：' . $orderRecord->transactionRecord->merchant_trade_no;
                     }
                     break;
                 case ($orderRecord->status == 41):
@@ -62,49 +63,11 @@ class OrderStatusPresenter
                     $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
                     break;
             }
-            /*if($order->delivery_method === 0) {
-                switch ($orderRecord->status) {
-                    case 11:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        $statusHtml = $statusHtml . '<br>帳號後五碼：'. $orderRecord->transactionRecord->remitter_account .' 匯款金額NT$'. number_format($orderRecord->transactionRecord->amount);
-                        break;
-                    case 12:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        if($order->payment_method === 0) {
-                            $statusHtml = $statusHtml . '<br>綠界付款編號：'. $orderRecord->transactionRecord->merchant_trade_no .' 金額NT$'. number_format($orderRecord->transactionRecord->amount);
-                        }
-                        break;
-                    case 41:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        $statusHtml = $statusHtml . '<br>收款帳號：'. $orderRecord->transactionRecord->payee_account .'</br>匯款金額NT$'. number_format($orderRecord->transactionRecord->amount);
-                        break;
-                    default:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        break;
-                }
-            } elseif($order->delivery_method === null) {
-                $statusHtml = $statusHtml . '等待確認訂單';#null
-            } else {
-                switch ($orderRecord->status) {
-                    case 11:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        $statusHtml = $statusHtml . '<br>帳號後五碼：'. $orderRecord->transactionRecord->remitter_account .' 匯款金額NT$'. number_format($orderRecord->transactionRecord->amount);
-                        break;
-                    case 13:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        if($order->payment_method === 0) {
-                            $statusHtml = $statusHtml . '<br>綠界付款編號：' . $orderRecord->transactionRecord->merchant_trade_no . ' 金額NT$' . number_format($orderRecord->transactionRecord->amount);
-                        }
-                        break;
-                    case 41:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        $statusHtml = $statusHtml . '<br>收款帳號：'. $orderRecord->transactionRecord->payee_account .'</br>匯款金額NT$'. number_format($orderRecord->transactionRecord->amount);
-                        break;
-                    default:
-                        $statusHtml = $statusHtml . $this->transfer($orderRecord->status);
-                        break;
-                }
-            }*/
+
+            // 顯示備注
+            if ($orderRecord->remark) {
+                $statusHtml = $statusHtml . '<br><span class="uk-text-meta">備注：' . $orderRecord->remark . '</span>';
+            }
 
             $statusHtml = $statusHtml.'</td>';
             $statusHtml = $statusHtml.'<td class="uk-table-expand uk-text-right">'.$orderRecord->created_at.'</td></tr>';

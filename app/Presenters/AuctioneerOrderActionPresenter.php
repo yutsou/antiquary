@@ -26,6 +26,66 @@ class AuctioneerOrderActionPresenter
         ';
     }
 
+    public function refundModal($orderId, $paymentMethod)
+    {
+        $linePayOption = '';
+        if ($paymentMethod == 2) {
+            $linePayOption = '
+                <div class="uk-margin">
+                    <label class="uk-form-label">退款方式</label>
+                    <div class="uk-form-controls">
+                        <label class="uk-form-label">
+                            <input class="uk-radio" type="radio" name="refund_method" value="line_pay" checked>
+                            LINE Pay 退款
+                        </label>
+                        <br>
+                        <label class="uk-form-label">
+                            <input class="uk-radio" type="radio" name="refund_method" value="bank_transfer">
+                            銀行轉帳退款
+                        </label>
+                    </div>
+                </div>';
+        } else {
+            $linePayOption = '
+                <div class="uk-margin">
+                    <label class="uk-form-label">退款方式</label>
+                    <div class="uk-form-controls">
+                        <label class="uk-form-label">
+                            <input class="uk-radio" type="radio" name="refund_method" value="bank_transfer" checked>
+                            銀行轉帳退款
+                        </label>
+                    </div>
+                </div>';
+        }
+
+        return
+        '
+        <div id="refund-modal-'.$orderId.'" class="modal">
+            <h2>訂單'.$orderId.'，選擇退款方式</h2>
+
+                <div class="uk-margin">
+                    <label class="uk-form-label">退款金額 (NT$)</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" type="number" name="refund_amount" step="0.01" min="0" required placeholder="請輸入退款金額">
+                    </div>
+                </div>
+                '.$linePayOption.'
+                <div class="uk-margin">
+                    <label class="uk-form-label">備注 (選填)</label>
+                    <div class="uk-form-controls">
+                        <textarea class="uk-textarea" name="refund_remark" rows="3" placeholder="請輸入退款備注，例如：客戶要求退款原因、特殊處理說明等"></textarea>
+                    </div>
+                </div>
+                <p class="uk-text-right">
+                    <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
+                    <a class="uk-button custom-button-1 uk-button-primary confirm-refund" orderId="'.$orderId.'" actionUrl="'.route('auctioneer.orders.confirm_refund', $orderId).'" redirectUrl="'.route('auctioneer.orders.index').'">確定退款</a>
+                </p>
+
+        </div>
+        <a href="#refund-modal-'.$orderId.'" rel="modal:open" class="uk-button custom-button-2">處理退款</a>
+        ';
+    }
+
     public function present($order)
     {
         switch (true) {
@@ -98,6 +158,9 @@ class AuctioneerOrderActionPresenter
                     $this->modal('設為棄標', '確認設為棄標嗎？', 'set-withdrawal-bid', $order->id, route('auctioneer.orders.set_withdrawal_bid', $order), route('auctioneer.orders.index'), 2).
                     $this->modal('確認已付款', '確認已付款嗎？', 'confirm-paid', $order->id, route('auctioneer.orders.confirm_paid', $order), route('auctioneer.orders.index'))
                     ;
+            case ($order->status == 60):
+                return $this->refundModal($order->id, $order->payment_method);
+
             default:
                 return '';
         }

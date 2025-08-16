@@ -134,14 +134,42 @@ class OrderService extends OrderRepository
             }
         }
 
+        if($order->payment_method == 2) {
+            $merchant_trade_no = $request->transactionId;
+        } elseif($order->payment_method == 0) {
+            $merchant_trade_no = $request->MerchantTradeNo;
+        }
+
         $input = [
             'payment_method' => $order->payment_method,
-            'merchant_trade_no' => $request->MerchantTradeNo,
+            #'merchant_trade_no' => $request->MerchantTradeNo,
+            'merchant_trade_no' => $merchant_trade_no,
             'trade_no' => $request->TradeNo,
             'amount' => $order->total
         ];
 
         OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
+    }
+
+    public function failPayment($request, $orderId)
+    {
+        $order = $this->getOrder($orderId);
+
+        if($order->payment_method == 2) {
+            $merchant_trade_no = $request->transactionId;
+        } elseif($order->payment_method == 0) {
+            $merchant_trade_no = $request->MerchantTradeNo;
+        }
+
+        $input = [
+            'payment_method' => $order->payment_method,
+            #'merchant_trade_no' => $request->MerchantTradeNo,
+            'merchant_trade_no' => $merchant_trade_no,
+            'trade_no' => $request->TradeNo,
+            'amount' => $order->total
+        ];
+
+        OrderRepository::updateOrderStatusWithTransaction($input, 14, $orderId);
     }
 
     public function ajaxGetOrders()
@@ -358,9 +386,9 @@ class OrderService extends OrderRepository
         return round($lot->current_bid * 0.1);
     }
 
-    public function updateOrderStatus($status, $order)
+    public function updateOrderStatus($status, $order, $remark = null)
     {
-        return parent::updateOrderStatus($status, $order->id);
+        return parent::updateOrderStatus($status, $order->id, $remark);
     }
 
     public function createProductOrder($lot)

@@ -10,6 +10,7 @@ use App\Services\BannerService;
 use App\Services\CategoryService;
 use App\Services\EcpayService;
 use App\Services\GomypayService;
+use App\Services\LineService;
 use App\Services\LotService;
 use App\Services\OrderService;
 use App\Services\PromotionService;
@@ -22,7 +23,7 @@ use Illuminate\Support\Facades\Response;
 
 class MartController extends Controller
 {
-    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService, $promotionService, $gomypayService;
+    private $lotService, $auctionService, $ecpayService, $orderService, $categoryService, $bannerService, $promotionService, $gomypayService, $lineService;
 
     public function __construct(
         LotService $lotService,
@@ -32,7 +33,8 @@ class MartController extends Controller
         CategoryService $categoryService,
         BannerService $bannerService,
         PromotionService $promotionService,
-        GomypayService $gomypayService
+        GomypayService $gomypayService,
+        LineService $lineService
     ) {
         $this->lotService = $lotService;
         $this->auctionService = $auctionService;
@@ -42,6 +44,7 @@ class MartController extends Controller
         $this->bannerService = $bannerService;
         $this->promotionService = $promotionService;
         $this->gomypayService = $gomypayService;
+        $this->lineService = $lineService;
     }
 
     public function showAuction($auctionId)
@@ -262,5 +265,20 @@ class MartController extends Controller
     public function postTest(Request $request)
     {
         dd($request->images);
+    }
+
+    public function payLineAuthorize(Request $request)
+    {
+        $orderId = $request->orderId;
+        $order = $this->orderService->getOrder($orderId);
+        $result = $this->lineService->confirmPayment($request, $order);
+        Log::channel('line')->info($request->toArray());
+        if ($result) {
+            $this->orderService->hasPaid($request, $orderId);
+            return redirect()->route('account.orders.show', $orderId)->with('success', '付款完成');
+        } else {
+            $this->orderService->failPayment($request, $orderId);
+            return redirect()->route('account.orders.show', $orderId)->with('warning', '付款失敗，請重新付款');
+        }
     }
 }

@@ -91,7 +91,7 @@
                                 <label><input class="uk-radio" type="radio" name="payment_method" value="1"> ATM轉帳</label>
                             </li>
                             <li>
-                                <label><input class="uk-radio" type="radio" name="payment_method" value="3"> Line Pay</label>
+                                <label><input class="uk-radio" type="radio" name="payment_method" value="2"> LINE Pay</label>
                             </li>
                         </ul>
                     </div>

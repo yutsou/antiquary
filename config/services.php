@@ -58,7 +58,10 @@ return [
         'get_token_url' => 'https://api.line.me/oauth2/v2.1/token',
         'get_user_profile_url' => 'https://api.line.me/v2/profile',
         'line_bot_richmenu_id' => env('LINE_BOT_RICHMENU_ID'),
-        'line_bot_admin_id' => env("LINE_BOT_ADMIN_ID")
+        'line_bot_admin_id' => env("LINE_BOT_ADMIN_ID"),
+        'line_pay_channel_id' => env('LINE_PAY_CHANNEL_ID', '2007920891'),
+        'line_pay_channel_secret' => env('LINE_PAY_CHANNEL_SECRET', 'ae1117126df2604192d0b751d8c4ce22'),
+        'line_pay_url' => env('LINE_PAY_URL', 'https://sandbox-api-pay.line.me')
     ],
 
 ];

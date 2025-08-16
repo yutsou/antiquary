@@ -8,6 +8,7 @@
         "php": "^8.0.2",
         "ecpay/sdk": "^1.1",
         "guzzlehttp/guzzle": "^7.2",
+        "jenssegers/agent": "^2.6",
         "kalnoy/nestedset": "^6.0",
         "laravel/framework": "^9.19.0",
         "laravel/sanctum": "^2.14.1",

@@ -131,3 +131,36 @@ $(document).on('click', '.confirm-paid', function(){
         }
     });
 });
+
+$(document).on('click', '.confirm-refund', function(){
+    let orderId = $(this).attr('orderId');
+    let actionUrl = $(this).attr('actionUrl');
+    let redirectUrl = $(this).attr('redirectUrl');
+    let refundAmount = $('input[name="refund_amount"]').val();
+    let refundMethod = $('input[name="refund_method"]:checked').val();
+    let refundRemark = $('textarea[name="refund_remark"]').val();
+
+    if (!refundAmount || refundAmount <= 0) {
+        alert('請輸入有效的退款金額');
+        return;
+    }
+
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: "post",
+        url: actionUrl,
+        data: {
+            refund_amount: refundAmount,
+            refund_method: refundMethod,
+            refund_remark: refundRemark
+        },
+        success: function () {
+            window.location.assign(redirectUrl);
+        },
+        error: function(xhr, status, error) {
+            alert('退款處理失敗，請稍後再試');
+        }
+    });
+});

@@ -7,6 +7,7 @@ use App\Services\AuctionService;
 use App\Services\BidService;
 use App\Services\LineService;
 use App\Services\LotService;
+use App\Services\OrderService;
 use App\Services\UserService;
 use Carbon\Carbon;
 use Exception;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class LineController extends Controller
 {
-    private $lotService, $userService, $bidService, $lineService, $auctionService;
+    private $lotService, $userService, $bidService, $lineService, $auctionService, $orderService;
 
     public function __construct(
         LotService $lotService,
@@ -25,12 +26,14 @@ class LineController extends Controller
         BidService $bidService,
         LineService $lineService,
         AuctionService $auctionService,
+        OrderService $orderService
     ) {
         $this->lotService = $lotService;
         $this->userService = $userService;
         $this->bidService = $bidService;
         $this->lineService = $lineService;
         $this->auctionService = $auctionService;
+        $this->orderService = $orderService;
 
     }
 

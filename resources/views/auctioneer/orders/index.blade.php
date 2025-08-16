@@ -58,6 +58,6 @@
             });
         });
     </script>
-    <script src="{{ asset('js/orderAction.js') }}?v=05"></script>
+    <script src="{{ asset('js/orderAction.js') }}?v=07"></script>
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
 @endpush
