@@ -270,6 +270,12 @@ class MartController extends Controller
     public function payLineAuthorize(Request $request)
     {
         $orderId = $request->orderId;
+        if(config('app.env') == 'production') {
+            $lineIdPrefix = 'antiquary-test-';
+        } else {
+            $lineIdPrefix = 'test-a-';
+        }
+        $orderId = str_replace($lineIdPrefix, '', $orderId);
         $order = $this->orderService->getOrder($orderId);
         $result = $this->lineService->confirmPayment($request, $order);
         Log::channel('line')->info($request->toArray());

@@ -721,11 +721,26 @@ class LineService
 
         $products = array();
         $amount = 0;
+        if(config('app.env') == 'production') {
+            $lineIdPrefix = 'antiquary-test-';
+        } else {
+            $lineIdPrefix = 'test-a-';
+        }
+
+        $delivery_cost = intval($order->delivery_cost);
+
+        array_push($products, [
+            "id" => "delivery-fee",
+            "name" => "運費",
+            "quantity" => 1,
+            "price" => $delivery_cost
+        ]);
+
         foreach($order->orderItems as $orderItem) {
             $price = intval($orderItem->price);
             $quantity = $orderItem->quantity;
             array_push($products, [
-                "id" => 'b'.strval($orderItem->lot->id),
+                "id" => strval($orderItem->lot->id),
                 "name" => $orderItem->lot->name,
                 "quantity" => $quantity,
                 "price" => $price
@@ -733,14 +748,8 @@ class LineService
             $amount = $amount + ($price*$quantity);
         }
 
-        $delivery_cost = intval($order->delivery_cost);
-        array_push($products, [
-            "id" => "shipping_fee",
-            "name" => "運費",
-            "quantity" => 1,
-            "price" => $delivery_cost
-        ]);
         $amount = $amount + $delivery_cost;
+
 
         $packages = [[
             "id" => "0",
@@ -751,7 +760,7 @@ class LineService
         $r_body = json_encode(array(
             "amount" => intval($order->total),
             "currency" => "TWD",
-            "orderId" => $order->id,
+            "orderId" => $lineIdPrefix.strval($order->id),
             "packages" => $packages,
             "redirectUrls" => array(
                 'confirmUrl' => route('mart.pay.line.authorize'),
