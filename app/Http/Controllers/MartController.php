@@ -271,9 +271,9 @@ class MartController extends Controller
     {
         $orderId = $request->orderId;
         if(config('app.env') == 'production') {
-            $lineIdPrefix = 'antiquary-test-';
+            $lineIdPrefix = config('services.line.line_order_id_prefix');
         } else {
-            $lineIdPrefix = 'test-a-';
+            $lineIdPrefix = 'test-1-';
         }
         $orderId = str_replace($lineIdPrefix, '', $orderId);
         $order = $this->orderService->getOrder($orderId);

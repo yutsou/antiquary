@@ -61,7 +61,8 @@ return [
         'line_bot_admin_id' => env("LINE_BOT_ADMIN_ID"),
         'line_pay_channel_id' => env('LINE_PAY_CHANNEL_ID', '2007920891'),
         'line_pay_channel_secret' => env('LINE_PAY_CHANNEL_SECRET', 'ae1117126df2604192d0b751d8c4ce22'),
-        'line_pay_url' => env('LINE_PAY_URL', 'https://sandbox-api-pay.line.me')
+        'line_pay_url' => env('LINE_PAY_URL', 'https://sandbox-api-pay.line.me'),
+        'line_order_id_prefix' => env('LINE_ORDER_ID_PREFIX', 'test-a-')
     ],
 
 ];

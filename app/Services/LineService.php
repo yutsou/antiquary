@@ -722,9 +722,9 @@ class LineService
         $products = array();
         $amount = 0;
         if(config('app.env') == 'production') {
-            $lineIdPrefix = 'antiquary-test-';
+            $lineIdPrefix = config('services.line.line_order_id_prefix');
         } else {
-            $lineIdPrefix = 'test-a-';
+            $lineIdPrefix = 'test-1-';
         }
 
         $delivery_cost = intval($order->delivery_cost);
