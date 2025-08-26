@@ -103,7 +103,7 @@ class MemberOrderActionPresenter
                 return '
                 <div class="uk-grid-small" uk-grid>
                     <div>
-                        '.$this->modal('要求退貨', '確認退貨嗎？', 'complete-order', $order->id, route('account.orders.request_refund', $order), route('account.orders.show', $order), 'custom-button-2').'
+                        '.$this->modal('要求退貨', '確認退貨嗎？', 'request-refund', $order->id, route('account.orders.request_refund', $order), route('account.orders.show', $order), 'custom-button-2').'
                     </div>
                     <div>
                         '.$this->modal('完成訂單', '確認完成訂單嗎？', 'complete-order', $order->id, route('account.orders.complete', $order), route('account.orders.show', $order)).'

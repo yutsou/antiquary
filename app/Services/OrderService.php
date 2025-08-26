@@ -269,16 +269,24 @@ class OrderService extends OrderRepository
                 'payee_id'=>1
             ];
             CustomClass::sendTemplateNotice(1, 7, 0, $order->id, 1); // notice auctioneer to confirm payment
-        } else { #type 1
-            $status = 41;
-            // 獲取第一個商品的賣家資訊
-            foreach($order->orderItems as $item) {
+        }
+        OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
+
+    }
+
+    public function noticeOwnerRemit($orderId, $lotId)
+    {
+        $order = $this->getOrder($orderId);
+        $status = 41;
+        // 獲取第一個商品的賣家資訊
+        foreach($order->orderItems as $item) {
+            if($item->lot->id == $lotId) {
                 if($item->lot->type == 0) { // 競標商品
                     $owner = $item->lot->owner;
                     $input = [
                         'status' => $status,
                         'payment_method' => 1,
-                        'amount'=>$order->owner_real_take,
+                        'amount'=>$item->price,
                         'remitter_id'=>Auth::user()->id,
                         'remitter_account'=>Auth::user()->bank_account_number,
                         'payee_id'=>$owner->id,
@@ -287,10 +295,10 @@ class OrderService extends OrderRepository
 
                     $item->lot->update(['status'=>41]);
                     CustomClass::sendTemplateNotice($item->lot->owner_id, 3, 4, $orderId);
-                } // 直賣商品
+                    OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
+                }
             }
         }
-        OrderRepository::updateOrderStatusWithTransaction($input, $status, $orderId);
 
     }
 
@@ -575,7 +583,9 @@ class OrderService extends OrderRepository
 
         // 計算總計
         $subtotal = $mergeRequest->items->sum(function($item) {
-            return $item->lot->reserve_price * $item->quantity;
+            // 競標商品使用 current_bid 作為價格，一般商品使用 reserve_price
+            $price = $item->lot->type === 0 ? $item->lot->current_bid : $item->lot->reserve_price;
+            return $price * $item->quantity;
         });
         $total = $subtotal + $mergeRequest->new_shipping_fee;
 
@@ -601,11 +611,15 @@ class OrderService extends OrderRepository
 
         // 為每個 merge shipping item 創建 order item 記錄
         foreach ($mergeRequest->items as $item) {
+            // 競標商品使用 current_bid 作為價格，一般商品使用 reserve_price
+            $price = $item->lot->type === 0 ? $item->lot->current_bid : $item->lot->reserve_price;
+            $subtotal = $price * $item->quantity;
+
             $order->orderItems()->create([
                 'lot_id' => $item->lot_id,
                 'quantity' => $item->quantity,
-                'price' => $item->lot->reserve_price,
-                'subtotal' => $item->lot->reserve_price * $item->quantity,
+                'price' => $price,
+                'subtotal' => $subtotal,
                 'status' => 'normal',
             ]);
         }

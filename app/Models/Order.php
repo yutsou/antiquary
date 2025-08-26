@@ -94,4 +94,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function lots()
+    {
+        return $this->belongsToMany(Lot::class, 'order_items', 'order_id', 'lot_id');
+    }
 }

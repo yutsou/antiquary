@@ -749,7 +749,7 @@ class MemberController extends Controller
                 $url = route('account.returned_lots.index');
             }
         } else {
-            $this->lotService->reBiding($lotId);
+            $this->lotService->reBidding($lotId);
             $url = route('account.selling_lots.index');
         }
 
@@ -1303,7 +1303,9 @@ class MemberController extends Controller
                 // 檢查庫存是否為0，如果是則下架商品
                 $updatedLot = $lot->fresh();
                 if ($updatedLot->inventory <= 0) {
-                    $updatedLot->update(['status' => 60]); // 60 是下架狀態
+                    // 如果 lot type 是 0，則將 status 改為 23，否則改為 60
+                    $newStatus = $updatedLot->type == 0 ? 23 : 60;
+                    $updatedLot->update(['status' => $newStatus]);
                 }
             }
         }

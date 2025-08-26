@@ -80,6 +80,9 @@
                             <th class="uk-table-expand">物品</th>
                             <th class="uk-table-expand">自訂編號</th>
                             <th class="uk-table-expand">價格</th>
+                            @if($order->status == 60) {{-- 爭議 - 要求退款 --}}
+                                <th class="uk-table-expand">動作</th>
+                            @endif
                         </tr>
                         </thead>
                         <tbody>
@@ -87,11 +90,26 @@
                             <tr>
                                 @if($orderItem->lot->type == '0')
                                     <td><a href="{{ route("mart.lots.show", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
+                                    <td>-</td>
                                 @else
                                     <td><a href="{{ route("auctioneer.products.edit", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
                                     <td>{{ $orderItem->lot->custom_id }}</td>
                                 @endif
-                                <td>NT${{ number_format($orderItem->lot->current_bid) }}</td>
+                                <td>NT${{ number_format($orderItem->price) }}</td>
+                                @if($order->status == 60 && $orderItem->lot->type == 0 && $orderItem->lot->status == 23) {{-- 爭議退款且為競標商品 --}}
+                                    <td>
+                                        <button class="uk-button uk-button-danger uk-button-small"
+                                                onclick="setLotAsWithdrawn({{ $orderItem->lot->id }}, {{ $order->id }})">
+                                            設為棄標
+                                        </button>
+                                    </td>
+                                @elseif($order->status == 60)
+                                    <td>-</td>
+                                @elseif($order->status == 61 && $orderItem->lot->status == 23)
+                                <td>
+                                    {!! $orderActionPresenter->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_owner_remit', ["orderId" => $order->id, "lotId" => $orderItem->lot->id]), route('auctioneer.orders.index')); !!}
+                                </td>
+                                @endif
                             </tr>
                             @if ($orderItem->lot->type == 0)
                                 <tr>
@@ -107,7 +125,7 @@
                                                     委賣人電話: {{ $orderItem->lot->owner->phone }}<br>
                                                     分行名稱: {{ $orderItem->lot->owner->bank_branch_name }}
                                                     帳號: {{ $orderItem->lot->owner->bank_account_number }}<br>
-                                                    匯款金額: NT${{ number_format($order->owner_real_take) }}
+                                                    匯款金額: NT${{ number_format($orderItem->price) }}
                                                 </td>
                                             </tr>
                                         </table>
@@ -179,6 +197,45 @@
     <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
 @endpush
 @push('scripts')
-    <script src="{{ asset('js/orderAction.js') }}?v=07"></script>
+    <script src="{{ asset('js/orderAction.js') }}?v=08"></script>
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
+    <script>
+        function setLotAsWithdrawn(lotId, orderId) {
+            if (confirm('確認要將此競標商品設為棄標嗎？此操作不可撤銷。')) {
+                fetch(`/auctioneer/dashboard/orders/${orderId}/set-lot-withdrawn`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        lot_id: lotId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '商品已設為棄標！',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                        location.reload();
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '操作失敗：' + data.message,
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('操作失敗，請稍後再試');
+                });
+            }
+        }
+    </script>
 @endpush

@@ -160,6 +160,6 @@
     <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
 @endpush
 @push('scripts')
-    <script src="{{ asset('js/orderAction.js') }}?v=06"></script>
+    <script src="{{ asset('js/orderAction.js') }}?v=08"></script>
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
 @endpush

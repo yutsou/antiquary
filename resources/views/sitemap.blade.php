@@ -11,7 +11,7 @@
     <!-- 拍賣品頁面 -->
     @foreach($lots as $lot)
         <url>
-            <loc>{{ url('/lots/'.$lot->id) }}</loc>
+            <loc>{{ url('/products/'.$lot->id) }}</loc>
             <lastmod>{{ $lot->updated_at->toAtomString() }}</lastmod>
             <changefreq>weekly</changefreq>
             <priority>0.8</priority>

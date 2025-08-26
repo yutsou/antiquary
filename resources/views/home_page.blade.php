@@ -93,6 +93,93 @@
 @section('content')
     <!-- Main Content Container -->
     <div class="main-content-container">
+        @if($auctions->where('status', 1)->count() != 0)
+        <section class="auction-section">
+            <div class="section-header">
+                <div class="section-title-container">
+                    <h2 class="section-title">進行中的拍賣會</h2>
+                    <div class="section-subtitle">Live Auctions</div>
+                </div>
+                <div class="section-decoration">
+                    <div class="decoration-line"></div>
+                    <div class="decoration-dot"></div>
+                </div>
+            </div>
+
+            <!-- Desktop Auction Slider -->
+    <div class="uk-visible@m">
+                <div class="uk-slider-container-offset modern-slider" uk-slider="finite: true">
+                    <div class="uk-position-relative uk-visible-toggle" tabindex="-1">
+                <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
+                    @foreach($auctions->where('status', 1) as $auction)
+                        <li>
+                                    <div class="modern-card auction-card auction-card-click" auctionId="{{ $auction->id }}">
+                                        <div class="card-image-container">
+                                            <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="{{ $auction->name }}" class="card-image">
+                                            <div class="card-overlay">
+                                                <div class="overlay-content">
+                                                    <span class="material-symbols-outlined overlay-icon">gavel</span>
+                                                    <span class="overlay-text">參與競標</span>
+                                                </div>
+                                            </div>
+                                            <div class="auction-badge">
+                                                <span class="badge-text">進行中</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-content">
+                                            <h3 class="card-title">{{ $auction->name }}</h3>
+                                            <div class="auction-time">
+                                                <span class="material-symbols-outlined time-icon">schedule</span>
+                                                <span class="time-text">{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</span>
+                                </div>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+                        <a class="uk-position-center-left uk-position-small uk-hidden-hover slider-nav-btn" href="#" uk-slidenav-previous
+                   uk-slider-item="previous"></a>
+                        <a class="uk-position-center-right uk-position-small uk-hidden-hover slider-nav-btn" href="#" uk-slidenav-next
+                   uk-slider-item="next"></a>
+            </div>
+                    <ul class="uk-slider-nav uk-dotnav uk-flex-center uk-margin slider-dots"></ul>
+        </div>
+    </div>
+
+            <!-- Mobile Auction Slider -->
+    <div class="uk-hidden@m">
+                <div class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slider="center: true">
+            <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 30">
+                @foreach($auctions as $auction)
+                    <li class="uk-width-5-6">
+                                <div class="mobile-card auction-card auction-card-click" auctionId="{{ $auction->id }}">
+                                    <div class="mobile-card-image-container">
+                                        <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="{{ $auction->name }}" class="mobile-card-image">
+                                        <div class="mobile-card-overlay">
+                                            <div class="mobile-overlay-content">
+                                                <span class="material-symbols-outlined mobile-overlay-icon">gavel</span>
+                                            </div>
+                                        </div>
+                                        <div class="mobile-auction-badge">
+                                            <span class="mobile-badge-text">進行中</span>
+                                        </div>
+                                </div>
+                                    <div class="mobile-card-content">
+                                        <h3 class="mobile-card-title">{{ $auction->name }}</h3>
+                                        <div class="mobile-auction-time">
+                                            <span class="material-symbols-outlined mobile-time-icon">schedule</span>
+                                            <span class="mobile-time-text">{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+        </section>
+@endif
+
         <!-- Featured Categories Section -->
     @if($productsByCategory && count($productsByCategory) > 0)
         @foreach($productsByCategory as $categoryData)
@@ -213,92 +300,7 @@
     @endif
 
         <!-- Active Auctions Section -->
-    @if($auctions->where('status', 1)->count() != 0)
-            <section class="auction-section">
-                <div class="section-header">
-                    <div class="section-title-container">
-                        <h2 class="section-title">進行中的拍賣會</h2>
-                        <div class="section-subtitle">Live Auctions</div>
-                    </div>
-                    <div class="section-decoration">
-                        <div class="decoration-line"></div>
-                        <div class="decoration-dot"></div>
-                    </div>
-                </div>
 
-                <!-- Desktop Auction Slider -->
-        <div class="uk-visible@m">
-                    <div class="uk-slider-container-offset modern-slider" uk-slider="finite: true">
-                        <div class="uk-position-relative uk-visible-toggle" tabindex="-1">
-                    <ul class="uk-slider-items uk-child-width-1-4@s uk-grid">
-                        @foreach($auctions->where('status', 1) as $auction)
-                            <li>
-                                        <div class="modern-card auction-card auction-card-click" auctionId="{{ $auction->id }}">
-                                            <div class="card-image-container">
-                                                <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="{{ $auction->name }}" class="card-image">
-                                                <div class="card-overlay">
-                                                    <div class="overlay-content">
-                                                        <span class="material-symbols-outlined overlay-icon">gavel</span>
-                                                        <span class="overlay-text">參與競標</span>
-                                                    </div>
-                                                </div>
-                                                <div class="auction-badge">
-                                                    <span class="badge-text">進行中</span>
-                                                </div>
-                                            </div>
-                                            <div class="card-content">
-                                                <h3 class="card-title">{{ $auction->name }}</h3>
-                                                <div class="auction-time">
-                                                    <span class="material-symbols-outlined time-icon">schedule</span>
-                                                    <span class="time-text">{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</span>
-                                    </div>
-                                    </div>
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
-                            <a class="uk-position-center-left uk-position-small uk-hidden-hover slider-nav-btn" href="#" uk-slidenav-previous
-                       uk-slider-item="previous"></a>
-                            <a class="uk-position-center-right uk-position-small uk-hidden-hover slider-nav-btn" href="#" uk-slidenav-next
-                       uk-slider-item="next"></a>
-                </div>
-                        <ul class="uk-slider-nav uk-dotnav uk-flex-center uk-margin slider-dots"></ul>
-            </div>
-        </div>
-
-                <!-- Mobile Auction Slider -->
-        <div class="uk-hidden@m">
-                    <div class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slider="center: true">
-                <ul class="uk-slider-items uk-grid uk-grid-small uk-grid-match" uk-height-viewport="offset-top: true; offset-bottom: 30">
-                    @foreach($auctions as $auction)
-                        <li class="uk-width-5-6">
-                                    <div class="mobile-card auction-card auction-card-click" auctionId="{{ $auction->id }}">
-                                        <div class="mobile-card-image-container">
-                                            <img src="{{ $auction->lots->first()->blImages->first()->url }}" alt="{{ $auction->name }}" class="mobile-card-image">
-                                            <div class="mobile-card-overlay">
-                                                <div class="mobile-overlay-content">
-                                                    <span class="material-symbols-outlined mobile-overlay-icon">gavel</span>
-                                                </div>
-                                            </div>
-                                            <div class="mobile-auction-badge">
-                                                <span class="mobile-badge-text">進行中</span>
-                                            </div>
-                                    </div>
-                                        <div class="mobile-card-content">
-                                            <h3 class="mobile-card-title">{{ $auction->name }}</h3>
-                                            <div class="mobile-auction-time">
-                                                <span class="material-symbols-outlined mobile-time-icon">schedule</span>
-                                                <span class="mobile-time-text">{{ $carbonPresenter->auctionPresent($auction->start_at, $auction->end_at) }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-            </section>
-    @endif
     </div>
 @endsection
 

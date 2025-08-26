@@ -33,6 +33,7 @@ class LotService extends LotRepository
         $input['owner_id'] = Auth::user()->id;
         $input['description'] = $request->description;
         $input['reserve_price'] = $request->reserve_price;
+        $input['type'] = 0;
 
         // 設置 inventory：如果是 application 或沒有設置，則為 1
         if ($status === null || $status === 0) {
@@ -237,7 +238,7 @@ class LotService extends LotRepository
 
     public function getSellingLots($user)
     {
-        return $user->ownLots->whereBetween('status',[10,25]);
+        return $user->ownLots->whereBetween('status',[10,24,25,26]);
     }
 
     public function getReturnedLots($user)
@@ -461,7 +462,7 @@ class LotService extends LotRepository
         LotRepository::update($input, $lotId);
     }
 
-    public function reBiding($lotId)
+    public function reBidding($lotId)
     {
         $lot = $this->getLot($lotId);
         if ($lot->status == 25) {
@@ -472,10 +473,12 @@ class LotService extends LotRepository
 
         $input = [
             'status'=>$status,
+            'winner_id'=>null,
             'current_bid'=>0,
             'auction_id'=>null,
             'auction_start_at'=>null,
             'auction_end_at'=>null,
+            'inventory'=>1,
         ];
         LotRepository::update($input, $lotId);
 

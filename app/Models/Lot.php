@@ -149,9 +149,14 @@ class Lot extends Model
         return $this->hasMany(LogisticRecord::class);
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->belongsToMany(Order::class, 'order_items', 'lot_id', 'order_id');
     }
 
     public function bidRecords()

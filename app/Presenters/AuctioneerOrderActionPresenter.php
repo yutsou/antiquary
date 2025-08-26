@@ -107,17 +107,6 @@ class AuctioneerOrderActionPresenter
                         return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
                     }
                 }
-            case ($order->status == 40):
-                $count = 0;
-                foreach($order->orderItems as $item) {
-                    if($item->lot->type == 0) { // 競標商品
-                        $count++;
-                    }
-                }
-                if($count != 0) {
-                    return $this->modal('通知賣家已匯款', '確定通知賣家已匯款？', 'notice-remit', $order->id, route('auctioneer.orders.notice_remit', $order), route('auctioneer.orders.index'));
-                }
-                break;
             case ($order->status == 13):
                 $firstItem = $order->orderItems->first();
                 if (!$firstItem) {

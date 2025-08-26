@@ -9,8 +9,8 @@ class SmsService
         $message = urlencode($message);
 
         $data = array(
-            "username" => 'evilfish0305',
-            "password" => 'eagle111',
+            "username" => config('services.twsms.username'),
+            "password" => config('services.twsms.password'),
             "mobile" => $mobile,
             "longsms" => $longsms,
             "message" => $message

@@ -65,4 +65,9 @@ return [
         'line_order_id_prefix' => env('LINE_ORDER_ID_PREFIX', 'test-a-')
     ],
 
+    'twsms' => [
+        'username' => env('TWSMS_USERNAME'),
+        'password' => env('TWSMS_PASSWORD'),
+    ],
+
 ];

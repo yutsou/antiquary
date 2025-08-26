@@ -82,7 +82,7 @@ class HandlePaymentNotice implements ShouldQueue
                 CustomClass::sendTemplateNotice($lot->owner_id, 2, 3, $lot->id, 1);
 
                 // 將商品狀態設為棄標
-                app(LotService::class)->updateLotStatus(25, $lot);
+                app(LotService::class)->updateLotStatus(26, $lot);
             }
         }
     }

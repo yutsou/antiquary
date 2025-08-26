@@ -21,28 +21,59 @@
                 @endforeach
             </div>
             <div class="uk-margin-medium">
-                <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
-                    @foreach($lots->where('auction_end_at', null) as $singleLot)
-                        <div>
-                            <div class="uk-card uk-card-default uk-card-hover antiquary-card-click" lotId="{{ $singleLot->id }}">
-                                <div class="uk-card-media-top">
-                                    <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                         style="background-image: url({{ $singleLot->blImages->first()->url }});">
-                                    </div>
-                                </div>
-                                <div class="uk-card-body">
-
-                                    <div class="uk-flex uk-flex-right">
-                                        @include('mart.components.favorite-inline', $singleLot)
-                                    </div>
-                                    <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
-                                    <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-
+                <!-- 拍賣商品區塊 -->
+            @if($lots->where('auction_end_at', '!=', null)->count() > 0)
+            <h3 class="uk-card-title">拍賣商品</h3>
+            <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
+                @foreach($lots->where('auction_end_at', '!=', null) as $singleLot)
+                    <div>
+                        <div class="uk-card uk-card-default uk-card-hover bidding-card-click" lotId="{{ $singleLot->id }}">
+                            <div class="uk-card-media-top">
+                                <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
+                                     style="background-image: url({{ $singleLot->blImages->first()->url }});">
                                 </div>
                             </div>
+                            <div class="uk-card-body">
+
+                                <div class="uk-flex uk-flex-right">
+                                    @include('mart.components.favorite-inline', $singleLot)
+                                </div>
+                                <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
+                                <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
+                                <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
+                            </div>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+        <!-- 商店直賣商品區塊 -->
+        @if($lots->where('auction_end_at', null)->count() > 0)
+            <h3 class="uk-card-title">Antiquary 精選</h3>
+            <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
+                @foreach($lots->where('auction_end_at', null) as $singleLot)
+                    <div>
+                        <div class="uk-card uk-card-default uk-card-hover antiquary-card-click" lotId="{{ $singleLot->id }}">
+                            <div class="uk-card-media-top">
+                                <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
+                                     style="background-image: url({{ $singleLot->blImages->first()->url }});">
+                                </div>
+                            </div>
+                            <div class="uk-card-body">
+
+                                <div class="uk-flex uk-flex-right">
+                                    @include('mart.components.favorite-inline', $singleLot)
+                                </div>
+                                <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
+                                <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
+
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
             </div>
         </div>
     </div>

@@ -188,11 +188,11 @@ class AuctioneerController extends Controller
         return back()->with('notification', '通知成功');
     }
 
-    public function noticeRemit($orderId)
+    public function noticeOwnerRemit($orderId, $lotId)
     {
-        $this->orderService->noticeRemit(null, $orderId, 1);
-        #return back()->with('notification', '通知成功');
+        $this->orderService->noticeOwnerRemit($orderId, $lotId);
     }
+
 
     public function noticeConfirmAtmPay($orderId)
     {
@@ -254,6 +254,47 @@ class AuctioneerController extends Controller
         $firstItem = $order->orderItems->first();
         if ($firstItem) {
             $this->lotService->updateLotStatus(25, $firstItem->lot); // 棄標
+        }
+    }
+
+    public function setLotWithdrawn(Request $request, $orderId)
+    {
+        try {
+            $order = $this->orderService->getOrder($orderId);
+            $lotId = $request->input('lot_id');
+
+            // 檢查訂單狀態是否為爭議退款
+            if ($order->status != 60) {
+                return response()->json(['success' => false, 'message' => '只有爭議退款的訂單才能執行此操作']);
+            }
+
+            // 找到對應的 order item
+            $orderItem = $order->orderItems->where('lot_id', $lotId)->first();
+            if (!$orderItem) {
+                return response()->json(['success' => false, 'message' => '找不到指定的商品']);
+            }
+
+            // 檢查是否為競標商品
+            if ($orderItem->lot->type != 0) {
+                return response()->json(['success' => false, 'message' => '只有競標商品才能設為棄標']);
+            }
+
+            // 將商品設為棄標
+            $this->lotService->updateLotStatus(26, $orderItem->lot); // 26 是棄標狀態
+
+            CustomClass::sendTemplateNotice($orderItem->lot->owner_id, 2, 3, $orderItem->lot->id, 1);
+
+            // 清空 winner_id 和 current_bid
+            $orderItem->lot->update([
+                'winner_id' => null,
+                'current_bid' => 0
+            ]);
+
+            return response()->json(['success' => true, 'message' => '商品已設為棄標']);
+
+        } catch (\Exception $e) {
+            dd($e);
+            return response()->json(['success' => false, 'message' => '操作失敗：' . $e->getMessage()]);
         }
     }
 

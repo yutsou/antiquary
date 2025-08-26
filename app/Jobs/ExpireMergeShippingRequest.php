@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\CustomFacades\CustomClass;
 use App\Models\MergeShippingRequest;
 use App\Services\CartService;
 use Illuminate\Bus\Queueable;
@@ -81,10 +82,19 @@ class ExpireMergeShippingRequest implements ShouldQueue
                 if ($lot->inventory > 0 && $lot->status == 60) { // 60 是下架狀態
                     $lot->update(['status' => 61]); // 61 是正常狀態
                 }
+
+                if ($lot->type == 0) {
+                    $lot->update(['status' => 26]); // 26 是棄標狀態
+                    CustomClass::sendTemplateNotice($lot->owner_id, 2, 3, $lot->id, 1);
+                }
             }
 
-            // 將物品加回購物車
-            $cartService->addToCart($mergeRequest->user_id, $item->lot_id, $item->quantity);
+            // 如果 lot type 是 0，將物品從購物車移除，否則加回購物車
+            if ($lot->type == 0) {
+                $cartService->removeCartItem($mergeRequest->user_id, $item->lot_id);
+            } else {
+                $cartService->addToCart($mergeRequest->user_id, $item->lot_id, $item->quantity);
+            }
         }
     }
 }

@@ -96,12 +96,13 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::get('/orders/{orderId}', [AuctioneerController::class, 'showOrder'])->name('auctioneer.orders.show');
     Route::post('/orders/{orderId}/notice-shipping', [AuctioneerController::class, 'noticeShipping'])->name('auctioneer.orders.notice_shipping');
     Route::post('/orders/{orderId}/notice-arrival', [AuctioneerController::class, 'noticeArrival'])->name('auctioneer.orders.notice_arrival');
-    Route::post('/orders/{orderId}/notice-remit', [AuctioneerController::class, 'noticeRemit'])->name('auctioneer.orders.notice_remit');
+    Route::post('/orders/{orderId}/lots/{lotId}/notice-remit', [AuctioneerController::class, 'noticeOwnerRemit'])->name('auctioneer.orders.notice_owner_remit');
 
     Route::post('/orders/{orderId}/notice-confirm-atm-pay', [AuctioneerController::class, 'noticeConfirmAtmPay'])->name('auctioneer.orders.notice_confirm_atm_pay');
     Route::post('/orders/{orderId}/confirm-paid', [AuctioneerController::class, 'confirmPaid'])->name('auctioneer.orders.confirm_paid');
     Route::post('/orders/{orderId}/confirm-refill-transfer-info', [AuctioneerController::class, 'confirmRefillTransferInfo'])->name('auctioneer.orders.confirm_refill_transfer_info');
     Route::post('/orders/{orderId}/set-withdrawal-bid', [AuctioneerController::class, 'setWithdrawalBid'])->name('auctioneer.orders.set_withdrawal_bid');
+    Route::post('/orders/{orderId}/set-lot-withdrawn', [AuctioneerController::class, 'setLotWithdrawn'])->name('auctioneer.orders.set_lot_withdrawn');
 
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');
