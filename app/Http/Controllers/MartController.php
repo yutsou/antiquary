@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MartController extends Controller
 {
@@ -136,7 +137,45 @@ class MartController extends Controller
     public function searchLots(Request $request)
     {
         $result = $this->lotService->searchLots($request->q);
-        return CustomClass::viewWithTitle(view('mart.lots.index')->with('lots', $result), $request->q.' 搜尋結果');
+
+        // 分離拍賣商品和直賣商品
+        $auctionLots = $result->where('auction_end_at', '!=', null);
+        $directLots = $result->where('auction_end_at', null);
+
+        // 合併兩個集合並保持排序
+        $combinedLots = $auctionLots->concat($directLots);
+
+        // 分頁設置
+        $perPage = 20;
+        $currentPage = $request->get('page', 1);
+
+        // 手動分頁
+        $totalItems = $combinedLots->count();
+        $totalPages = ceil($totalItems / $perPage);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $paginatedLots = $combinedLots->slice($offset, $perPage);
+
+        // 創建分頁器
+        $paginator = new LengthAwarePaginator(
+            $paginatedLots,
+            $totalItems,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+                'query' => $request->query(),
+            ]
+        );
+
+        return CustomClass::viewWithTitle(
+            view('mart.lots.index')
+                ->with('lots', $paginatedLots)
+                ->with('paginator', $paginator)
+                ->with('searchQuery', $request->q),
+            $request->q.' 搜尋結果'
+        );
     }
 
     public function showProduct($lotId)
@@ -148,20 +187,96 @@ class MartController extends Controller
         return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1])->with('description', $description), $lot->name);
     }
 
-    public function showMCategory($mCategoryId)
+    public function showMCategory($mCategoryId, Request $request)
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategories = $mCategory->children()->get();
-        $lots = $mCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
-        return CustomClass::viewWithTitle(view('mart.m_categories.show')->with('mCategory', $mCategory)->with('sCategories', $sCategories)->with('lots', $lots), $mCategory->name);
+        $allLots = $mCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
+
+        // 分離拍賣商品和直賣商品
+        $auctionLots = $allLots->where('auction_end_at', '!=', null);
+        $directLots = $allLots->where('auction_end_at', null);
+
+        // 合併兩個集合並保持排序
+        $combinedLots = $auctionLots->concat($directLots);
+
+        // 分頁設置
+        $perPage = 20;
+        $currentPage = $request->get('page', 1);
+
+        // 手動分頁
+        $totalItems = $combinedLots->count();
+        $totalPages = ceil($totalItems / $perPage);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $paginatedLots = $combinedLots->slice($offset, $perPage);
+
+        // 創建分頁器
+        $paginator = new LengthAwarePaginator(
+            $paginatedLots,
+            $totalItems,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+            ]
+        );
+
+        return CustomClass::viewWithTitle(
+            view('mart.m_categories.show')
+                ->with('mCategory', $mCategory)
+                ->with('sCategories', $sCategories)
+                ->with('lots', $paginatedLots)
+                ->with('paginator', $paginator),
+            $mCategory->name
+        );
     }
 
-    public function  showSCategory($mCategoryId, $sCategoryId)
+    public function showSCategory($mCategoryId, $sCategoryId, Request $request)
     {
         $mCategory = $this->categoryService->getCategory($mCategoryId);
         $sCategory = $this->categoryService->getCategory($sCategoryId);
-        $lots = $sCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
-        return CustomClass::viewWithTitle(view('mart.s_categories.show')->with('mCategory', $mCategory)->with('sCategory', $sCategory)->with('lots', $lots), $sCategory->name);
+        $allLots = $sCategory->lots->whereIn('status', [20,21,61])->sortBy('auction_end_at');
+
+        // 分離拍賣商品和直賣商品
+        $auctionLots = $allLots->where('auction_end_at', '!=', null);
+        $directLots = $allLots->where('auction_end_at', null);
+
+        // 合併兩個集合並保持排序
+        $combinedLots = $auctionLots->concat($directLots);
+
+        // 分頁設置
+        $perPage = 20;
+        $currentPage = $request->get('page', 1);
+
+        // 手動分頁
+        $totalItems = $combinedLots->count();
+        $totalPages = ceil($totalItems / $perPage);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $paginatedLots = $combinedLots->slice($offset, $perPage);
+
+        // 創建分頁器
+        $paginator = new LengthAwarePaginator(
+            $paginatedLots,
+            $totalItems,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+            ]
+        );
+
+        return CustomClass::viewWithTitle(
+            view('mart.s_categories.show')
+                ->with('mCategory', $mCategory)
+                ->with('sCategory', $sCategory)
+                ->with('lots', $paginatedLots)
+                ->with('paginator', $paginator),
+            $sCategory->name
+        );
     }
 
     public function showAbout()

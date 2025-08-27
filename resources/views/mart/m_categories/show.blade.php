@@ -21,59 +21,130 @@
                 @endforeach
             </div>
             <div class="uk-margin-medium">
+                @php
+                    $auctionLotsInPage = $lots->where('auction_end_at', '!=', null);
+                    $directLotsInPage = $lots->where('auction_end_at', null);
+                @endphp
+
                 <!-- 拍賣商品區塊 -->
-            @if($lots->where('auction_end_at', '!=', null)->count() > 0)
-            <h3 class="uk-card-title">拍賣商品</h3>
-            <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
-                @foreach($lots->where('auction_end_at', '!=', null) as $singleLot)
-                    <div>
-                        <div class="uk-card uk-card-default uk-card-hover bidding-card-click" lotId="{{ $singleLot->id }}">
-                            <div class="uk-card-media-top">
-                                <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                     style="background-image: url({{ $singleLot->blImages->first()->url }});">
-                                </div>
-                            </div>
-                            <div class="uk-card-body">
+                @if($auctionLotsInPage->count() > 0)
+                    <h3 class="uk-card-title">拍賣商品</h3>
+                    <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
+                        @foreach($auctionLotsInPage as $singleLot)
+                            <div>
+                                <div class="uk-card uk-card-default uk-card-hover bidding-card-click" lotId="{{ $singleLot->id }}">
+                                    <div class="uk-card-media-top">
+                                        <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
+                                             style="background-image: url({{ $singleLot->blImages->first()->url }});">
+                                        </div>
+                                    </div>
+                                    <div class="uk-card-body">
 
-                                <div class="uk-flex uk-flex-right">
-                                    @include('mart.components.favorite-inline', $singleLot)
+                                        <div class="uk-flex uk-flex-right">
+                                            @include('mart.components.favorite-inline', $singleLot)
+                                        </div>
+                                        <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
+                                        <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
+                                        <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
+                                    </div>
                                 </div>
-                                <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
-                                <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-                                <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
                             </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <!-- 商店直賣商品區塊 -->
+                @if($directLotsInPage->count() > 0)
+                    <h3 class="uk-card-title">Antiquary 精選</h3>
+                    <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
+                        @foreach($directLotsInPage as $singleLot)
+                            <div>
+                                <div class="uk-card uk-card-default uk-card-hover antiquary-card-click" lotId="{{ $singleLot->id }}">
+                                    <div class="uk-card-media-top">
+                                        <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
+                                             style="background-image: url({{ $singleLot->blImages->first()->url }});">
+                                        </div>
+                                    </div>
+                                    <div class="uk-card-body">
+
+                                        <div class="uk-flex uk-flex-right">
+                                            @include('mart.components.favorite-inline', $singleLot)
+                                        </div>
+                                        <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
+                                        <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
+
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <!-- 分頁導航 -->
+                @if(isset($paginator) && $paginator->hasPages())
+                    <div class="uk-margin-medium">
+                        <ul class="uk-pagination uk-flex-center" uk-margin>
+                            {{-- 上一頁 --}}
+                            @if($paginator->onFirstPage())
+                                <li><a href="#" class="uk-disabled"><span uk-pagination-previous></span></a></li>
+                            @else
+                                <li><a href="{{ $paginator->previousPageUrl() }}"><span uk-pagination-previous></span></a></li>
+                            @endif
+
+                            {{-- 頁碼 --}}
+                            @php
+                                $start = max(1, $paginator->currentPage() - 2);
+                                $end = min($paginator->lastPage(), $paginator->currentPage() + 2);
+
+                                // 確保顯示至少5個頁碼
+                                if ($end - $start < 4) {
+                                    if ($start == 1) {
+                                        $end = min($paginator->lastPage(), $start + 4);
+                                    } else {
+                                        $start = max(1, $end - 4);
+                                    }
+                                }
+                            @endphp
+
+                            {{-- 第一頁 --}}
+                            @if($start > 1)
+                                <li><a href="{{ $paginator->url(1) }}">1</a></li>
+                                @if($start > 2)
+                                    <li><span>...</span></li>
+                                @endif
+                            @endif
+
+                            {{-- 頁碼範圍 --}}
+                            @for($page = $start; $page <= $end; $page++)
+                                @if($page == $paginator->currentPage())
+                                    <li class="uk-active"><span>{{ $page }}</span></li>
+                                @else
+                                    <li><a href="{{ $paginator->url($page) }}">{{ $page }}</a></li>
+                                @endif
+                            @endfor
+
+                            {{-- 最後一頁 --}}
+                            @if($end < $paginator->lastPage())
+                                @if($end < $paginator->lastPage() - 1)
+                                    <li><span>...</span></li>
+                                @endif
+                                <li><a href="{{ $paginator->url($paginator->lastPage()) }}">{{ $paginator->lastPage() }}</a></li>
+                            @endif
+
+                            {{-- 下一頁 --}}
+                            @if($paginator->hasMorePages())
+                                <li><a href="{{ $paginator->nextPageUrl() }}"><span uk-pagination-next></span></a></li>
+                            @else
+                                <li><a href="#" class="uk-disabled"><span uk-pagination-next></span></a></li>
+                            @endif
+                        </ul>
+
+                        {{-- 顯示總數信息 --}}
+                        <div class="uk-text-center uk-text-small uk-text-muted">
+                            顯示第 {{ ($paginator->currentPage() - 1) * $paginator->perPage() + 1 }} - {{ min($paginator->currentPage() * $paginator->perPage(), $paginator->total()) }} 項，共 {{ $paginator->total() }} 項商品
                         </div>
                     </div>
-                @endforeach
-            </div>
-        @endif
-
-        <!-- 商店直賣商品區塊 -->
-        @if($lots->where('auction_end_at', null)->count() > 0)
-            <h3 class="uk-card-title">Antiquary 精選</h3>
-            <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
-                @foreach($lots->where('auction_end_at', null) as $singleLot)
-                    <div>
-                        <div class="uk-card uk-card-default uk-card-hover antiquary-card-click" lotId="{{ $singleLot->id }}">
-                            <div class="uk-card-media-top">
-                                <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                     style="background-image: url({{ $singleLot->blImages->first()->url }});">
-                                </div>
-                            </div>
-                            <div class="uk-card-body">
-
-                                <div class="uk-flex uk-flex-right">
-                                    @include('mart.components.favorite-inline', $singleLot)
-                                </div>
-                                <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
-                                <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
+                @endif
             </div>
         </div>
     </div>
