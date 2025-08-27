@@ -483,6 +483,11 @@
             color: white !important;
         }
 
+        /* Mobile sub category card title - white color */
+        .sub-category-card .mobile-card-title {
+            color: white !important;
+        }
+
         .card-price {
             margin-top: auto;
             text-align: center;
