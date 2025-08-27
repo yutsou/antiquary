@@ -2,16 +2,21 @@
 @inject('carbonPresenter', 'App\Presenters\CarbonPresenter')
 
 @section('content')
+    <!-- Breadcrumb -->
     <div class="uk-margin uk-text-small">
         <a href="/" class="custom-color-1 custom-link-mute">首頁</a> > <a href="{{ URL::current() }}" class="custom-color-1 custom-link-mute">{{ $head }}</a>
     </div>
-    <div class="uk-flex uk-flex-center">
-        <div class="uk-width-1-1">
-            <div class="uk-margin-medium">
-                <h1 class="uk-heading-medium">{{ $head }}</h1>
+
+    <!-- Main Content Container -->
+    <div class="main-content-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="section-title-container uk-text-left">
+                <h1 class="section-title">{{ $head }}</h1>
                 @if(isset($searchQuery))
-                    <p class="uk-text-muted">搜尋關鍵字: "{{ $searchQuery }}"</p>
+                    <div class="section-subtitle">搜尋關鍵字: "{{ $searchQuery }}"</div>
                 @endif
+            </div>
             </div>
 
             @php
@@ -21,61 +26,179 @@
 
             <!-- 拍賣商品區塊 -->
             @if($auctionLotsInPage->count() > 0)
-                <h3 class="uk-card-title">拍賣商品</h3>
+            <section class="lots-section">
+                <div class="section-header">
+                    <div class="section-title-container">
+                        <h2 class="section-title">拍賣商品</h2>
+                        <div class="section-subtitle">Live Auctions</div>
+                    </div>
+                    <div class="section-decoration">
+                        <div class="decoration-line"></div>
+                        <div class="decoration-dot"></div>
+                    </div>
+                </div>
+
+                <!-- Desktop Auction Lots -->
+                <div class="uk-visible@m">
                 <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
                     @foreach($auctionLotsInPage as $singleLot)
                         <div>
-                            <div class="uk-card uk-card-default uk-card-hover bidding-card-click" lotId="{{ $singleLot->id }}">
-                                <div class="uk-card-media-top">
-                                    <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                         style="background-image: url({{ $singleLot->blImages->first()->url }});">
+                                <div class="modern-card auction-lot-card bidding-card-click" lotId="{{ $singleLot->id }}">
+                                    <div class="card-image-container">
+                                        <img src="{{ $singleLot->blImages->first()->url }}" alt="{{ $singleLot->name }}" class="card-image">
+                                        <div class="card-overlay">
+                                            <div class="overlay-content">
+                                                <span class="material-symbols-outlined overlay-icon">gavel</span>
+                                                <span class="overlay-text">參與競標</span>
+                                            </div>
+                                        </div>
+                                        <div class="auction-badge">
+                                            <span class="badge-text">拍賣中</span>
+                                        </div>
+                                        <div class="favorite-container">
+                                            @include('mart.components.favorite-inline', $singleLot)
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="uk-card-body">
-
-                                    <div class="uk-flex uk-flex-right">
-                                        @include('mart.components.favorite-inline', $singleLot)
+                                    <div class="card-content">
+                                        <h3 class="card-title">{{ $singleLot->name }}</h3>
+                                        <div class="card-price">
+                                            <span class="price-label">目前出價</span>
+                                            <span class="price-value" id="lot-{{ $singleLot->id }}-price">NT${{ number_format($singleLot->current_bid) }}</span>
+                                        </div>
+                                        <div class="auction-time">
+                                            <span class="material-symbols-outlined time-icon">schedule</span>
+                                            <span class="time-text">{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</span>
+                                        </div>
                                     </div>
-                                    <h3 class="uk-card-title uk-text-truncate custom-font-medium">{{ $singleLot->name }}</h3>
-                                    <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-                                    <p>{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</p>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
+
+                <!-- Mobile Auction Lots -->
+                <div class="uk-hidden@m">
+                    <div class="uk-child-width-1-2@s uk-grid-small uk-grid-match" uk-grid>
+                        @foreach($auctionLotsInPage as $singleLot)
+                            <div>
+                                <div class="mobile-card auction-lot-card bidding-card-click" lotId="{{ $singleLot->id }}">
+                                    <div class="mobile-card-image-container">
+                                        <img src="{{ $singleLot->blImages->first()->url }}" alt="{{ $singleLot->name }}" class="mobile-card-image">
+                                        <div class="mobile-card-overlay">
+                                            <div class="mobile-overlay-content">
+                                                <span class="material-symbols-outlined mobile-overlay-icon">gavel</span>
+                                            </div>
+                                        </div>
+                                        <div class="mobile-auction-badge">
+                                            <span class="mobile-badge-text">拍賣中</span>
+                                        </div>
+                                        <div class="mobile-favorite-container">
+                                        @include('mart.components.favorite-inline', $singleLot)
+                                        </div>
+                                    </div>
+                                    <div class="mobile-card-content">
+                                        <h3 class="mobile-card-title">{{ $singleLot->name }}</h3>
+                                        <div class="mobile-auction-time">
+                                            <span class="material-symbols-outlined mobile-time-icon">schedule</span>
+                                            <span class="mobile-time-text">{!! $carbonPresenter->lotPresent($singleLot->id, $singleLot->auction_end_at) !!}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mobile-card-price-container">
+                                        <div class="mobile-card-price">
+                                            <span class="mobile-price-label">目前出價</span>
+                                            <span class="mobile-price-value" id="lot-{{ $singleLot->id }}-price">NT${{ number_format($singleLot->current_bid) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                        </div>
+                </div>
+            </section>
             @endif
 
             <!-- 商店直賣商品區塊 -->
             @if($directLotsInPage->count() > 0)
-                <h3 class="uk-card-title">Antiquary 精選</h3>
+            <section class="lots-section">
+                <div class="section-header">
+                    <div class="section-title-container">
+                        <h2 class="section-title">Antiquary 精選</h2>
+                        <div class="section-subtitle">Featured Products</div>
+                    </div>
+                    <div class="section-decoration">
+                        <div class="decoration-line"></div>
+                        <div class="decoration-dot"></div>
+                    </div>
+                </div>
+
+                <!-- Desktop Direct Lots -->
+                <div class="uk-visible@m">
                 <div class="uk-child-width-1-3@s uk-child-width-1-4@m uk-grid-small uk-grid-match" uk-grid>
                     @foreach($directLotsInPage as $singleLot)
                         <div>
-                            <div class="uk-card uk-card-default uk-card-hover antiquary-card-click" lotId="{{ $singleLot->id }}">
-                                <div class="uk-card-media-top">
-                                    <div class="uk-background-cover uk-height-medium uk-panel uk-flex uk-flex-center uk-flex-middle"
-                                         style="background-image: url({{ $singleLot->blImages->first()->url }});">
+                                <div class="modern-card product-lot-card antiquary-card-click" lotId="{{ $singleLot->id }}">
+                                    <div class="card-image-container">
+                                        <img src="{{ $singleLot->blImages->first()->url }}" alt="{{ $singleLot->name }}" class="card-image">
+                                        <div class="card-overlay">
+                                            <div class="overlay-content">
+                                                <span class="material-symbols-outlined overlay-icon">visibility</span>
+                                                <span class="overlay-text">查看詳情</span>
+                                            </div>
+                                        </div>
+                                        <div class="favorite-container">
+                                            @include('mart.components.favorite-inline', $singleLot)
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="uk-card-body">
-
-                                    <div class="uk-flex uk-flex-right">
-                                        @include('mart.components.favorite-inline', $singleLot)
+                                    <div class="card-content">
+                                        <h3 class="card-title">{{ $singleLot->name }}</h3>
+                                        <div class="card-price">
+                                            <span class="price-label">售價</span>
+                                            <span class="price-value" id="lot-{{ $singleLot->id }}-price">NT${{ number_format($singleLot->current_bid) }}</span>
+                                        </div>
                                     </div>
-                                    <h3 class="uk-card-title custom-font-medium">{{ $singleLot->name }}</h3>
-                                    <label class="custom-font-medium" id="lot-{{ $singleLot->id }}-price" style="color: #003a6c">NT${{ number_format($singleLot->current_bid) }}</label>
-
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
+
+                <!-- Mobile Direct Lots -->
+                <div class="uk-hidden@m">
+                    <div class="uk-child-width-1-2@s uk-grid-small uk-grid-match" uk-grid>
+                        @foreach($directLotsInPage as $singleLot)
+                            <div>
+                                <div class="mobile-card product-lot-card antiquary-card-click" lotId="{{ $singleLot->id }}">
+                                    <div class="mobile-card-image-container">
+                                        <img src="{{ $singleLot->blImages->first()->url }}" alt="{{ $singleLot->name }}" class="mobile-card-image">
+                                        <div class="mobile-card-overlay">
+                                            <div class="mobile-overlay-content">
+                                                <span class="material-symbols-outlined mobile-overlay-icon">visibility</span>
+                                            </div>
+                                        </div>
+                                        <div class="mobile-favorite-container">
+                                        @include('mart.components.favorite-inline', $singleLot)
+                                        </div>
+                                    </div>
+                                    <div class="mobile-card-content">
+                                        <h3 class="mobile-card-title">{{ $singleLot->name }}</h3>
+                                    </div>
+                                    <div class="mobile-card-price-container">
+                                        <div class="mobile-card-price">
+                                            <span class="mobile-price-label">售價</span>
+                                            <span class="mobile-price-value" id="lot-{{ $singleLot->id }}-price">NT${{ number_format($singleLot->current_bid) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                        </div>
+                </div>
+            </section>
             @endif
 
             <!-- 分頁導航 -->
             @if(isset($paginator) && $paginator->hasPages())
-                <div class="uk-margin-medium">
+            <div class="pagination-section">
                     <ul class="uk-pagination uk-flex-center" uk-margin>
                         {{-- 上一頁 --}}
                         @if($paginator->onFirstPage())
@@ -133,19 +256,481 @@
                     </ul>
 
                     {{-- 顯示總數信息 --}}
-                    <div class="uk-text-center uk-text-small uk-text-muted">
+                <div class="pagination-info">
                         顯示第 {{ ($paginator->currentPage() - 1) * $paginator->perPage() + 1 }} - {{ min($paginator->currentPage() * $paginator->perPage(), $paginator->total()) }} 項，共 {{ $paginator->total() }} 項商品
                     </div>
                 </div>
             @endif
         </div>
-    </div>
+
     @include('mart.components.favorite-outline')
 @endsection
+
 @push('style')
-    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}"
-          crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ asset('extensions/jquery-modal/0.9.2/css/jquery.modal.min.css') }}" crossorigin="anonymous">
+    <style>
+        /* Main Content Container */
+        .main-content-container {
+            padding: 60px 0;
+            background: #fff;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        /* Section Styles */
+        .lots-section {
+            margin-bottom: 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title-container {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #003a6c;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section-decoration {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .decoration-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #003a6c, #f77f00);
+            border-radius: 2px;
+        }
+
+        .decoration-dot {
+            width: 8px;
+            height: 8px;
+            background: #d62828;
+            border-radius: 50%;
+        }
+
+        /* Modern Card Styles */
+        .modern-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modern-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-image-container {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .modern-card:hover .card-image {
+            transform: scale(1.1);
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 58, 108, 0.8) 0%, rgba(247, 127, 0, 0.8) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modern-card:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .overlay-content {
+            text-align: center;
+            color: white;
+        }
+
+        .overlay-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .overlay-text {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .card-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #003a6c !important;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+            min-height: 2.8em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-word;
+            text-shadow: none;
+            background: transparent;
+        }
+
+        .card-price {
+            margin-top: auto;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .price-label {
+            display: block;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .price-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #d62828;
+        }
+
+        .auction-time {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .time-icon {
+            font-size: 1rem;
+            color: #f77f00;
+        }
+
+        /* Auction Badge */
+        .auction-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #d62828, #9e1b1b);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(214, 40, 40, 0.3);
+        }
+
+        .badge-text {
+            color: white;
+        }
+
+        /* Favorite Container */
+        .favorite-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+        }
+
+        /* Mobile Card Styles */
+        .mobile-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .mobile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .mobile-card-image-container {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .mobile-card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-card:hover .mobile-card-image {
+            transform: scale(1.05);
+        }
+
+        .mobile-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 58, 108, 0.7) 0%, rgba(247, 127, 0, 0.7) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-card:hover .mobile-card-overlay {
+            opacity: 1;
+        }
+
+        .mobile-overlay-content {
+            text-align: center;
+            color: white;
+        }
+
+        .mobile-overlay-icon {
+            font-size: 1.5rem;
+        }
+
+        .mobile-card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #003a6c !important;
+            margin: 0 0 10px 0;
+            line-height: 1.3;
+            min-height: 2.6em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-word;
+            text-shadow: none;
+            background: transparent;
+        }
+
+        .mobile-card-price-container {
+            background: white;
+            padding: 15px 20px;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .mobile-card-price {
+            text-align: center;
+        }
+
+        .mobile-price-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 3px;
+        }
+
+        .mobile-price-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #d62828;
+        }
+
+        .mobile-auction-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #d62828, #9e1b1b);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .mobile-badge-text {
+            color: white;
+        }
+
+        .mobile-auction-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #6c757d;
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+
+        .mobile-time-icon {
+            font-size: 0.9rem;
+            color: #f77f00;
+        }
+
+        .mobile-favorite-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+
+        /* Pagination Styles */
+        .pagination-section {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .pagination-info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 959px) {
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .main-content-container {
+                padding: 40px 0;
+            }
+
+            .lots-section {
+                margin-bottom: 60px;
+            }
+        }
+
+        @media (max-width: 639px) {
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .main-content-container {
+                padding: 30px 0;
+            }
+
+            .lots-section {
+                margin-bottom: 80px;
+            }
+
+            .card-content {
+                padding: 20px;
+            }
+
+            .mobile-card-content {
+                padding: 15px;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 2.0s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .scale-in {
+            animation: scaleIn 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
 @endpush
+
 @push('scripts')
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('extensions/jquery-modal/0.9.2/js/jquery.modal.min.js') }}"></script>
