@@ -399,18 +399,44 @@ class LotService extends LotRepository
 
     public function searchLots($query)
     {
-        // 使用數據庫查詢替代 Scout 搜尋，因為 collection 驅動可能有問題
-        $words = explode(" ", $query);
+        // 輸入驗證和清理
+        $query = trim($query);
+
+        // 檢查輸入長度
+        if (strlen($query) > 255) {
+            return collect(); // 返回空集合
+        }
+
+        // 移除危險字符
+        $query = preg_replace('/[<>"\']/', '', $query);
+
+        // 如果清理後為空，返回空集合
+        if (empty($query)) {
+            return collect();
+        }
+
+        // 分割關鍵字並過濾空值
+        $words = array_filter(explode(" ", $query), function($word) {
+            return !empty(trim($word)) && strlen(trim($word)) >= 1;
+        });
+
+        // 限制關鍵字數量
+        $words = array_slice($words, 0, 10);
+
         $query = Lot::whereIn('status', [21, 61]);
 
         foreach($words as $word) {
-            $query->where(function($q) use ($word) {
-                $q->where('name', 'LIKE', '%' . $word . '%')
-                  ->orWhere('description', 'LIKE', '%' . $word . '%');
-            });
+            $word = trim($word);
+            if (!empty($word)) {
+                $query->where(function($q) use ($word) {
+                    $q->where('name', 'LIKE', '%' . $word . '%')
+                      ->orWhere('description', 'LIKE', '%' . $word . '%');
+                });
+            }
         }
 
-        return $query->get();
+        // 限制返回結果數量
+        return $query->limit(1000)->get();
     }
 
     #type 0 application 1 returned 2 unsold

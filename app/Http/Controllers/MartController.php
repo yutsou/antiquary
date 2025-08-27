@@ -136,6 +136,21 @@ class MartController extends Controller
 
     public function searchLots(Request $request)
     {
+        // 驗證搜索參數
+        $request->validate([
+            'q' => 'nullable|string|max:255',
+        ]);
+
+        // 如果沒有搜索關鍵字，返回空結果
+        if (empty($request->q)) {
+            return CustomClass::viewWithTitle(
+                view('mart.lots.index')
+                    ->with('lots', collect())
+                    ->with('searchQuery', ''),
+                '搜尋結果'
+            );
+        }
+
         $result = $this->lotService->searchLots($request->q);
 
         // 分離拍賣商品和直賣商品
