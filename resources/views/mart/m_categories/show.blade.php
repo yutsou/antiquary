@@ -18,16 +18,6 @@
 
         <!-- Sub Categories Section -->
         <section class="sub-categories-section">
-            <div class="section-header">
-                <div class="section-title-container">
-                    <h2 class="section-title">子分類</h2>
-                    <div class="section-subtitle">Sub Categories</div>
-                </div>
-                <div class="section-decoration">
-                    <div class="decoration-line"></div>
-                    <div class="decoration-dot"></div>
-                </div>
-            </div>
 
             <!-- Desktop Sub Categories -->
             <div class="uk-visible@m">
