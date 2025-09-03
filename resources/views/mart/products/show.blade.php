@@ -532,4 +532,41 @@
             });
         });
     </script>
+    <script>
+        $(function () {
+            // Click handlers
+            $('.auction-card-click').on('click', function() {
+                let auctionId = $(this).attr('auctionId');
+                window.location.assign('/auctions/'+auctionId);
+            });
+
+            $('.product-card-click').on('click', function() {
+                let productId = $(this).attr('productId');
+                window.location.assign('/products/'+productId);
+            });
+
+            $('.main-category-card-click').on('click', function() {
+                let mainCategoryId = $(this).attr('main-categoryId');
+                window.location.assign('/m-categories/'+ mainCategoryId);
+            });
+
+            // Optional hover state toggle (no animations)
+            $('.modern-card, .mobile-card').on('mouseenter', function() {
+                $(this).addClass('card-hover');
+            }).on('mouseleave', function() {
+                $(this).removeClass('card-hover');
+            });
+
+            // Smooth scroll for in-page anchors (no reveal animations)
+            $('a[href^="#"]').on('click', function(e) {
+                e.preventDefault();
+                const target = $(this.getAttribute('href'));
+                if (target.length) {
+                    $('html, body').animate({
+                        scrollTop: target.offset().top - 80
+                    }, 800);
+                }
+            });
+        });
+    </script>
 @endpush
