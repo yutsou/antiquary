@@ -216,7 +216,7 @@
 
             </div>
             <div class="uk-hidden@m">
-                <ul class="uk-child-width-expand" uk-tab>
+                <ul class="uk-child-width-expand" uk-tab id="product-tab">
                     <li class="uk-active"><a href="#">商品規格</a></li>
                     <li><a href="#">商品詳情</a></li>
                 </ul>
@@ -279,6 +279,26 @@
                                 </li>
                                 @endif
                             @endforeach
+                            <li>
+                                <div class="modern-card category-card main-category-card-click" main-categoryId="{{ $categoryData['category']->id }}">
+                                    <div class="card-image-container">
+                                        <img src="{{ $categoryData['category']->parent->image->url ?? '/images/web/common/no-picture.jpg' }}" alt="{{ $categoryData['category']->name }}" class="card-image">
+                                        <div class="card-overlay">
+                                            <div class="overlay-content">
+                                                <span class="material-symbols-outlined overlay-icon">category</span>
+                                                <span class="overlay-text">瀏覽分類</span>
+                                            </div>
+                                        </div>
+                            </div>
+                                    <div class="card-content">
+                                        <h3 class="card-title">更多{{ $categoryData['category']->name }}的商品</h3>
+                                        <div class="card-action">
+                                            <span class="action-text">查看更多</span>
+                                            <span class="material-symbols-outlined action-icon">arrow_forward</span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
                         </ul>
                                 <a class="uk-position-center-left uk-position-small uk-hidden-hover slider-nav-btn" href="#" uk-slidenav-previous
                             uk-slider-item="previous"></a>
@@ -317,6 +337,21 @@
                             </li>
                             @endif
                         @endforeach
+                        <li class="uk-width-5-6">
+                            <div class="mobile-card main-category-card-click" main-categoryId="{{ $categoryData['category']->id }}">
+                                <div class="mobile-card-image-container">
+                                    <img src="{{ $categoryData['category']->parent->image->url ?? '/images/web/common/no-picture.jpg' }}" alt="{{ $categoryData['category']->name }}" class="mobile-card-image">
+                                    <div class="mobile-card-overlay">
+                                        <div class="mobile-overlay-content">
+                                            <span class="material-symbols-outlined mobile-overlay-icon">category</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mobile-card-content">
+                                    <h3 class="mobile-card-title">更多{{ $categoryData['category']->name }}的商品</h3>
+                                </div>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -333,7 +368,7 @@
           crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/hero.css') }}">
     <style>
-        .uk-active > a {
+        #product-tab .uk-active > a {
             border-bottom: 2px solid #003a6c !important;
         }
     </style>
