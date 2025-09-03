@@ -9,7 +9,7 @@
     </div>
     <div class="uk-child-width-1-3@m uk-grid-small uk-grid-match" uk-grid>
         <div>
-            <div class="uk-card uk-card-body custom-color-group-1">
+            <div class="uk-card uk-card-body custom-color-group-1" style="border-radius: 20px;">
                 <h3 class="uk-card-title" style="color: #fff;">會員資料</h3>
                 <ul class="uk-list uk-link-text">
                     <li><a href="{{ route('account.profile.edit') }}">帳戶設定</a></li>
@@ -33,7 +33,7 @@
             </div>
         </div>
         <div>
-            <div class="uk-card uk-card-body custom-color-group-3">
+            <div class="uk-card uk-card-body custom-color-group-3" style="border-radius: 20px;">
                 <h3 class="uk-card-title" style="color: #fff;">競標</h3>
                 <ul class="uk-list uk-link-text">
                     <li><a href="{{ route('account.favorites.index') }}">感興趣的物品</a></li>
@@ -53,7 +53,7 @@
             </div>
         </div>
         <div>
-            <div class="uk-card uk-card-body custom-color-group-4">
+            <div class="uk-card uk-card-body custom-color-group-4" style="border-radius: 20px;">
                 <h3 class="uk-card-title" style="color: #fff;">委賣物品</h3>
                 <ul class="uk-list uk-link-text">
                     <li><a href="{{ route('account.applications.create') }}">提交申請</a></li>

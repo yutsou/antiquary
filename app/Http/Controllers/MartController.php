@@ -198,8 +198,9 @@ class MartController extends Controller
         $lot = $this->lotService->getLot($lotId);
         $categories = $this->categoryService->getCategories($lot);
         $description = $lot->description;
+        $productsByCategory = $this->lotService->getPublishedLotsBySubCategories($lotId, $lot->sub_category->id);
 
-        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1])->with('description', $description), $lot->name);
+        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1])->with('description', $description)->with('productsByCategory', $productsByCategory), $lot->name);
     }
 
     public function showMCategory($mCategoryId, Request $request)

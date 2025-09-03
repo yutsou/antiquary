@@ -623,6 +623,29 @@ class LotService extends LotRepository
         return $result;
     }
 
+    public function getPublishedLotsBySubCategories($productId, $categoryId)
+    {
+        $subCategory = \App\Models\Category::find($categoryId);
+
+        $lots = $subCategory->lots()
+        ->where('status', 61)
+        ->where('inventory', '>', 0)
+        ->with(['blImages', 'categories'])
+        ->orderBy('created_at', 'desc')
+        ->limit(20)
+        ->get();
+
+        if ($lots->count() > 0) {
+            $result[] = [
+                'category' => $subCategory,
+                'lots' => $lots
+            ];
+        }
+
+
+        return $result;
+    }
+
     public function findOrFail($id)
     {
         return Lot::findOrFail($id);

@@ -5,6 +5,7 @@
 .custom-button-1 {
     background-color: #003a6c;
     color: white !important;
+    border-radius: 20px;
 }
 
 .custom-button-1:hover {
@@ -16,6 +17,7 @@
 .custom-button-2 {
     background-color: #d62828;
     color: white !important;
+    border-radius: 20px;
 }
 
 .custom-button-2:hover {
