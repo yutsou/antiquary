@@ -60,7 +60,7 @@
                                             @foreach($categories as $category)
                                                 <div>
                                                     <div class="uk-card uk-card-default uk-card-small uk-card-hover uk-grid-collapse uk-margin custom-category-card-click" uk-grid
-                                                         style="background-color: {{ $category->color_hex }};" categoryId="{{ $category->id }}">
+                                                         style="background-color: {{ $category->color_hex }}; border-radius: 20px;" categoryId="{{ $category->id }}">
                                                         <div class="uk-card-media-left uk-cover-container uk-width-1-3">
                                                             <img src="{{ $category->image->url }}" alt="" uk-cover>
                                                         </div>
@@ -217,7 +217,7 @@
                                     @foreach($categories as $category)
                                         <div>
                                             <div class="uk-card uk-card-default uk-card-small uk-card-hover uk-grid-collapse uk-margin custom-category-card-click" uk-grid
-                                                 style="background-color: {{ $category->color_hex }};" categoryId="{{ $category->id }}">
+                                                 style="background-color: {{ $category->color_hex }}; border-radius: 20px;" categoryId="{{ $category->id }}">
                                                 <div class="uk-card-media-left uk-cover-container uk-width-1-3">
                                                     <img src="{{ $category->image->url }}" alt="" uk-cover>
                                                 </div>
