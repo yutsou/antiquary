@@ -216,38 +216,33 @@
 
             </div>
             <div class="uk-hidden@m">
-                <div>
-                    <ul class="uk-child-width-expand" uk-tab>
-                        <li class="uk-active"><a href="#">商品規格</a></li>
-                        <li><a href="#">商品詳情</a></li>
-                    </ul>
-                    <ul class="uk-switcher uk-margin">
-                        <li>
-                            <table class="uk-table">
-                                <tbody>
+                <ul class="uk-child-width-expand" uk-tab>
+                    <li class="uk-active"><a href="#">商品規格</a></li>
+                    <li><a href="#">商品詳情</a></li>
+                </ul>
+                <ul class="uk-switcher uk-margin">
+                    <li>
+                        <table class="uk-table" style="table-layout: fixed; width: 100% !important;">
+                            <tbody>
+                            <tr>
+                                <td class="uk-width-1-5">分類</td>
+                                <td class="uk-width-expand">{{ $lot->main_category->name }}</td>
+                            </tr>
+                            @foreach($lot->specifications as $specification)
                                 <tr>
-                                    <td class="uk-width-1-5 uk-text-nowrap">分類</td>
-                                    <td>{{ $lot->main_category->name }}</td>
+                                    <td class="uk-width-1-5">{{ $specification->title }}</td>
+                                    <td class="uk-width-expand">{{ $specification->value }}</td>
                                 </tr>
-                                @foreach($lot->specifications as $specification)
-                                    <tr>
-                                        <td class="uk-text-nowrap">{{ $specification->title }}</td>
-                                        <td>{{ $specification->value }}</td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </li>
-                        <li>
-                            <div
-                                style="box-sizing: border-box; border-right: 1em #fff solid; border-left: 1em #fff solid">
-                                <p>
-                                    {!! nl2br($lot->description) !!}
-                                </p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>
+                        <p>
+                            {!! nl2br($lot->description) !!}
+                        </p>
+                    </li>
+                </ul>
             </div>
         </div>
         <div class="uk-margin-medium">
@@ -354,6 +349,7 @@
             }
 
         }
+
     </style>
     <style>
         .lot-modal-img {
