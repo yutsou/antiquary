@@ -268,7 +268,7 @@
 
         <div class="uk-section uk-transparent">
             <div class="uk-container">
-                <div class="uk-grid-match uk-child-width-1-3@m uk-text-center" uk-grid>
+                <div class="uk-grid-match uk-child-width-1-3@m uk-flex uk-flex-center uk-text-center" uk-grid>
                     <div>
                         <h4>關於 Antiquary</h4>
                         <ul class="uk-list uk-link-text">
@@ -292,7 +292,24 @@
                     </div>
                 </div>
                 <hr>
-                <div class="uk-margin-medium-top uk-text-center">
+                <div class="uk-flex uk-flex-center uk-margin-medium-top" uk-grid>
+                    <div>
+                        <a href="https://line.me/R/ti/p/%40164mbqgn" target="_blank">
+                            <img src="{{ asset('images/web/common/line-square-grey.png') }}" alt="LINE" width="32">
+                        </a>
+                    </div>
+                    <div>
+                        <a href="https://www.facebook.com/19th.flea.market" target="_blank">
+                            <img src="{{ asset('images/web/common/Facebook_Logo_Secondary.png') }}" alt="Facebook" width="32">
+                        </a>
+                    </div>
+                    <div>
+                        <a href="https://www.instagram.com/p/DN25OozXDLC/" target="_blank">
+                            <img src="{{ asset('images/web/common/Instagram_Glyph_Black.png') }}" alt="Instagram" width="32">
+                        </a>
+                    </div>
+                </div>
+                <div class="uk-text-center" style="margin-top: 20px;">
                     <a href="mailto:service@antiquary.com.tw" class="uk-link-text"><span uk-icon="mail"></span> service@antiquary.com.tw</a>
                 </div>
                 <div class="uk-margin uk-text-center">
