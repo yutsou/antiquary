@@ -75,8 +75,6 @@
                                 <h3 class="uk-card-title uk-form-label">上傳物品圖片</h3>
                                 <p class="uk-text-meta">可經由拖曳改變圖片順序，第一張圖片為封面圖片。</p>
                                 <div class="uk-placeholder uk-text-center">
-                                    <span uk-icon="icon: cloud-upload"></span>
-                                    <span class="uk-text-middle">拖曳圖片到此處，或</span>
                                     <div uk-form-custom>
                                         <input type="file" multiple id="gallery" accept="image/jpeg, image/png">
                                         <span class="uk-link">選擇圖片</span>
