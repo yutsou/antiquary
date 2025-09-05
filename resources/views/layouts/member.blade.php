@@ -304,7 +304,7 @@
                         </a>
                     </div>
                     <div>
-                        <a href="https://www.instagram.com/p/DN25OozXDLC/" target="_blank">
+                        <a href="https://www.instagram.com/19th.antique/" target="_blank">
                             <img src="{{ asset('images/web/common/Instagram_Glyph_Black.png') }}" alt="Instagram" width="32">
                         </a>
                     </div>
