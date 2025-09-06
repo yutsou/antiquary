@@ -108,6 +108,16 @@ class ExpertController extends Controller
         return back()->with('notification', '修改成功');
     }
 
+    public function deleteSubCategory($mainCategoryId, $subCategoryId)
+    {
+        try {
+            $this->categoryService->deleteCategory($subCategoryId);
+            return back()->with('notification', '子分類刪除成功');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
     public function manageDefaultSpecificationTitles($mainCategoryId)
     {
         $defaultSpecificationTitles = $this->categoryService->getCategory($mainCategoryId)->defaultSpecificationTitles;

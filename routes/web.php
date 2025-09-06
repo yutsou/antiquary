@@ -91,6 +91,7 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::get('/main-categories', [AuctioneerController::class, 'indexMainCategories'])->name('auctioneer.main_categories.index');
     Route::get('/main-categories/{mainCategoryId}/edit', [AuctioneerController::class, 'editMainCategory'])->name('auctioneer.main_categories.edit');
     Route::post('/main-categories/{mainCategoryId}', [AuctioneerController::class, 'updateMainCategory'])->name('auctioneer.main_categories.update');
+    Route::delete('/main-categories/{mainCategoryId}', [AuctioneerController::class, 'deleteMainCategory'])->name('auctioneer.main_categories.delete');
 
     Route::get('/orders', [AuctioneerController::class, 'indexOrders'])->name('auctioneer.orders.index');
     Route::get('/orders/{orderId}', [AuctioneerController::class, 'showOrder'])->name('auctioneer.orders.show');
@@ -158,6 +159,7 @@ Route::prefix('expert/dashboard')->middleware(EnsureIsExpert::class)->group(func
     Route::post('/main-categories/{mainCategoryId}/sub-categories', [ExpertController::class, 'storeSubCategory'])->name('expert.sub_categories.store');
     Route::get('/main-categories/{mainCategoryId}/sub-categories/{subCategoryId}', [ExpertController::class, 'editSubCategory'])->name('expert.sub_categories.edit');
     Route::post('/main-categories/{mainCategoryId}/sub-categories/{subCategoryId}', [ExpertController::class, 'updateSubCategory'])->name('expert.sub_categories.update');
+    Route::delete('/main-categories/{mainCategoryId}/sub-categories/{subCategoryId}', [ExpertController::class, 'deleteSubCategory'])->name('expert.sub_categories.delete');
 
     Route::get('/main-categories/{mainCategoryId}/default-specification-titles/manage', [ExpertController::class, 'manageDefaultSpecificationTitles'])->name('expert.default_specification_titles.manage');
     Route::post('/main-categories/{mainCategoryId}/default-specification-titles', [ExpertController::class, 'storeDefaultSpecificationTitles'])->name('expert.default_specification_titles.store');

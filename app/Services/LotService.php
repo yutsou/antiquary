@@ -552,6 +552,14 @@ class LotService extends LotRepository
             {
                 return '<a href="'.route('auctioneer.products.edit', $lot->id).'">'.$lot->name.'</a>';
             })
+            ->addColumn('main_category', function ($lot)
+            {
+                return $lot->main_category->name;
+            })
+            ->addColumn('sub_category', function ($lot)
+            {
+                return $lot->sub_category->name;
+            })
             /*->addColumn('specification', function ($lot)
             {
                 $specification = $lot->specifications->pluck('value')->toArray();
@@ -570,7 +578,7 @@ class LotService extends LotRepository
             {
                 return $auctioneerProductPresenter->present($lot);
             })
-            ->rawColumns(['name', 'status', 'action'])
+            ->rawColumns(['name', 'status', 'action', 'main_category', 'sub_category'])
             ->toJson();
 
         return  $datatable;

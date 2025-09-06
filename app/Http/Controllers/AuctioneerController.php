@@ -154,6 +154,16 @@ class AuctioneerController extends Controller
         return back()->with('notification', '修改成功');
     }
 
+    public function deleteMainCategory($categoryId)
+    {
+        try {
+            $this->categoryService->deleteCategory($categoryId);
+            return back()->with('notification', '主分類刪除成功');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
     public function indexOrders()
     {
         $customView = CustomClass::viewWithTitle(view('auctioneer.orders.index'), '訂單管理');
