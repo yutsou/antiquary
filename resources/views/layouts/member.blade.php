@@ -13,6 +13,10 @@
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        <meta property="og:image" content="{{ asset('/images/web/common/logo.png') }}">
+        <meta property="og:image:width" content="787">
+        <meta property="og:image:height" content="245">
+
         <!-- Styles -->
         <link rel="stylesheet" href="{{ asset('extensions/uikit-3.15.19/css/uikit.min.css') }}" />
         <link rel="stylesheet" href="{{ asset('css/custom.css') }}?v={{$version}}" />
