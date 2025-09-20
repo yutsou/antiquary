@@ -13,7 +13,7 @@
         <!-- CSRF Token -->
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <meta property="og:image" content="{{ asset('/images/web/common/logo.png') }}">
+        <meta property="og:image" content="{{ asset('/images/web/common/icon.png') }}">
         <meta property="og:image:width" content="787">
         <meta property="og:image:height" content="245">
 
