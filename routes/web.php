@@ -34,6 +34,7 @@ Route::get('/search', [MartController::class, 'searchLots'])->name('mart.lots.se
 Route::get('/m-categories/{mCategoryId}', [MartController::class, 'showMCategory'])->name('mart.m_categories.show');
 Route::get('/m-categories/{mCategoryId}/s-categories/{sCategoryId}', [MartController::class, 'showSCategory'])->name('mart.s_categories.show');
 Route::get('/products/{lotId}', [MartController::class, 'showProduct'])->name('mart.products.show');
+Route::get('/articles/{articleId}', [MartController::class, 'showArticle'])->name('mart.articles.show');
 
 #Auth
 Route::middleware('guest')->group(function () {
@@ -135,6 +136,14 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::get('/merge-shipping-requests', [AuctioneerController::class, 'indexMergeShippingRequests'])->name('auctioneer.merge_shipping_requests.index');
     Route::get('/merge-shipping-requests/{requestId}', [AuctioneerController::class, 'showMergeShippingRequest'])->name('auctioneer.merge_shipping_requests.show');
     Route::post('/merge-shipping-requests/{requestId}', [AuctioneerController::class, 'updateMergeShippingRequest'])->name('auctioneer.merge_shipping_requests.update');
+
+    // 文章管理
+    Route::get('/articles', [AuctioneerController::class, 'indexArticles'])->name('auctioneer.articles.index');
+    Route::get('/articles/create', [AuctioneerController::class, 'createArticle'])->name('auctioneer.articles.create');
+    Route::post('/articles', [AuctioneerController::class, 'storeArticle'])->name('auctioneer.articles.store');
+    Route::get('/articles/{articleId}/edit', [AuctioneerController::class, 'editArticle'])->name('auctioneer.articles.edit');
+    Route::post('/articles/{articleId}', [AuctioneerController::class, 'updateArticle'])->name('auctioneer.articles.update');
+    Route::delete('/articles/{articleId}', [AuctioneerController::class, 'deleteArticle'])->name('auctioneer.articles.delete');
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');

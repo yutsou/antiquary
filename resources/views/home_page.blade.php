@@ -302,6 +302,7 @@
     @endif
 
         <!-- Knowledge Article Section -->
+        @if($articles && $articles->count() > 0)
         <section class="">
             <div class="section-header">
                 <div class="section-title-container">
@@ -314,102 +315,67 @@
                 </div>
             </div>
 
-            <div class="article-container">
-                <div class="article-card">
-                    <div class="article-header">
-                        <div class="article-icon">
-                            <span class="material-symbols-outlined">auto_stories</span>
-                        </div>
-                        <div class="article-meta">
-                            <h3 class="article-title" style="color: #fff;">歐洲瓷盒的歷史與原始用途</h3>
-                            <div class="article-subtitle">European Porcelain Boxes: History & Original Purposes</div>
-                        </div>
-                    </div>
-
-                    <div class="article-content">
-                        <div class="article-intro">
-                            <p>歐洲瓷盒原始功能兼具實用與裝飾，從18世紀的鼻菸盒、香粉盒，到19–20世紀的珠寶飾品盒，始終象徵着貴族與上層社會的生活美學。今天，它們更多被視為藝術品與收藏品，每件手工繪製的瓷盒，都是承載歐洲工藝與浪漫風格的迷你藝術品。</p>
-                        </div>
-
-                        <div class="article-sections">
-                            <div class="article-section">
-                                <div class="section-number">1️⃣</div>
-                                <div class="section-content">
-                                    <h4 class="section-title">起源與發展</h4>
-                                    <p>18世紀的法國（尤其是 Limoges 與巴黎工坊）是瓷盒的發源地之一。這些瓷盒在當時多為手工製作、手繪裝飾，並鑲上黃銅、鎏金或銀質的金屬邊框。最初稱為 "bonbonnière"，是上流社會貴族男女隨身攜帶的精緻小物。</p>
+            <!-- Article Slider -->
+            <div class="uk-position-relative uk-visible-toggle" tabindex="-1" uk-slider="center: true">
+                <ul class="uk-slider-items">
+                    @foreach($articles as $article)
+                    <li class="uk-width-3-4">
+                        <div class="article-container">
+                            <div class="article-card">
+                                <div class="article-header">
+                                    <div class="article-icon">
+                                        <span class="material-symbols-outlined">auto_stories</span>
+                                    </div>
+                                    <div class="article-meta">
+                                        <h3 class="article-title" style="color: #fff;">{{ $article->title }}</h3>
+                                        @if($article->subtitle)
+                                        <div class="article-subtitle">{{ $article->subtitle }}</div>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="article-section">
-                                <div class="section-number">2️⃣</div>
-                                <div class="section-content">
-                                    <h4 class="section-title">主要用途</h4>
-                                    <ul class="usage-list">
-                                        <li><strong>珠寶與飾品盒：</strong>最常見的功能，用來存放戒指、耳環、胸針或小件首飾，特別放在梳妝台上，兼具實用與裝飾。</li>
-                                        <li><strong>鼻菸盒（snuff box）：</strong>18–19世紀盛行於貴族圈，用來存放磨成粉末的鼻菸。當時瓷質鼻菸盒象徵身份與品味。</li>
-                                        <li><strong>香粉盒與化妝小盒：</strong>部分瓷盒設計較扁平，內部可能放置蜜粉或香料，隨身攜帶。</li>
-                                        <li><strong>藥盒：</strong>小型瓷盒有時也用於裝藥丸，方便貴婦或紳士外出時使用。</li>
-                                        <li><strong>禮物與收藏：</strong>手工繪製的瓷盒經常被製作為禮物，象徵祝福與愛情（尤其是心型、花卉彩繪的款式）。</li>
-                                    </ul>
-                                </div>
-                            </div>
+                                <div class="article-content">
+                                    <div class="article-intro">
+                                        <p>{{ $article->intro }}</p>
+                                    </div>
 
-                            <div class="article-section">
-                                <div class="section-number">3️⃣</div>
-                                <div class="section-content">
-                                    <h4 class="section-title">裝飾特色</h4>
-                                    <ul class="decoration-list">
-                                        <li><strong>手繪花卉與金彩：</strong>玫瑰、牡丹、矢車菊、百合等花卉是最常見的題材，代表愛情、優雅與浪漫。</li>
-                                        <li><strong>金屬鑲邊與鎖扣：</strong>多為黃銅或鎏金，鎖扣上常見蝴蝶、花朵或葉片圖案。</li>
-                                        <li><strong>獨特造型：</strong>橢圓形、心型、圓形、八角形等，象徵不同寓意。心型常與愛情、婚禮、紀念日相關。</li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <div class="article-section">
-                                <div class="section-number">4️⃣</div>
-                                <div class="section-content">
-                                    <h4 class="section-title">英國與法國的差異</h4>
-                                    <div class="comparison-grid">
-                                        <div class="comparison-item">
-                                            <h5>法國（Limoges）</h5>
-                                            <p>以白瓷為基底，強調手繪精細度與柔美彩繪，代表高端瓷藝傳統。</p>
+                                    <div class="article-sections">
+                                        <div class="article-section">
+                                            <div class="section-content">
+                                                <div class="article-preview-content">
+                                                    {!! nl2br(e(Str::limit(strip_tags($article->content), 300, '...'))) !!}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="comparison-item">
-                                            <h5>英國瓷盒</h5>
-                                            <p>如 Staffordshire, Royal Worcester, Royal Crown Derby 等工坊出品，更注重工整描金與圖案設計，部分走浪漫或鄉村風格。</p>
+                                    </div>
+
+                                    <div class="article-footer">
+                                        <div class="article-tags">
+                                            <span class="uk-text-meta">
+                                                <span uk-icon="icon: user; ratio: 0.8"></span> {{ $article->auctioneer->name }}
+                                                <span uk-icon="icon: clock; ratio: 0.8" style="margin-left: 20px;"></span> {{ $article->created_at->format('Y年m月d日') }}
+                                            </span>
+                                        </div>
+                                        <div class="article-cta">
+                                            <a href="{{ route('mart.articles.show', $article->id) }}" class="read-more-btn custom-link-mute" style="display: inline-block; text-decoration: none;">
+                                                <span>觀看完整文章</span>
+                                                <span class="material-symbols-outlined">arrow_forward</span>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="article-section">
-                                <div class="section-number">5️⃣</div>
-                                <div class="section-content">
-                                    <h4 class="section-title">今日的收藏價值</h4>
-                                    <p>古董瓷盒因小巧、容易收集，深受歐洲與美國藏家喜愛，常成系列收藏（如「心型系列」、「花卉系列」、「Limoges 系列」）。除了作為飾品收納盒，許多收藏家也將它們陳列於玻璃櫃中，當作室內點綴與談資。</p>
-                                </div>
-                            </div>
                         </div>
-
-                        <div class="article-footer">
-                            <div class="article-tags">
-                                <span class="tag">歐洲古董</span>
-                                <span class="tag">瓷盒</span>
-                                <span class="tag">收藏知識</span>
-                                <span class="tag">工藝歷史</span>
-                            </div>
-                            <div class="article-cta">
-                                <button class="read-more-btn">
-                                    <span>探索更多古董知識</span>
-                                    <span class="material-symbols-outlined">arrow_forward</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </li>
+                    @endforeach
+                </ul>
+                
+                <!-- Navigation arrows -->
+                <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slider-item="previous"></a>
+                <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slider-item="next"></a>
             </div>
         </section>
+        @endif
 
     </div>
 @endsection
@@ -437,11 +403,10 @@
                 window.location.assign('/m-categories/'+ mainCategoryId);
             });
 
-            $('.read-more-btn').on('click', function() {
-                // 這裡可以導向到知識文章列表頁面或相關頁面
-                // 暫時使用 alert 提示，您可以根據實際需求修改
-                alert('即將推出更多古董知識文章！');
-            });
+            // 文章按钮现在链接到文章详情页面，不需要特殊的JavaScript处理
+            // $('.read-more-btn').on('click', function() {
+            //     // 現在通過正常的HTTP鏈接跳轉到文章詳情頁面
+            // });
 
             // Optional hover state toggle (no animations)
             $('.modern-card, .mobile-card').on('mouseenter', function() {

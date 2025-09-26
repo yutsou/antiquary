@@ -38,6 +38,8 @@
                     <li><a href="{{ route('auctioneer.promotions.index') }}">優惠管理</a></li>
                     <li><a href="{{ route('auctioneer.banners.index') }}">Banner管理</a></li>
                     <li><a href="{{ route('auctioneer.members.index') }}">會員管理</a></li>
+                    <li><a href="{{ route('auctioneer.articles.create') }}">文章創建</a></li>
+                    <li><a href="{{ route('auctioneer.articles.index') }}">文章管理</a></li>
                     <li><a href="{{ route('auctioneer.products.create') }}">商品創建</a></li>
                     <li><a href="{{ route('auctioneer.products.index') }}">商品管理</a></li>
                     <li class="uk-nav-header uk-margin-top" style="color: white; font-size: 1.2em;">專家</li>

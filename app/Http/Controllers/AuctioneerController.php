@@ -22,6 +22,8 @@ use Symfony\Component\ErrorHandler\Debug;
 use App\Models\MergeShippingRequest;
 use App\Models\MergeShippingItem;
 use App\Services\LineService;
+use App\Models\Article;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class AuctioneerController extends Controller
@@ -823,5 +825,100 @@ class AuctioneerController extends Controller
             $this->orderService->updateOrderStatus(61, $order, $remark);
             $order->save();
         }
+    }
+
+    // 文章管理功能
+    public function indexArticles()
+    {
+        $articles = Article::with('auctioneer')->orderBy('created_at', 'desc')->get();
+        return CustomClass::viewWithTitle(view('auctioneer.articles.index')->with('articles', $articles), '文章管理');
+    }
+
+    public function createArticle()
+    {
+        return CustomClass::viewWithTitle(view('auctioneer.articles.create'), '創建文章');
+    }
+
+    public function storeArticle(Request $request)
+    {
+        $input = $request->all();
+        $rules = [
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'intro' => 'required|string',
+            'content' => 'required|string',
+        ];
+        $messages = [
+            'title.required' => '文章標題為必填',
+            'title.max' => '文章標題不能超過255字',
+            'subtitle.max' => '副標題不能超過255字',
+            'intro.required' => '簡介為必填',
+            'content.required' => '內容為必填',
+        ];
+
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        Article::create([
+            'title' => $request->title,
+            'subtitle' => $request->subtitle,
+            'intro' => $request->intro,
+            'content' => $request->content,
+            'auctioneer_id' => Auth::id(),
+        ]);
+
+        return back()->with('notification', '文章創建成功');
+    }
+
+    public function editArticle($articleId)
+    {
+        $article = Article::findOrFail($articleId);
+        return CustomClass::viewWithTitle(view('auctioneer.articles.edit')->with('article', $article), '編輯文章');
+    }
+
+    public function updateArticle(Request $request, $articleId)
+    {
+        $article = Article::findOrFail($articleId);
+        
+        $input = $request->all();
+        $rules = [
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'intro' => 'required|string',
+            'content' => 'required|string',
+        ];
+        $messages = [
+            'title.required' => '文章標題為必填',
+            'title.max' => '文章標題不能超過255字',
+            'subtitle.max' => '副標題不能超過255字',
+            'intro.required' => '簡介為必填',
+            'content.required' => '內容為必填',
+        ];
+
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $article->update([
+            'title' => $request->title,
+            'subtitle' => $request->subtitle,
+            'intro' => $request->intro,
+            'content' => $request->content,
+        ]);
+
+        return back()->with('notification', '文章更新成功');
+    }
+
+    public function deleteArticle($articleId)
+    {
+        $article = Article::findOrFail($articleId);
+        $article->delete();
+        
+        return back()->with('notification', '文章刪除成功');
     }
 }

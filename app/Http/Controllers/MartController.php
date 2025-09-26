@@ -14,6 +14,7 @@ use App\Services\LineService;
 use App\Services\LotService;
 use App\Services\OrderService;
 use App\Services\PromotionService;
+use App\Models\Article;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,6 +81,7 @@ class MartController extends Controller
         $banners = $this->bannerService->getAllBanners()->sortBy('index');
         $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
         $productsByCategory = $this->lotService->getPublishedLotsByMainCategories();
+        $articles = Article::with('auctioneer')->orderBy('created_at', 'desc')->limit(10)->get();
         $description = 'Antiquary 是一個綜合古董舊物線上購物平台，我們出售古傢俬、燈飾、瓷器、水晶、藝術品、設計原創物品、裝飾品、收藏品、珍貴物品的平台。';
 
         return view('home_page')
@@ -88,7 +90,14 @@ class MartController extends Controller
             ->with('title', 'Antiquary')
             ->with('banners', $banners)
             ->with('productsByCategory', $productsByCategory)
+            ->with('articles', $articles)
             ->with('description', $description);
+    }
+
+    public function showArticle($articleId)
+    {
+        $article = Article::with('auctioneer')->findOrFail($articleId);
+        return CustomClass::viewWithTitle(view('mart.articles.show')->with('article', $article), $article->title);
     }
 
     public function payEcpayReceive(Request $request)
