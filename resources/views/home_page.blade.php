@@ -350,6 +350,9 @@
                                     </div>
 
                                     <div class="article-footer">
+                                        <div class="article-tags">
+                                            
+                                        </div>
                                         <div class="article-cta">
                                             <a href="{{ route('mart.articles.show', $article->id) }}" class="read-more-btn custom-link-mute" style="display: inline-block; text-decoration: none;">
                                                 <span>觀看完整文章</span>
