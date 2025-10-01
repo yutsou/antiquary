@@ -44,14 +44,7 @@
                 </div>
 
                 <!-- Article Footer -->
-                <div class="article-footer">
-                    <div class="article-tags">
-                        <span class="uk-text-meta">
-                            <span uk-icon="icon: user; ratio: 0.8"></span> {{ $article->auctioneer->name }}
-                            <span uk-icon="icon: clock; ratio: 0.8" style="margin-left: 20px;"></span> {{ $article->created_at->format('Y年m月d日') }}
-                        </span>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
