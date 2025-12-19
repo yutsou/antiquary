@@ -592,6 +592,7 @@ class LotService extends LotRepository
             'name'=>$request->name,
             'description'=>$request->description,
             'reserve_price'=>$request->reserve_price,
+            'current_bid'=>$request->reserve_price,
             'inventory'=>$request->inventory,
         ]);
     }

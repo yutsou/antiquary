@@ -2,6 +2,10 @@
     justify-content: center !important;
 }
 
+.custom-button {
+    border-radius: 20px;
+}
+
 .custom-button-1 {
     background-color: #003a6c;
     color: white !important;

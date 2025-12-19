@@ -882,7 +882,7 @@ class AuctioneerController extends Controller
     public function updateArticle(Request $request, $articleId)
     {
         $article = Article::findOrFail($articleId);
-        
+
         $input = $request->all();
         $rules = [
             'title' => 'required|string|max:255',
@@ -918,7 +918,19 @@ class AuctioneerController extends Controller
     {
         $article = Article::findOrFail($articleId);
         $article->delete();
-        
+
         return back()->with('notification', '文章刪除成功');
+    }
+
+    public function test()
+    {
+        $e_lots = collect();
+        $lots = $this->lotService->getAllLots();
+        foreach ($lots as $lot) {
+            if($lot->current_bid != $lot->reserve_price && $lot->type == 1) {
+                $e_lots->push($lot);
+            }
+        }
+        dd($e_lots);
     }
 }

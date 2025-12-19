@@ -169,7 +169,7 @@
                             <div id="confirmEdit" class="modal">
                                 <h2>確認送出修改嗎？</h2>
                                 <p class="uk-text-right">
-                                    <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
+                                    <a href="#" rel="modal:close" class="uk-button uk-button-default custom-button">取消</a>
                                     <a class="uk-button custom-button-1 uk-width-auto@s" id="submit-edit">確認</a>
                                 </p>
                             </div>

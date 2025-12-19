@@ -144,6 +144,8 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::get('/articles/{articleId}/edit', [AuctioneerController::class, 'editArticle'])->name('auctioneer.articles.edit');
     Route::post('/articles/{articleId}', [AuctioneerController::class, 'updateArticle'])->name('auctioneer.articles.update');
     Route::delete('/articles/{articleId}', [AuctioneerController::class, 'deleteArticle'])->name('auctioneer.articles.delete');
+
+    Route::get('test', [AuctioneerController::class, 'test']);
 });
 Route::prefix('auctioneer')->middleware(EnsureIsAuctioneer::class)->group(function () {
     Route::get('/ajax/experts', [AuctioneerController::class, 'ajaxExperts'])->name('ajax.experts.get');
