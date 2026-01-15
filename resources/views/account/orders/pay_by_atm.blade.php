@@ -29,8 +29,13 @@
             @csrf
             <div class="uk-grid-small" uk-grid>
                 <div>
-                    <input type="text" class="uk-input uk-form-width-medium" name="account_last_five_number"
-                           placeholder="帳號後五碼">
+                    <input type="text" class="uk-input uk-form-width-medium @error('account_last_five_number') uk-form-danger @enderror"
+                           name="account_last_five_number"
+                           placeholder="帳號後五碼"
+                           value="{{ old('account_last_five_number') }}">
+                    @error('account_last_five_number')
+                        <p class="uk-text-danger uk-text-small uk-margin-small-top">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <button class="uk-button custom-button-1">通知已匯款</button>

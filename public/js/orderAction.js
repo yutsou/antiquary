@@ -1,20 +1,18 @@
-$(function () {
-    $( ".complete-order" ).click(function() {
-        let orderId = $(this).attr('orderId');
-        let actionUrl = $(this).attr('actionUrl');
-        let redirectUrl = $(this).attr('redirectUrl');
-        //let url = '{{ route("account.orders.complete", ":id") }}';
-        //url = url.replace(':id', orderId);
-        $.ajax({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type: "post",
-            url: actionUrl,
-            success: function () {
-                window.location.assign(redirectUrl);
-            }
-        });
+$(document).on('click', '.complete-order', function(){
+    let orderId = $(this).attr('orderId');
+    let actionUrl = $(this).attr('actionUrl');
+    let redirectUrl = $(this).attr('redirectUrl');
+    //let url = '{{ route("account.orders.complete", ":id") }}';
+    //url = url.replace(':id', orderId);
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: "post",
+        url: actionUrl,
+        success: function () {
+            window.location.assign(redirectUrl);
+        }
     });
 });
 
@@ -48,6 +46,14 @@ $(document).on('click', '.notice-shipping', function(){
         data: { logistics_name:logisticsName, tracking_code:trackingCode },
         success: function () {
             window.location.assign(redirectUrl);
+        },
+        error: function(responses) {
+            let errors = merge_errors(responses);
+            let validatorAlert = $('#validator-alert-'+orderId);
+            validatorAlert.empty();
+            validatorAlert.prop('hidden', false);
+            validatorAlert.append(errors);
+             $.modal.close();
         }
     });
 });

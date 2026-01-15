@@ -98,6 +98,7 @@ class NoticePresenter
                     $model = Order::find($notice->target_id);
                     return match ($notice->code) {
                         0 => ['確認匯款通知', '提醒您，訂單 No.'.$model->id. ' 已匯款，請確認匯款。'],
+                        1 => ['確認LINE Pay付款通知', '提醒您，訂單 No.'.$model->id. ' 已使用LINE Pay付款，請確認付款。'],
                     };
                 case 8:
                     $model = MergeShippingRequest::find($notice->target_id);

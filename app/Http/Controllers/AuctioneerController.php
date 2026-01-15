@@ -188,6 +188,17 @@ class AuctioneerController extends Controller
 
     public function noticeShipping(Request $request, $orderId)
     {
+        $request->validate([
+            'logistics_name' => 'required|string|max:50',
+            'tracking_code' => 'required|string|max:100'
+        ], [
+            'logistics_name.required' => '物流公司為必填',
+            'logistics_name.string' => '物流公司必須為字符',
+            'logistics_name.max' => '物流公司不能超過 50 個字符',
+            'tracking_code.required' => '物流追蹤碼為必填',
+            'tracking_code.string' => '物流追蹤碼必須為字符',
+            'tracking_code.max' => '物流追蹤碼不能超過 100 個字符'
+        ]);
 
         $this->orderService->noticeShipping($orderId);
         $this->orderService->storeShippingLogistic($request, $orderId);
@@ -308,6 +319,11 @@ class AuctioneerController extends Controller
             dd($e);
             return response()->json(['success' => false, 'message' => '操作失敗：' . $e->getMessage()]);
         }
+    }
+
+    public function completeOrder($orderId)
+    {
+        $this->orderService->completeOrder($orderId);
     }
 
     public function indexMessages($orderId)

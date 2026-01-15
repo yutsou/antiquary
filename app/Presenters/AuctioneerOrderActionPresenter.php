@@ -18,7 +18,7 @@ class AuctioneerOrderActionPresenter
         <div id="'.$modalName.'-'.$orderId.'" class="modal">
             <h2>訂單'.$orderId.'，'.$content.'</h2>
             <p class="uk-text-right">
-                <a href="#" rel="modal:close" class="uk-button uk-button-default">取消</a>
+                <a href="#" rel="modal:close" class="custom-button uk-button uk-button-default">取消</a>
                 <button class="uk-button custom-button-1 uk-button-primary '.$modalName.'" type="button" orderId="'.$orderId.'" actionUrl="'.$actionUrl.'" redirectUrl="'.$redirectUrl.'">確定</button>
             </p>
         </div>
@@ -101,11 +101,15 @@ class AuctioneerOrderActionPresenter
 
                 } else {
                     $count = $order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
+                    $actions = '';
                     if ($count == 0) {
-                        return '<a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
+                        $actions = '<a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
                     } else {
-                        return '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
+                        $actions = '<span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('auctioneer.orders.chatroom_show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調</a>';
                     }
+                    $actions = $actions.
+                    $this->modal('完成訂單', '確認完成訂單嗎？', 'complete-order', $order->id, route('auctioneer.orders.complete', $order), route('auctioneer.orders.index'));
+                    return $actions;
                 }
             case ($order->status == 13):
                 $firstItem = $order->orderItems->first();
@@ -115,21 +119,28 @@ class AuctioneerOrderActionPresenter
                 if($firstItem->lot->entrust == 0){
                     return '';
                 } else {
-                    return '<div class="uk-grid-small" uk-grid>
-                                <div>
-                                    <input type="text" class="uk-input uk-form-width-small" id="logistics-name-'.$order->id.'" placeholder="物流公司">
+                    return '<div>
+                                <div class="uk-grid-small" uk-grid>
+                                    <div>
+                                        <input type="text" class="uk-input uk-form-width-small" id="logistics-name-'.$order->id.'" placeholder="物流公司"  required>
+                                    </div>
+                                    <div>
+                                        <input type="text" class="uk-input uk-form-width-medium" id="tracking-code-'.$order->id.'" placeholder="物流追蹤碼" required>
+                                    </div>
+                                    <div>
+                                        '.$this->modal('通知出貨', '通知出貨嗎？', 'notice-shipping', $order->id, route('auctioneer.orders.notice_shipping', $order), route('auctioneer.orders.index')).'
+                                    </div>
                                 </div>
-                                <div>
-                                    <input type="text" class="uk-input uk-form-width-medium" id="tracking-code-'.$order->id.'" placeholder="物流追蹤碼">
-                                </div>
-                                <div>
-                                    '.$this->modal('通知出貨', '通知出貨嗎？', 'notice-shipping', $order->id, route('auctioneer.orders.notice_shipping', $order), route('auctioneer.orders.index')).'
+                                <div class="uk-alert-warning alert" id="validator-alert-'.$order->id.'" uk-alert hidden>
+                                    <ul id="validator-alert-ul"></ul>
                                 </div>
                             </div>';
                 }
 
             case ($order->status == 20):
                 return $this->modal('通知到貨', '通知到貨嗎？', 'notice-arrival', $order->id, route('auctioneer.orders.notice_arrival', $order), route('auctioneer.orders.index'));
+            case ($order->status == 21):
+                return $this->modal('完成訂單', '確認完成訂單嗎？', 'complete-order', $order->id, route('auctioneer.orders.complete', $order), route('auctioneer.orders.index'));
             case ($order->status == 51):
                 if($order->payment_method == 1) {
                     return

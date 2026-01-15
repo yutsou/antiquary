@@ -160,12 +160,6 @@ class MemberController extends Controller
         return redirect()->route('account.orders.show', $orderId);
     }
 
-    public function completeOrder($orderId)
-    {
-        $this->orderService->completeOrder($orderId);
-        #return redirect()->route('account.orders.show', $orderId);
-    }
-
     public function pay($orderId)
     {
         $order = $this->orderService->getOrder($orderId);
@@ -178,6 +172,14 @@ class MemberController extends Controller
     }
 
     public function noticeAtmPay(Request $request, $orderId) {
+        $request->validate([
+            'account_last_five_number' => 'required|string|size:5|regex:/^\d+$/'
+        ], [
+            'account_last_five_number.required' => '帳號後五碼為必填',
+            'account_last_five_number.size' => '帳號後五碼必須為 5 個字符',
+            'account_last_five_number.regex' => '帳號後五碼必須為數字'
+        ]);
+
         $this->orderService->noticeRemit($request, $orderId, 0);
         return redirect()->route('account.orders.show', $orderId);
     }

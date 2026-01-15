@@ -417,10 +417,17 @@ class MartController extends Controller
         }
         $orderId = str_replace($lineIdPrefix, '', $orderId);
         $order = $this->orderService->getOrder($orderId);
+        // additional logging to help debug missing notifications
+        Log::channel('line')->info('incoming_line_pay_request', [
+            'all' => $request->all(),
+            'headers' => $request->headers->all(),
+            'server' => $request->server->all(),
+            'ip' => $request->ip(),
+        ]);
         $result = $this->lineService->confirmPayment($request, $order);
-        Log::channel('line')->info($request->toArray());
         if ($result) {
             $this->orderService->hasPaid($request, $orderId);
+            CustomClass::sendTemplateNotice(1, 7, 1, $order->id, 1);
             return redirect()->route('account.orders.show', $orderId)->with('success', '付款完成');
         } else {
             $this->orderService->failPayment($request, $orderId);

@@ -41,9 +41,6 @@ class MemberOrderActionPresenter
                         <div>
                             <a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1">協調面交資訊</a>
                         </div>
-                        <div>
-                            <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>
-                        </div>
                     </div>
                     ';
                 } else {
@@ -52,21 +49,9 @@ class MemberOrderActionPresenter
                         <div>
                             <span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交資訊</a>
                         </div>
-                        <div>
-                            <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>
-                        </div>
                     </div>
                     ';
                 }
-
-            case 21:
-                return '
-                    <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
-                        <div>
-                            <a href="'.route('account.orders.show', $order).'" class="uk-button custom-button-1">完成訂單</a>
-                        </div>
-                    </div>
-                    ';
             default:
                 return '<a>&nbsp;</a>';
         }
@@ -94,9 +79,6 @@ class MemberOrderActionPresenter
                     <div>
                         <a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交地點時間</a>
                     </div>
-                    <div>
-                        '.$this->modal('完成訂單', '確認完成訂單嗎？', 'complete-order', $order->id, route('account.orders.complete', $order), route('account.orders.show', $order)).'
-                    </div>
                 </div>
                 ';
             case 21:
@@ -104,9 +86,6 @@ class MemberOrderActionPresenter
                 <div class="uk-grid-small" uk-grid>
                     <div>
                         '.$this->modal('要求退貨', '確認退貨嗎？', 'request-refund', $order->id, route('account.orders.request_refund', $order), route('account.orders.show', $order), 'custom-button-2').'
-                    </div>
-                    <div>
-                        '.$this->modal('完成訂單', '確認完成訂單嗎？', 'complete-order', $order->id, route('account.orders.complete', $order), route('account.orders.show', $order)).'
                     </div>
                 </div>
                 ';

@@ -243,7 +243,8 @@ class OrderService extends OrderRepository
             }
             // 直賣商品（type==1）不動 lot status
         }
-        CustomClass::sendTemplateNotice(1, 3, 3, $order->id);
+        // CustomClass::sendTemplateNotice(1, 3, 3, $order->id);
+        // 將完成訂單改為有管理員操作
     }
 
     public function noticeRemit($request, $orderId, $type)

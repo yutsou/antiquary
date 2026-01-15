@@ -53,7 +53,7 @@ Route::post('/password-reset-confirm/send', [AuthController::class, 'sendPasswor
 Route::get('/password/reset/{token}', [AuthController::class, 'showPasswordReset'])->name('auth.password_reset.show');
 Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('auth.password.reset');
 
-Route::get('/pay/line/authorize', [MartController::class, 'payLineAuthorize'])->name('mart.pay.line.authorize');
+Route::match(['get', 'post'], '/pay/line/authorize', [MartController::class, 'payLineAuthorize'])->name('mart.pay.line.authorize');
 
 #line bind
 Route::get('/auth/line/generate-verify-code', [AuthController::class, 'generateLineVerifyCode'])->name('auth.line_verify_code.generate');
@@ -105,6 +105,7 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::post('/orders/{orderId}/confirm-refill-transfer-info', [AuctioneerController::class, 'confirmRefillTransferInfo'])->name('auctioneer.orders.confirm_refill_transfer_info');
     Route::post('/orders/{orderId}/set-withdrawal-bid', [AuctioneerController::class, 'setWithdrawalBid'])->name('auctioneer.orders.set_withdrawal_bid');
     Route::post('/orders/{orderId}/set-lot-withdrawn', [AuctioneerController::class, 'setLotWithdrawn'])->name('auctioneer.orders.set_lot_withdrawn');
+    Route::post('/orders/{orderId}/complete', [AuctioneerController::class, 'completeOrder'])->name('auctioneer.orders.complete');
 
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');
@@ -260,7 +261,6 @@ Route::prefix('account')->middleware(['auth', OrderOwnership::class])->group(fun
     Route::get('/orders/{orderId}/pay', [MemberController::class, 'pay'])->name('account.orders.pay');
     Route::get('/orders/{orderId}/atm-pay-info', [MemberController::class, 'showAtmPayInfo'])->name('account.atm_pay_info.show');
     Route::post('/orders/{orderId}/notice-atm-pay', [MemberController::class, 'noticeAtmPay'])->name('account.atm_pay.notice');
-    Route::post('/orders/{orderId}/complete', [MemberController::class, 'completeOrder'])->name('account.orders.complete');
     Route::post('/orders/{orderId}/notice-shipping', [MemberController::class, 'noticeShipping'])->name('account.orders.notice_shipping');
     Route::get('/orders/{orderId}/shipping-info', [MemberController::class, 'showShippingInfo'])->name('account.orders.show_shipping_info');
     Route::post('/orders/{orderId}/notice-arrival', [MemberController::class, 'noticeArrival'])->name('account.orders.notice_arrival');
