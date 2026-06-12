@@ -169,6 +169,11 @@
                         <div>
                             商品售價: NT$<span id="currentBid">{{ number_format($lot->reserve_price) }}</span>
                         </div>
+                        @if($premiumRate > 0)
+                            <div class="uk-text-meta">
+                                (折扣後售價: NT$<span id="discountedPrice">{{ number_format($lot->reserve_price * $premiumRate) }}</span>)
+                            </div>
+                        @endif
                     </div>
 
                     <hr>

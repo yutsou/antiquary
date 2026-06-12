@@ -208,8 +208,9 @@ class MartController extends Controller
         $categories = $this->categoryService->getCategories($lot);
         $description = $lot->description;
         $productsByCategory = $this->lotService->getPublishedLotsBySubCategories($lotId, $lot->sub_category->id);
+        $premiumRate = $this->promotionService->getPremiumRate();
 
-        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1])->with('description', $description)->with('productsByCategory', $productsByCategory), $lot->name);
+        return CustomClass::viewWithTitle(view('mart.products.show')->with('lot', $lot)->with('mCategory', $categories[0])->with('sCategory', $categories[1])->with('description', $description)->with('productsByCategory', $productsByCategory)->with('premiumRate', $premiumRate), $lot->name);
     }
 
     public function showMCategory($mCategoryId, Request $request)
