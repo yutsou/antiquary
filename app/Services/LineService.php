@@ -738,6 +738,13 @@ class LineService
 
         foreach($order->orderItems as $orderItem) {
             $price = intval($orderItem->price);
+            if($order->premium != 0) {
+                if($order->premium<1) {
+                    $price = $price * $order->premium;
+                } else {
+                    $price = $price - $order->premium;
+                }
+            }
             $quantity = $orderItem->quantity;
             array_push($products, [
                 "id" => strval($orderItem->lot->id),
@@ -745,17 +752,19 @@ class LineService
                 "quantity" => $quantity,
                 "price" => $price
             ]);
+
             $amount = $amount + ($price*$quantity);
+
         }
 
         $amount = $amount + $delivery_cost;
-
 
         $packages = [[
             "id" => "0",
             "amount" => $amount,
             "products" => $products,
         ]];
+
 
         $r_body = json_encode(array(
             "amount" => intval($order->total),

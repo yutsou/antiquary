@@ -44,6 +44,7 @@
                             data-sitekey="6Lce1CAqAAAAAGoDOkmLMxcKOBQEkYb_EQbwQqwg"
                             data-callback='onSubmit'
                             data-action='submit'>登入</button>
+                    <button class="uk-button custom-button-1 uk-width-1-1">登入</button>
                 </div>
             </form>
             <div class="separator">或是</div>

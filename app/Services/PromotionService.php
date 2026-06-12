@@ -36,17 +36,9 @@ class PromotionService
 
         if($promotionStatus === true) {
             $premiumRate = Cache::get('promotion.premium_rate');
-            if($premiumRate < 1) {
-                return ($premiumRate * 100).'%';
-            } else {
-                return 'NT$'.number_format($premiumRate);
-            }
+            return floatval($premiumRate);
         } else {
-            if(Auth::check()) {
-                return (Auth::user()->premium_rate * 100) . '%';
-            } else {
-                return '10%';
-            }
+            return null;
         }
 
     }

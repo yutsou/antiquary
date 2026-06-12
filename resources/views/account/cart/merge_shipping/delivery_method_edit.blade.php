@@ -77,7 +77,8 @@
                                     <div class="uk-width-expand">
                                         <div class="uk-card-body" style="padding: 20px 20px">
                                             <h3 class="uk-card-title" style="margin: 0 0 10px 0"><a href="{{ route('mart.products.show', $item->lot->id) }}" class="custom-link">{{ $item->lot->name }}</a></h3>
-                                            <p>數量: {{ $item->quantity }} | 小計: NT${{ number_format($item->lot->reserve_price * $item->quantity) }}</p>
+                                            <p>數量: {{ $item->quantity }} | 單價: NT${{ number_format($item->lot->reserve_price) }}</p>
+                                            <p>小計: NT${{ number_format($item->lot->reserve_price * $item->quantity) }}</p>
                                         </div>
                                     </div>
                                 </div>

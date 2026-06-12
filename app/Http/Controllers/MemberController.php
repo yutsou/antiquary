@@ -26,10 +26,11 @@ use Illuminate\Validation\Rule;
 use App\Models\MergeShippingRequest;
 use App\Models\MergeShippingItem;
 use App\Services\LineService;
+use App\Services\PromotionService;
 
 class MemberController extends Controller
 {
-    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService, $cartService, $lineService;
+    private $categoryService, $lotService, $specificationService, $deliveryMethodService, $imageService, $userService, $orderService, $ecpayService, $bidService, $gomypayService, $cartService, $lineService, $promotionService;
 
     public function __construct(
         CategoryService $categoryService,
@@ -43,7 +44,8 @@ class MemberController extends Controller
         BidService $bidService,
         GomypayService $gomypayService,
         CartService $cartService,
-        LineService $lineService
+        LineService $lineService,
+        PromotionService $promotionService
     ) {
         $this->categoryService = $categoryService;
         $this->lotService = $lotService;
@@ -57,6 +59,7 @@ class MemberController extends Controller
         $this->gomypayService = $gomypayService;
         $this->cartService = $cartService;
         $this->lineService = $lineService;
+        $this->promotionService = $promotionService;
     }
 
     public function showDashboard()
@@ -1150,6 +1153,7 @@ class MemberController extends Controller
         $paymentMethod = $request->input('payment_method');
         $deliveryMethod = $request->input('delivery_method');
         $deliveryCost = $request->input('delivery_cost');
+        $premiumRate = $this->promotionService->getPremiumRate();
 
         if (empty($selectedLotIds) || !isset($paymentMethod) || !isset($deliveryMethod)) {
             return redirect()->route('account.cart.show')->with('error', '請完成所有必要選擇');
@@ -1164,7 +1168,19 @@ class MemberController extends Controller
 
         // 計算總計（包含運費）
         $subtotal = $selectedLots->sum('subtotal');
-        $total = $subtotal + $deliveryCost;
+
+
+        if($premiumRate != null) {
+            if ($premiumRate > 1) {
+                $total = $subtotal - $premiumRate + $deliveryCost;
+            } else {
+                $total = $subtotal * $premiumRate + $deliveryCost;
+            }
+        } else {
+            $total = $subtotal + $deliveryCost;
+        }
+
+
 
         // 準備運送資訊
         $deliveryInfo = $this->prepareDeliveryInfo($request, [$deliveryMethod]);
@@ -1178,6 +1194,7 @@ class MemberController extends Controller
                 ->with('deliveryCost', $deliveryCost)
                 ->with('subtotal', $subtotal)
                 ->with('total', $total)
+                ->with('premiumRate', $premiumRate)
                 ->with($deliveryInfo),
             '訂單確認'
         );
@@ -1192,6 +1209,7 @@ class MemberController extends Controller
         $deliveryCost = $request->input('delivery_cost');
         $recipientName = $request->input('recipient_name');
         $recipientPhone = $request->input('recipient_phone');
+        $premiumRate = $this->promotionService->getPremiumRate();
 
         if (empty($selectedLotIds) || !isset($paymentMethod) || !isset($deliveryMethod) || !isset($deliveryCost) || !isset($recipientName) || !isset($recipientPhone)) {
             return redirect()->route('account.cart.show')->with('error', '請完成所有必要選擇');
@@ -1199,7 +1217,7 @@ class MemberController extends Controller
 
         try {
             // 創建訂單
-            $order = $this->orderService->createCartOrder($user->id, $selectedLotIds, $request->all());
+            $order = $this->orderService->createCartOrder($user->id, $selectedLotIds, $request->all(), $premiumRate);
 
             // 從購物車中移除已購買的商品（包括競標商品）
             try {
@@ -1404,16 +1422,27 @@ class MemberController extends Controller
         $country = $request->input('country');
         $countrySelectorCode = $request->input('country_selector_code');
         $crossBoardAddress = $request->input('cross_board_address');
+        $premiumRate = $this->promotionService->getPremiumRate();
 
         if (!isset($paymentMethod) || !isset($deliveryMethod)) {
             return redirect()->route('account.cart.merge_shipping.delivery_method.edit', $requestId)->with('error', '請完成所有必要選擇');
         }
-
         // 計算總計
+
         $subtotal = $mergeRequest->items->sum(function($item) {
             return $item->lot->reserve_price * $item->quantity;
         });
-        $total = $subtotal + $mergeRequest->new_shipping_fee;
+
+
+        if($premiumRate != null) {
+            if ($premiumRate > 1) {
+                $total = $subtotal - $premiumRate + $mergeRequest->new_shipping_fee;
+            } else {
+                $total = $subtotal * $premiumRate + $mergeRequest->new_shipping_fee;
+            }
+        } else {
+            $total = $subtotal + $mergeRequest->new_shipping_fee;
+        }
 
         // 準備運送資訊
         $deliveryInfo = $this->prepareMergeShippingDeliveryInfo($request);
@@ -1434,7 +1463,8 @@ class MemberController extends Controller
                 ->with('address', $address)
                 ->with('country', $country)
                 ->with('countrySelectorCode', $countrySelectorCode)
-                ->with('crossBoardAddress', $crossBoardAddress),
+                ->with('crossBoardAddress', $crossBoardAddress)
+                ->with('premiumRate', $premiumRate),
             '訂單確認'
         );
     }
@@ -1449,10 +1479,11 @@ class MemberController extends Controller
             ->where('id', $requestId)
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
             ->firstOrFail();
+        $premiumRate = $this->promotionService->getPremiumRate();
 
         try {
             // 創建訂單
-            $order = $this->orderService->createMergeShippingOrder($user->id, $mergeRequest, $request->all());
+            $order = $this->orderService->createMergeShippingOrder($user->id, $mergeRequest, $request->all(), $premiumRate);
 
             // 更新合併運費請求狀態為已完成
             $mergeRequest->update(['status' => MergeShippingRequest::STATUS_COMPLETED]);

@@ -169,6 +169,18 @@
                                         <td>小計：</td>
                                         <td>NT${{ number_format($subtotal) }}</td>
                                     </tr>
+                                    @if ($premiumRate !== null)
+                                        <tr>
+                                            <td>折扣：</td>
+                                            @if ($premiumRate > 1)
+                                                <td>NT${{ number_format($subtotal - $premiumRate) }}</td>
+                                            @else
+                                                <td>NT${{ number_format($subtotal * floatval(1-$premiumRate)) }}</td>
+                                            @endif
+
+                                        </tr>
+                                    @endif
+
                                     <tr>
                                         <td>運費：</td>
                                         <td>NT${{ number_format($deliveryCost) }}</td>

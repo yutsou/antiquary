@@ -93,7 +93,8 @@
                                     <div class="uk-width-expand">
                                         <div class="uk-card-body" style="padding: 20px 20px">
                                             <h3 class="uk-card-title" style="margin: 0 0 10px 0"><a href="{{ route('mart.products.show', $item->lot->id) }}" class="custom-link">{{ $item->lot->name }}</a></h3>
-                                            <p>數量: {{ $item->quantity }} | 小計: NT${{ number_format($item->lot->reserve_price * $item->quantity) }}</p>
+                                            <p>數量: {{ $item->quantity }} | 單價: NT${{ number_format($item->lot->reserve_price) }}</p>
+                                            <p>小計: NT${{ number_format($item->lot->reserve_price * $item->quantity) }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -101,8 +102,47 @@
                         </div>
                     </div>
                 </div>
-                <div class="uk-margin uk-text-right">
-                    <h3>總金額：NT${{ number_format($mergeRequest->items->sum(function($item){ return $item->lot->reserve_price * $item->quantity; }) + $deliveryCost) }}</h3>
+<div class="uk-margin">
+                    <div class="uk-card uk-card-default uk-card-body">
+                        <div uk-grid>
+                            <div class="uk-width-2-3@m">
+                                <label>備註：</label>
+                                <div class="uk-margin">
+                                    <textarea class="uk-textarea" rows="4" name="remark"></textarea>
+                                </div>
+                            </div>
+                            <div class="uk-width-expand">
+                                <table class="uk-table uk-text-right">
+                                    <tbody>
+                                    <tr>
+                                        <td>小計：</td>
+                                        <td>NT${{ number_format($subtotal) }}</td>
+                                    </tr>
+                                    @if ($premiumRate !== null)
+                                        <tr>
+                                            <td>折扣：</td>
+                                            @if ($premiumRate > 1)
+                                                <td>NT${{ number_format($subtotal - $premiumRate) }}</td>
+                                            @else
+                                                <td>NT${{ number_format($subtotal * floatval(1-$premiumRate)) }}</td>
+                                            @endif
+
+                                        </tr>
+                                    @endif
+
+                                    <tr>
+                                        <td>運費：</td>
+                                        <td>NT${{ number_format($deliveryCost) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>總計：</strong></td>
+                                        <td><strong>NT${{ number_format($total) }}</strong></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="uk-margin uk-align-right">
                     <button class="uk-button custom-button-1" type="submit">確認下單</button>

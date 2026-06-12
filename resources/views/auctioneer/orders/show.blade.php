@@ -142,7 +142,7 @@
                 <div class="uk-width-2-3">
                     <label>備註：</label>
                     <div class="uk-margin">
-                        <p>{{ $order->remark }}</p>
+                        <p>{!! $order->remark !!}</p>
                     </div>
                 </div>
                 <div class="uk-width-expand">
@@ -152,10 +152,17 @@
                             <td>小計：</td>
                             <td>NT${{ number_format($order->orderItems->sum(function($item) { return $item->lot->current_bid; })) }}</td>
                         </tr>
-                        <tr>
-                            <td>手續費：</td>
-                            <td>NT${{ number_format($order->premium) }}</td>
-                        </tr>
+                        @if ($order->premium != 0)
+                            <tr>
+                                <td>折扣：</td>
+                                @if ($order->premium > 1)
+                                    <td>NT${{ number_format($order->subtotal - $order->premium) }}</td>
+                                @else
+                                    <td>NT${{ number_format($order->subtotal * floatval(1-$order->premium)) }}</td>
+                                @endif
+
+                            </tr>
+                        @endif
                         <tr>
                             <td>運費：</td>
                             @if($order->delivery_cost == '')
