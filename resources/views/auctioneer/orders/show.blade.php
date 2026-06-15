@@ -79,6 +79,7 @@
                         <tr>
                             <th class="uk-table-expand">物品</th>
                             <th class="uk-table-expand">自訂編號</th>
+                            <th class="uk-table-expand">數量</th>
                             <th class="uk-table-expand">價格</th>
                             @if($order->status == 60) {{-- 爭議 - 要求退款 --}}
                                 <th class="uk-table-expand">動作</th>
@@ -95,6 +96,7 @@
                                     <td><a href="{{ route("auctioneer.products.edit", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
                                     <td>{{ $orderItem->lot->custom_id }}</td>
                                 @endif
+                                <td>{{ $orderItem->quantity }}</td>
                                 <td>NT${{ number_format($orderItem->price) }}</td>
                                 @if($order->status == 60 && $orderItem->lot->type == 0 && $orderItem->lot->status == 23) {{-- 爭議退款且為競標商品 --}}
                                     <td>
@@ -150,16 +152,14 @@
                         <tbody>
                         <tr>
                             <td>小計：</td>
-                            <td>NT${{ number_format($order->orderItems->sum(function($item) { return $item->lot->current_bid; })) }}</td>
+                            <td>NT${{ number_format($order->subtotal) }}</td>
                         </tr>
-                        @if ($order->premium != 0)
+                        @if ($order->discount != null)
                             <tr>
                                 <td>折扣：</td>
-                                @if ($order->premium > 1)
-                                    <td>NT${{ number_format($order->subtotal - $order->premium) }}</td>
-                                @else
-                                    <td>NT${{ number_format($order->subtotal * floatval(1-$order->premium)) }}</td>
-                                @endif
+
+                                <td>- NT${{ number_format($order->subtotal * floatval(1-$order->discount)) }}</td>
+
 
                             </tr>
                         @endif

@@ -895,6 +895,7 @@ class MemberController extends Controller
     {
         $user = Auth::user();
         $cartItems = $this->cartService->getCartItems($user->id);
+        $discountRate = $this->promotionService->getDiscountRate();
         $mergeShippingRequests = $user->mergeShippingRequests()
             ->whereNotIn('status', [MergeShippingRequest::STATUS_COMPLETED, MergeShippingRequest::STATUS_REMOVED])
             ->with('items.lot.blImages')
@@ -903,7 +904,8 @@ class MemberController extends Controller
         $customView = CustomClass::viewWithTitle(
             view('account.cart.show')
                 ->with('cartItems', $cartItems)
-                ->with('mergeShippingRequests', $mergeShippingRequests),
+                ->with('mergeShippingRequests', $mergeShippingRequests)
+                ->with('discountRate', $discountRate),
             '購物車'
         );
         return $customView;
@@ -1009,8 +1011,11 @@ class MemberController extends Controller
             return redirect()->route('account.cart.show')->with('error', '請選擇要結帳的商品');
         }
 
+        $discountRate = $this->promotionService->getDiscountRate();
+
         // 獲取選中的商品
-        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds, $discountRate);
+
 
         if ($selectedLots->isEmpty()) {
             return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
@@ -1076,7 +1081,9 @@ class MemberController extends Controller
                 ->with('commonDeliveryCodes', $commonDeliveryCodes)
                 ->with('totalQuantity', $totalQuantity)
                 ->with('homeDeliveryTotal', $homeDeliveryTotal)
+                ->with('discountRate', $discountRate)
                 ->with('crossBorderTotal', $crossBorderTotal),
+
             '選擇運送方式'
         );
     }
@@ -1096,13 +1103,14 @@ class MemberController extends Controller
         $country = $request->input('country');
         $countrySelectorCode = $request->input('country_selector_code');
         $crossBoardAddress = $request->input('cross_board_address');
+        $discountRate = $this->promotionService->getDiscountRate();
 
         if (empty($selectedLotIds) || !isset($deliveryMethod)) {
             return redirect()->route('account.cart.show')->with('error', '請選擇要結帳的商品和運送方式');
         }
 
         // 獲取選中的商品
-        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds, $discountRate);
 
         if ($selectedLots->isEmpty()) {
             return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
@@ -1153,29 +1161,30 @@ class MemberController extends Controller
         $paymentMethod = $request->input('payment_method');
         $deliveryMethod = $request->input('delivery_method');
         $deliveryCost = $request->input('delivery_cost');
-        $premiumRate = $this->promotionService->getPremiumRate();
+        $discountRate = $this->promotionService->getDiscountRate();
 
         if (empty($selectedLotIds) || !isset($paymentMethod) || !isset($deliveryMethod)) {
             return redirect()->route('account.cart.show')->with('error', '請完成所有必要選擇');
         }
 
         // 獲取選中的商品
-        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds);
+        $selectedLots = $this->cartService->getSelectedCartItems($user->id, $selectedLotIds, $discountRate);
+
 
         if ($selectedLots->isEmpty()) {
             return redirect()->route('account.cart.show')->with('error', '選中的商品不存在於購物車中');
         }
 
-        // 計算總計（包含運費）
-        $subtotal = $selectedLots->sum('subtotal');
+
+        $subtotal = $selectedLots->sum(function($lot)  {
+
+            return $lot->reserve_price * $lot->cart_quantity;
+
+        });
 
 
-        if($premiumRate != null) {
-            if ($premiumRate > 1) {
-                $total = $subtotal - $premiumRate + $deliveryCost;
-            } else {
-                $total = $subtotal * $premiumRate + $deliveryCost;
-            }
+        if($discountRate != null) {
+            $total = $subtotal * $discountRate + $deliveryCost;
         } else {
             $total = $subtotal + $deliveryCost;
         }
@@ -1194,7 +1203,7 @@ class MemberController extends Controller
                 ->with('deliveryCost', $deliveryCost)
                 ->with('subtotal', $subtotal)
                 ->with('total', $total)
-                ->with('premiumRate', $premiumRate)
+                ->with('discountRate', $discountRate)
                 ->with($deliveryInfo),
             '訂單確認'
         );
@@ -1209,7 +1218,7 @@ class MemberController extends Controller
         $deliveryCost = $request->input('delivery_cost');
         $recipientName = $request->input('recipient_name');
         $recipientPhone = $request->input('recipient_phone');
-        $premiumRate = $this->promotionService->getPremiumRate();
+        $discountRate = $this->promotionService->getDiscountRate();
 
         if (empty($selectedLotIds) || !isset($paymentMethod) || !isset($deliveryMethod) || !isset($deliveryCost) || !isset($recipientName) || !isset($recipientPhone)) {
             return redirect()->route('account.cart.show')->with('error', '請完成所有必要選擇');
@@ -1217,7 +1226,7 @@ class MemberController extends Controller
 
         try {
             // 創建訂單
-            $order = $this->orderService->createCartOrder($user->id, $selectedLotIds, $request->all(), $premiumRate);
+            $order = $this->orderService->createCartOrder($user->id, $selectedLotIds, $request->all(), $discountRate);
 
             // 從購物車中移除已購買的商品（包括競標商品）
             try {
@@ -1343,6 +1352,7 @@ class MemberController extends Controller
 
     public function mergeShippingDeliveryMethodEdit($requestId)
     {
+        $discountRate = $this->promotionService->getDiscountRate();
         $user = Auth::user();
         $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods', 'logisticRecords'])
             ->where('user_id', $user->id)
@@ -1350,15 +1360,18 @@ class MemberController extends Controller
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
             ->firstOrFail();
 
+
         return CustomClass::viewWithTitle(
             view('account.cart.merge_shipping.delivery_method_edit')
-                ->with('mergeRequest', $mergeRequest),
+                ->with('mergeRequest', $mergeRequest)
+                ->with('discountRate', $discountRate),
             '合併運費結帳'
         );
     }
 
     public function mergeShippingDeliveryUpdate(Request $request, $requestId)
     {
+
         $user = Auth::user();
         $mergeRequest = MergeShippingRequest::with(['items.lot.blImages', 'items.lot.deliveryMethods', 'logisticRecords'])
             ->where('user_id', $user->id)
@@ -1377,6 +1390,7 @@ class MemberController extends Controller
         $country = $request->input('country');
         $countrySelectorCode = $request->input('country_selector_code');
         $crossBoardAddress = $request->input('cross_board_address');
+        $discountRate = $this->promotionService->getDiscountRate();
 
 
         if (!isset($deliveryMethod)) {
@@ -1396,7 +1410,8 @@ class MemberController extends Controller
                 ->with('address', $address)
                 ->with('country', $country)
                 ->with('countrySelectorCode', $countrySelectorCode)
-                ->with('crossBoardAddress', $crossBoardAddress),
+                ->with('crossBoardAddress', $crossBoardAddress)
+                ->with('discountRate', $discountRate),
             '選擇付款方式'
         );
     }
@@ -1422,7 +1437,7 @@ class MemberController extends Controller
         $country = $request->input('country');
         $countrySelectorCode = $request->input('country_selector_code');
         $crossBoardAddress = $request->input('cross_board_address');
-        $premiumRate = $this->promotionService->getPremiumRate();
+        $discountRate = $this->promotionService->getDiscountRate();
 
         if (!isset($paymentMethod) || !isset($deliveryMethod)) {
             return redirect()->route('account.cart.merge_shipping.delivery_method.edit', $requestId)->with('error', '請完成所有必要選擇');
@@ -1434,12 +1449,8 @@ class MemberController extends Controller
         });
 
 
-        if($premiumRate != null) {
-            if ($premiumRate > 1) {
-                $total = $subtotal - $premiumRate + $mergeRequest->new_shipping_fee;
-            } else {
-                $total = $subtotal * $premiumRate + $mergeRequest->new_shipping_fee;
-            }
+        if($discountRate != null) {
+            $total = $subtotal * $discountRate + $mergeRequest->new_shipping_fee;
         } else {
             $total = $subtotal + $mergeRequest->new_shipping_fee;
         }
@@ -1464,7 +1475,7 @@ class MemberController extends Controller
                 ->with('country', $country)
                 ->with('countrySelectorCode', $countrySelectorCode)
                 ->with('crossBoardAddress', $crossBoardAddress)
-                ->with('premiumRate', $premiumRate),
+                ->with('discountRate', $discountRate),
             '訂單確認'
         );
     }
@@ -1479,11 +1490,11 @@ class MemberController extends Controller
             ->where('id', $requestId)
             ->where('status', MergeShippingRequest::STATUS_APPROVED)
             ->firstOrFail();
-        $premiumRate = $this->promotionService->getPremiumRate();
+        $discountRate = $this->promotionService->getDiscountRate();
 
         try {
             // 創建訂單
-            $order = $this->orderService->createMergeShippingOrder($user->id, $mergeRequest, $request->all(), $premiumRate);
+            $order = $this->orderService->createMergeShippingOrder($user->id, $mergeRequest, $request->all(), $discountRate);
 
             // 更新合併運費請求狀態為已完成
             $mergeRequest->update(['status' => MergeShippingRequest::STATUS_COMPLETED]);

@@ -31,14 +31,17 @@ class CartService extends CartRepository
         return $this->updateCartItemQuantity($userId, $lotId, $quantity);
     }
 
-    public function getSelectedCartItems($userId, $selectedLotIds)
+    public function getSelectedCartItems($userId, $selectedLotIds, $discountRate = null)
     {
         $cartItems = $this->getUserCart($userId)->whereIn('lot_id', $selectedLotIds);
-        $lots = $cartItems->map(function ($cartItem) {
+        $lots = $cartItems->map(function ($cartItem) use ($discountRate) {
             $lot = $cartItem->lot;
             $lot->cart_quantity = $cartItem->quantity;
             // 競標商品使用 current_bid，一般商品使用 reserve_price
             $price = $lot->type === 0 ? $lot->current_bid : $lot->reserve_price;
+            if ($discountRate !== null) {
+                $price = $price * $discountRate;
+            }
             $lot->subtotal = $cartItem->quantity * $price;
             return $lot;
         });

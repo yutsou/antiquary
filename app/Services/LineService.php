@@ -738,12 +738,8 @@ class LineService
 
         foreach($order->orderItems as $orderItem) {
             $price = intval($orderItem->price);
-            if($order->premium != 0) {
-                if($order->premium<1) {
-                    $price = $price * $order->premium;
-                } else {
-                    $price = $price - $order->premium;
-                }
+            if($order->discount != null) {
+                $price = $price * $order->discount;
             }
             $quantity = $orderItem->quantity;
             array_push($products, [

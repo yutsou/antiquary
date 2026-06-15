@@ -453,7 +453,7 @@ class OrderService extends OrderRepository
         return $order;
     }
 
-    public function createCartOrder($userId, $selectedLotIds, $requestData, $premiumRate = null)
+    public function createCartOrder($userId, $selectedLotIds, $requestData, $discountRate = null)
     {
         $now = Carbon::now();
         $user = Auth::user();
@@ -495,16 +495,13 @@ class OrderService extends OrderRepository
             $price = $lot->type === 0 ? $lot->current_bid : $lot->reserve_price;
             $subtotal += $price * $lot->cart_quantity;
         }
-        
+
         // 運費直接用 requestData['delivery_cost']
         $deliveryCost = intval($requestData['delivery_cost']);
 
-        if($premiumRate != null) {
-            if ($premiumRate > 1) {
-                $total = $subtotal - $premiumRate + $deliveryCost;
-            } else {
-                $total = $subtotal * $premiumRate + $deliveryCost;
-            }
+        if($discountRate != null) {
+            $total = $subtotal * $discountRate + $deliveryCost;
+
         } else {
             $total = $subtotal + $deliveryCost;
         }
@@ -528,7 +525,7 @@ class OrderService extends OrderRepository
             'delivery_cost' => $deliveryCost,
             'total' => $total,
             'commission' => 0,
-            'premium' => $premiumRate != null ? $premiumRate : 0,
+            'discount' => $discountRate != null ? $discountRate : 0,
             'earning' => $total,
             'remark' => $requestData['remark'] ?? null,
             // 你可以選擇 lot_id 設定為 null 或第一個商品
@@ -585,7 +582,7 @@ class OrderService extends OrderRepository
         return OrderRepository::createLogisticRecord($input, $orderId);
     }
 
-    public function createMergeShippingOrder($userId, $mergeRequest, $requestData, $premiumRate = null)
+    public function createMergeShippingOrder($userId, $mergeRequest, $requestData, $discountRate = null)
     {
         $now = Carbon::now();
 
@@ -599,12 +596,8 @@ class OrderService extends OrderRepository
             return $price * $item->quantity;
         });
 
-        if($premiumRate != null) {
-            if ($premiumRate > 1) {
-                $total = $subtotal - $premiumRate + $mergeRequest->new_shipping_fee;
-            } else {
-                $total = $subtotal * $premiumRate + $mergeRequest->new_shipping_fee;
-            }
+        if($discountRate != null) {
+            $total = $subtotal * $discountRate + $mergeRequest->new_shipping_fee;
         } else {
             $total = $subtotal + $mergeRequest->new_shipping_fee;
         }
@@ -622,7 +615,7 @@ class OrderService extends OrderRepository
             'delivery_cost' => $mergeRequest->new_shipping_fee,
             'total' => $total,
             'commission' => 0,
-            'premium' => $premiumRate != null ? $premiumRate : 0,
+            'discount' => $discountRate,
             'earning' => $total,
             'remark' => '合併運費訂單 - 請求ID: ' . $mergeRequest->id . '<br />' . $requestData['remark'] ?? null,
         ];

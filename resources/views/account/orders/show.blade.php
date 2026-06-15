@@ -88,7 +88,8 @@
                         <thead>
                         <tr>
                             <th>物品</th>
-                            <th>價格</th>
+                            <th>數量</th>
+                            <th>單價</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -99,8 +100,8 @@
                             @else
                                 <td><a href="{{ route("mart.products.show", $orderItem->lot) }}" class="custom-link">{{ $orderItem->lot->name }}</a></td>
                             @endif
-
-                            <td>NT${{ number_format($orderItem->subtotal) }}</td>
+                            <td>{{ $orderItem->quantity }}</td>
+                            <td>NT${{ number_format($orderItem->price) }}</td>
                         </tr>
                         @endforeach
                         </tbody>
@@ -122,14 +123,12 @@
                             <td>小計：</td>
                             <td>NT${{ number_format($order->subtotal) }}</td>
                         </tr>
-                        @if ($order->premium != 0)
+                        @if ($order->discount != 0)
                             <tr>
                                 <td>折扣：</td>
-                                @if ($order->premium > 1)
-                                    <td>NT${{ number_format($order->subtotal - $order->premium) }}</td>
-                                @else
-                                    <td>NT${{ number_format($order->subtotal * floatval(1-$order->premium)) }}</td>
-                                @endif
+
+                                <td>- NT${{ number_format($order->subtotal * floatval(1-$order->discount)) }}</td>
+
 
                             </tr>
                         @endif

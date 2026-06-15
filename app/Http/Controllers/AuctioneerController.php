@@ -356,32 +356,26 @@ class AuctioneerController extends Controller
     public function updatePromotion(Request $request)
     {
         $input = $request->all();
+
+        // 直接在這裡限制必須是數字，且在 0 到 0.9999 之間
         $rules = [
-            'commission_rate' => 'required',
-            'premium_rate' => 'required'
+            'discount_rate' => 'required|numeric|between:0,0.9999',
         ];
+
         $messages = [
-            'commission_rate.required'=>'賣家佣金抽成為必填',
-            'premium_rate.required'=>'買家額外費用為必填'
+            'discount_rate.required' => '優惠率為必填',
+            'discount_rate.numeric'  => '優惠率必須是數字',
+            'discount_rate.between'  => '優惠率必須為小數（介於 0 ~ 0.9999 之間）',
         ];
-
-        if($request->commission_rate > 1) {
-            $rules['commission_rate'] = $rules['commission_rate'].'|integer';
-            $messages['commission_rate.integer'] = '數值大於1的話必須為整數';
-        }
-
-        if($request->premium_rate > 1) {
-            $rules['premium_rate'] = $rules['premium_rate'].'|integer';
-            $messages['premium_rate.integer'] = '數值大於1的話必須為整數';
-        }
 
         $validator = Validator::make($input, $rules, $messages);
 
         if ($validator->fails()) {
             return Response::json(array(
                 'success' => false,
-                'errors' => $validator->getMessageBag()->toArray()
-            ), 400); // 400 being the HTTP code for an invalid request.
+                // 確保這裡回傳的是結構完整的錯誤訊息
+                'errors' => $validator->errors()->toArray()
+            ), 400);
         } else {
             $this->promotionService->updatePromotion($request);
             return Response::json(array(
@@ -936,17 +930,5 @@ class AuctioneerController extends Controller
         $article->delete();
 
         return back()->with('notification', '文章刪除成功');
-    }
-
-    public function test()
-    {
-        $e_lots = collect();
-        $lots = $this->lotService->getAllLots();
-        foreach ($lots as $lot) {
-            if($lot->current_bid != $lot->reserve_price && $lot->type == 1) {
-                $e_lots->push($lot);
-            }
-        }
-        dd($e_lots);
     }
 }

@@ -93,8 +93,13 @@
                                     <div class="uk-width-expand">
                                         <div class="uk-card-body" style="padding: 20px 20px">
                                             <h3 class="uk-card-title" style="margin: 0 0 10px 0"><a href="{{ route('mart.products.show', $item->lot->id) }}" class="custom-link">{{ $item->lot->name }}</a></h3>
-                                            <p>數量: {{ $item->quantity }} | 單價: NT${{ number_format($item->lot->reserve_price) }}</p>
-                                            <p>小計: NT${{ number_format($item->lot->reserve_price * $item->quantity) }}</p>
+                                            @if($discountRate != null)
+                                                <p>數量: {{ $item->quantity }} | <del>單價: NT${{ number_format($item->lot->reserve_price) }}</del> 折後: NT${{ number_format($item->lot->reserve_price * $discountRate) }}</p>
+                                                <p>小計: NT${{ number_format($item->lot->reserve_price * $item->quantity * $discountRate) }}</p>
+                                            @else
+                                                <p>數量: {{ $item->quantity }} | 單價: NT${{ number_format($item->lot->reserve_price) }}</p>
+                                                <p>小計: NT${{ number_format($item->lot->reserve_price * $item->quantity) }}</p>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -118,15 +123,10 @@
                                         <td>小計：</td>
                                         <td>NT${{ number_format($subtotal) }}</td>
                                     </tr>
-                                    @if ($premiumRate !== null)
+                                    @if ($discountRate !== null)
                                         <tr>
                                             <td>折扣：</td>
-                                            @if ($premiumRate > 1)
-                                                <td>NT${{ number_format($subtotal - $premiumRate) }}</td>
-                                            @else
-                                                <td>NT${{ number_format($subtotal * floatval(1-$premiumRate)) }}</td>
-                                            @endif
-
+                                            <td>- NT${{ number_format($subtotal * (1-$discountRate)) }}</td>
                                         </tr>
                                     @endif
 

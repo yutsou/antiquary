@@ -12,15 +12,9 @@
             </div>
             <div id="input-section" {{ $promotions[0] == true ? "" : "hidden" }}>
                 <div class="uk-margin">
-                    <label class="uk-form-label" for="form-stacked-text">賣家佣金抽成</label>
+                    <label class="uk-form-label" for="form-stacked-text">優惠率</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" name="commission_rate" type="number" placeholder="輸入整數為金額、小數為趴數" value="{{ $promotions[1] }}">
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="form-stacked-text">買家額外費用</label>
-                    <div class="uk-form-controls">
-                        <input class="uk-input" name="premium_rate" type="number" placeholder="輸入整數為金額、小數為趴數" value="{{ $promotions[2] }}">
+                        <input class="uk-input" name="discount_rate" type="number" placeholder="輸入小數" value="{{ $promotions[1] }}">
                     </div>
                 </div>
             </div>
@@ -45,6 +39,7 @@
             });
             $('#update-button').click(function() {
                 let url = '{{ route("auctioneer.promotions.update") }}';
+
                 $.ajax({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -69,11 +64,12 @@
                         }, 1500);
                     },
                     error: function (response) {
+
                         Swal.fire({
                             position: 'center',
                             icon: 'warning',
                             html:
-                                merge_errors(response.responseJSON.errors),
+                                merge_errors(response),
                             showConfirmButton: true,
                             confirmButtonColor: '#003a6c',
                             confirmButtonText: '<span style="color: #fff;">確定</span>'

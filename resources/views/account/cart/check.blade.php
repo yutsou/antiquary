@@ -143,7 +143,16 @@
                                         </div>
                                     </td>
                                     <td>{{ $lot->cart_quantity }}</td>
+                                    @if($discountRate != null)
+                                        <td>
+
+                                        <del>NT${{ number_format($lot->reserve_price) }}</del><br>
+                                        NT${{ number_format($lot->reserve_price * $discountRate) }}
+
+                                        </td>
+                                    @else
                                     <td>NT${{ number_format($lot->reserve_price) }}</td>
+                                    @endif
                                     <td>{{ $methodPresenter->transferDeliveryMethod($deliveryMethod) }}</td>
                                     <td>NT${{ number_format($itemDeliveryCost) }}</td>
                                 </tr>
@@ -169,13 +178,11 @@
                                         <td>小計：</td>
                                         <td>NT${{ number_format($subtotal) }}</td>
                                     </tr>
-                                    @if ($premiumRate !== null)
+                                    @if ($discountRate !== null)
                                         <tr>
                                             <td>折扣：</td>
-                                            @if ($premiumRate > 1)
-                                                <td>NT${{ number_format($subtotal - $premiumRate) }}</td>
-                                            @else
-                                                <td>NT${{ number_format($subtotal * floatval(1-$premiumRate)) }}</td>
+                                            @if ($discountRate != null)
+                                                <td>NT${{ number_format($subtotal * floatval(1-$discountRate)) }}</td>
                                             @endif
 
                                         </tr>

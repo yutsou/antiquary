@@ -10,7 +10,7 @@ class PromotionService
 {
     public function getPromotion()
     {
-         return [Cache::get('promotion.status'), Cache::get('promotion.commission_rate'), Cache::get('promotion.premium_rate')];
+         return [Cache::get('promotion.status'), Cache::get('promotion.discount_rate')];
     }
 
     public function updatePromotion($request)
@@ -18,25 +18,23 @@ class PromotionService
         $this->initPromotion();
         if(isset($request->status)) {
             Cache::forever('promotion.status', true);
-            Cache::forever('promotion.commission_rate', $request->commission_rate);
-            Cache::forever('promotion.premium_rate', $request->premium_rate);
+            Cache::forever('promotion.discount_rate', $request->discount_rate);
         }
     }
 
     private function initPromotion()
     {
         Cache::forget('promotion.status');
-        Cache::forget('promotion.commission_rate');
-        Cache::forget('promotion.premium_rate');
+        Cache::forget('promotion.discount_rate');
     }
 
-    public function getPremiumRate()
+    public function getDiscountRate()
     {
         $promotionStatus = Cache::get('promotion.status');
 
         if($promotionStatus === true) {
-            $premiumRate = Cache::get('promotion.premium_rate');
-            return floatval($premiumRate);
+            $discountRate = Cache::get('promotion.discount_rate');
+            return floatval($discountRate);
         } else {
             return null;
         }

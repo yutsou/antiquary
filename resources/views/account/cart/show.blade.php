@@ -138,7 +138,12 @@
                                     <div class="uk-margin-small cart-meta uk-text-right@s uk-text-left">
                                       <label for="cart-quantity-{{ $lot->id }}" class="uk-margin-small-right">數量:</label>
                                       <input type="number" id="cart-quantity-{{ $lot->id }}" name="cart_quantities[{{ $lot->id }}]" class="uk-input cart-quantity-input" style="width: 80px; display: inline-block;" min="1" value="{{ $lot->cart_quantity }}" data-lot-id="{{ $lot->id }}" />
-                                      <span class="uk-margin-small-left">| 小計: NT${{ number_format($lot->subtotal) }}</span>
+                                      @if($discountRate != null)
+                                        <span class="uk-margin-small-left">| <del>單價: NT${{ number_format($lot->reserve_price) }}</del> 折後: NT${{ number_format($lot->reserve_price * $discountRate) }}</span>
+                                      @else
+                                        <span class="uk-margin-small-left">| 單價: NT${{ number_format($lot->reserve_price) }}</span>
+                                      @endif
+
                                       <label class="uk-margin-small-left">
                                         <input type="checkbox" class="uk-checkbox cart-item-checkbox" name="selected_lots[]" value="{{ $lot->id }}"> 選擇本商品
                                       </label>
