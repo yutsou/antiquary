@@ -106,6 +106,7 @@ Route::prefix('auctioneer/dashboard')->middleware(EnsureIsAuctioneer::class)->gr
     Route::post('/orders/{orderId}/set-withdrawal-bid', [AuctioneerController::class, 'setWithdrawalBid'])->name('auctioneer.orders.set_withdrawal_bid');
     Route::post('/orders/{orderId}/set-lot-withdrawn', [AuctioneerController::class, 'setLotWithdrawn'])->name('auctioneer.orders.set_lot_withdrawn');
     Route::post('/orders/{orderId}/complete', [AuctioneerController::class, 'completeOrder'])->name('auctioneer.orders.complete');
+    Route::post('/orders/{orderId}/cancel', [AuctioneerController::class, 'cancelOrder'])->name('auctioneer.orders.cancel');
 
 
     Route::get('/orders/{orderId}/chatroom', [AuctioneerController::class, 'indexMessages'])->name('auctioneer.orders.chatroom_show');

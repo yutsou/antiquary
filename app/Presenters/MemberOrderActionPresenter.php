@@ -33,13 +33,13 @@ class MemberOrderActionPresenter
                     return '<a href="'.route('account.orders.pay', $order).'" class="uk-button custom-button-1">前往付款</a>';
                 }
 
-            case 12:
+            default:
                 $count = $order->messages->where('read_at', null)->where('user_id','!=', Auth::user()->id)->count();
                 if($count == 0) {
                     return '
                     <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
                         <div>
-                            <a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1">協調面交資訊</a>
+                            <a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1">詢問訂單</a>
                         </div>
                     </div>
                     ';
@@ -47,13 +47,11 @@ class MemberOrderActionPresenter
                     return '
                     <div class="uk-grid-small uk-flex uk-flex-right" uk-grid>
                         <div>
-                            <span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 協調面交資訊</a>
+                            <span class="uk-badge" style="background-color: #d62828;">'.$count.'</span><a href="' . route('mart.chatroom.show', $order) . '" class="uk-button custom-button-1"><span uk-icon="commenting"></span> 詢問訂單</a>
                         </div>
                     </div>
                     ';
                 }
-            default:
-                return '<a>&nbsp;</a>';
         }
     }
 

@@ -61,7 +61,7 @@ class MartController extends Controller
         $lot = $this->lotService->getLot($lotId);
         $categories = $this->categoryService->getCategories($lot);
         $carbon = Carbon::now();
-        $premium = $this->promotionService->getPremiumRate(Auth::user());
+        $premium = 0.8;
         $auctions = $this->auctionService->getAllAuctions()->where('status', '!=', 2);
         $auctionId = $lot->auction_id;
         $auction = $this->auctionService->getAuction($auctionId);

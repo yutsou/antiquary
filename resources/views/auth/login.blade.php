@@ -39,12 +39,16 @@
                 <div class="uk-margin">
                     <a class="uk-link-text " href="{{ route('auth.password_forgot.show') }}">忘記密碼？</a>
                 </div>
-                <div class="uk-margin">
-                    <button class="g-recaptcha uk-button custom-button-1 uk-width-1-1"
-                            data-sitekey="6Lce1CAqAAAAAGoDOkmLMxcKOBQEkYb_EQbwQqwg"
-                            data-callback='onSubmit'
-                            data-action='submit'>登入</button>
-                </div>
+                @production
+                    <div class="uk-margin">
+                        <button class="g-recaptcha uk-button custom-button-1 uk-width-1-1"
+                                data-sitekey="{{ config('services.recaptcha.site_key') }}"
+                                data-callback='onSubmit'
+                                data-action='submit'>登入</button>
+                    </div>
+                @else
+                    <button type="submit" class="uk-button custom-button-1 uk-width-1-1 uk-margin">登入</button>
+                @endproduction
             </form>
             <div class="separator">或是</div>
             <div class="uk-margin">
@@ -66,12 +70,15 @@
     </div>
 @endsection
 @push('scripts')
-    <script src="https://www.google.com/recaptcha/api.js"></script>
+    @production
+        <script src="https://www.google.com/recaptcha/api.js"></script>
+        <script>
+            function onSubmit(token) {
+                $('#login-form').submit();
+            }
+        </script>
+    @endproduction
     <script>
-        function onSubmit(token) {
-            $('#login-form').submit();
-        }
-
         $(function () {
             $('#login-form').submit(function (e) {
                 e.preventDefault();

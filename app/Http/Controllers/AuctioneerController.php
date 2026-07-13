@@ -931,4 +931,11 @@ class AuctioneerController extends Controller
 
         return back()->with('notification', '文章刪除成功');
     }
+
+    public function cancelOrder($orderId)
+    {
+        $order = $this->orderService->getOrder($orderId);
+        $this->orderService->updateOrderStatus(60, $order); // 訂單取消
+        return back()->with('notification', '訂單已取消');
+    }
 }

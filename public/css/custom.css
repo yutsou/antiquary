@@ -33,6 +33,7 @@
 .custom-button-3 {
     background-color: #f77f00;
     color: white !important;
+    border-radius: 20px;
 }
 
 .custom-button-3:hover {
