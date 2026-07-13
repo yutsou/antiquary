@@ -70,4 +70,8 @@ return [
         'password' => env('TWSMS_PASSWORD'),
     ],
 
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+    ]
+
 ];
