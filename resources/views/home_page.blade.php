@@ -206,7 +206,7 @@
                                 <li>
                                             <div class="modern-card product-card-click" productId="{{ $product->id }}">
                                                 <div class="card-image-container">
-                                                    <img src="{{ $product->blImages->first()->url }}" alt="{{ $product->name }}" class="card-image">
+                                                    <img src="{{ $product->blImages->first()?->url ?? '/images/default-product.png' }}" alt="{{ $product->name }}" class="card-image">
                                                     <div class="card-overlay">
                                                         <div class="overlay-content">
                                                             <span class="material-symbols-outlined overlay-icon">visibility</span>
@@ -351,7 +351,7 @@
 
                                     <div class="article-footer">
                                         <div class="article-tags">
-                                            
+
                                         </div>
                                         <div class="article-cta">
                                             <a href="{{ route('mart.articles.show', $article->id) }}" class="read-more-btn custom-link-mute" style="display: inline-block; text-decoration: none;">
@@ -366,7 +366,7 @@
                     </li>
                     @endforeach
                 </ul>
-                
+
                 <!-- Navigation arrows -->
                 <a class="uk-position-center-left uk-position-small uk-hidden-hover" href="#" uk-slidenav-previous uk-slider-item="previous"></a>
                 <a class="uk-position-center-right uk-position-small uk-hidden-hover" href="#" uk-slidenav-next uk-slider-item="next"></a>
