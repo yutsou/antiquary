@@ -206,7 +206,9 @@
                                 <li>
                                             <div class="modern-card product-card-click" productId="{{ $product->id }}">
                                                 <div class="card-image-container">
-                                                    <img src="{{ $product->blImages->first()?->url ?? '/images/default-product.png' }}" alt="{{ $product->name }}" class="card-image">
+                                                    @if($product->blImages->isNotEmpty())
+                                                        <img src="{{ $product->blImages->first()->url }}" alt="{{ $product->name }}" class="card-image">
+                                                    @endif
                                                     <div class="card-overlay">
                                                         <div class="overlay-content">
                                                             <span class="material-symbols-outlined overlay-icon">visibility</span>
@@ -261,7 +263,9 @@
                             <li class="uk-width-5-6">
                                         <div class="mobile-card product-card-click" productId="{{ $product->id }}">
                                             <div class="mobile-card-image-container">
-                                                <img src="{{ $product->blImages->first()?->url ?? '/images/default-product.png' }}" alt="{{ $product->name }}" class="mobile-card-image">
+                                                @if($product->blImages->isNotEmpty())
+                                                    <img src="{{ $product->blImages->first()->url }}" alt="{{ $product->name }}" class="mobile-card-image">
+                                                @endif
                                                 <div class="mobile-card-overlay">
                                                     <div class="mobile-overlay-content">
                                                         <span class="material-symbols-outlined mobile-overlay-icon">visibility</span>
