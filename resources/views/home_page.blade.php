@@ -261,7 +261,7 @@
                             <li class="uk-width-5-6">
                                         <div class="mobile-card product-card-click" productId="{{ $product->id }}">
                                             <div class="mobile-card-image-container">
-                                                <img src="{{ $product->blImages->first()->url }}" alt="{{ $product->name }}" class="mobile-card-image">
+                                                <img src="{{ $product->blImages->first()?->url ?? '/images/default-product.png' }}" alt="{{ $product->name }}" class="mobile-card-image">
                                                 <div class="mobile-card-overlay">
                                                     <div class="mobile-overlay-content">
                                                         <span class="material-symbols-outlined mobile-overlay-icon">visibility</span>
